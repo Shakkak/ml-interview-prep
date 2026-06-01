@@ -113,9 +113,25 @@ A theory of deep learning representation: $Z = f(X)$ should be:
 1. **Sufficient** for predicting $Y$: maximize $I(Z; Y)$
 2. **Compressed** representation of $X$: minimize $I(Z; X)$
 
-Optimal trade-off: $\max I(Z; Y) - \beta \cdot I(Z; X)$
+**Information Bottleneck (IB) Lagrangian:**
 
-Tishby & Schwartz-Ziv (2017) claimed deep networks undergo distinct compression and fitting phases in the $I(Z;X)$ vs $I(Z;Y)$ plane during training. This sparked controversy — Saxe et al. (2018) showed the claimed compression phase only appears with saturating activations (tanh), not ReLU. The IB framework remains theoretically interesting as a lens on generalization but its empirical claim is disputed.
+$$\mathcal{L}_{IB} = I(Z; Y) - \beta \cdot I(Z; X)$$
+
+The Lagrange multiplier $\beta > 0$ controls the compression-sufficiency tradeoff. The **information plane** ($I(Z;X)$ vs $I(Z;Y)$) visualizes where a representation sits — a good encoder pushes $I(Z;Y)$ high while keeping $I(Z;X)$ low.
+
+Tishby & Schwartz-Ziv (2017) claimed deep networks undergo distinct compression and fitting phases in the information plane during training. This sparked controversy — Saxe et al. (2018) showed the claimed compression phase only appears with saturating activations (tanh), not ReLU. The IB framework remains theoretically interesting as a lens on generalization but its empirical claim is disputed.
+
+### Connection to VAE and β-VAE
+
+The Variational Autoencoder (VAE) Evidence Lower Bound (ELBO) can be written as:
+
+$$\mathcal{L}_{VAE} = \mathbb{E}_{q(z|x)}[\log p(x|z)] - D_{KL}(q(z|x) \| p(z))$$
+
+The reconstruction term $\mathbb{E}[\log p(x|z)]$ lower-bounds $I(Z;X)$ (how well $Z$ predicts $X$). The KL term penalizes how far the encoder posterior is from the prior — which, when the prior is factored, acts as a compression penalty on $I(Z;X)$.
+
+When $\beta = 1$, the VAE ELBO equals (up to a constant) the IB Lagrangian applied to the generative direction.
+
+**β-VAE** (Higgins et al., 2017) upweights the KL penalty: $\mathcal{L}_{\beta\text{-VAE}} = \mathbb{E}[\log p(x|z)] - \beta \cdot D_{KL}(q(z|x)\|p(z))$. Larger $\beta > 1$ forces stronger compression of $I(Z;X)$, encouraging **disentangled** representations (each latent dimension captures an independent factor of variation) at the cost of reconstruction quality.
 
 ### Data Processing Inequality
 

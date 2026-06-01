@@ -112,6 +112,16 @@ This bilinear score $q_i^T k_j$ defines a particular notion of similarity. Multi
 
 The key insight: Flash Attention achieves $O(n)$ **memory** while keeping **exact** computation — it reduces HBM bandwidth, not FLOPs. Approximate methods (Linformer, Performer) reduce FLOPs but sacrifice exactness.
 
+### When the QK Dot Product Fails as a Similarity Measure
+
+The QK dot product is a **bilinear form** — a good similarity measure only when queries and keys are projected into a shared semantic space where geometric proximity means relevance. This assumption breaks in two important cases:
+
+**1. Cross-attention cold-start:** in encoder-decoder cross-attention (e.g., a fresh decoder attending to encoder outputs), the query projection $W_Q$ is initialized randomly while the encoder keys carry meaningful structure. Early in training, the dot products are effectively random — the attention distribution is nearly uniform and carries no semantic signal. The model must first learn to project queries into the same space as keys before cross-attention becomes informative. This is why cross-attention typically converges more slowly than self-attention during training.
+
+**2. Norm-induced saturation:** the dot product magnitude grows with both $\|q\|$ and $\|k\|$. Without the $1/\sqrt{d_k}$ scaling, high-norm query or key vectors drive softmax into its saturation regime — one token dominates with near-1 attention weight. This makes the output insensitive to the actual content of the attended token (the gradient through softmax vanishes). The scaling corrects variance but does not fully prevent saturation when logits grow during long training (see **attention sink** phenomenon in large language models, where certain tokens absorb disproportionate attention regardless of content).
+
+**3. Representation collapse in very deep models:** in deep transformers (>96 layers), residual stream vectors across all tokens can converge toward a low-dimensional subspace. When queries and keys are drawn from this collapsed subspace, all pairwise dot products become similar — the attention distribution flattens. Pre-norm transformers (see [[normalization-layers]]) mitigate this via layer normalization before each projection.
+
 ### Interpretability: What Attention Heads Learn
 
 Empirical studies (Voita et al., 2019; Clark et al., 2019) reveal consistent specialization across models:

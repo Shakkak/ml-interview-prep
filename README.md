@@ -1,10 +1,10 @@
 # ml-interview-prep
 
-ML study vault for Obsidian + Anki. 91 concept notes and 444 flashcards covering deep learning, statistics, and ML theory — from fundamentals to interview-level depth.
+ML study vault for Obsidian + Anki. 93 concept notes and 563 flashcards covering deep learning, statistics, and ML theory — from fundamentals to PhD-level depth.
 
 ## Contents
 
-- **`vault/`** — 91 Obsidian-compatible Markdown notes across 9 topics
+- **`vault/`** — 93 Obsidian-compatible Markdown notes across 9 topics
   - Each note is split into **Fundamental / Intermediate / Advanced** sections
   - Topics: architectures, training, theory, math, probability, generative models, self-supervised learning, adaptation, data
 

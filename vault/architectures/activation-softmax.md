@@ -90,6 +90,20 @@ This connection is not cosmetic. It implies:
 - Temperature $\tau$ has a precise physical meaning: low temperature = peaked around the ground state; high temperature = thermal disorder
 - KL divergence from a softmax distribution to a uniform distribution equals the **free energy** of the system
 
+### Temperature Scaling for Post-Hoc Calibration
+
+Neural networks trained with standard cross-entropy are often **overconfident**: a model that predicts 95% confidence is right only 80% of the time. The cause is that maximizing cross-entropy drives logits toward large magnitudes, saturating softmax near 1.0.
+
+**Post-hoc temperature scaling** (Guo et al., 2017): after training, find a single scalar $T > 1$ on a held-out validation set that minimizes cross-entropy of $\text{softmax}(z/T)$ (model parameters frozen). The output probabilities shrink toward uniform, reducing overconfidence.
+
+- $T = 1$: original predictions (overconfident)
+- $T > 1$: softer predictions (better calibrated)
+- $T < 1$: sharper predictions (even more overconfident — useful for greedy decoding of LLMs)
+
+Guo et al. showed this single-parameter recalibration matches or outperforms more complex methods (isotonic regression, Platt scaling with multiple parameters) on modern deep networks. Key insight: the **rank order** of predictions is unchanged — only confidence magnitudes shift. The model's accuracy is unchanged; only its confidence estimates improve.
+
+**Connection to training:** label smoothing (see [[regularization-label-smoothing]]) achieves a similar effect *during* training by capping the optimal logit gap. Temperature scaling applies the same correction *after* training without touching model weights. Models trained with label smoothing often need less post-hoc temperature scaling.
+
 ### Gumbel-Softmax: Differentiable Discrete Sampling
 
 Sampling a discrete category from a softmax is non-differentiable. The Gumbel-Softmax trick (Jang et al., 2017) adds Gumbel noise to logits before softmax to simulate sampling:
