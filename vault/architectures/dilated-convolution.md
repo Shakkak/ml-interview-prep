@@ -46,7 +46,7 @@ After 5 layers with rates $\{1,2,4,8,16\}$: 63×63 receptive field with only 9 p
 
 ### DeepLab Family
 
-DeepLab modifies a ResNet backbone: the **last two stages' strided convolutions are replaced with dilated convolutions** (stride=1, dilation=2 and 4). Output stride changes from 32 to 8:
+DeepLab modifies a [[arch-residual-block|ResNet]] backbone: the **last two stages' strided convolutions are replaced with dilated convolutions** (stride=1, dilation=2 and 4). Output stride changes from 32 to 8:
 - ResNet final feature map: 28×28 instead of 7×7 for a 224×224 input.
 - 16× more spatial detail for the segmentation head.
 - Same receptive field preserved by the dilation values.
@@ -55,7 +55,7 @@ DeepLab modifies a ResNet backbone: the **last two stages' strided convolutions 
 |---------|----------|----------------|----------------|
 | v1/v2 | Dilated ResNet | CRF | Dilated conv for segmentation |
 | v3 | Dilated ResNet | None | ASPP (multi-scale) |
-| v3+ | Dilated ResNet | U-Net decoder | Sharp boundaries via skip connections |
+| v3+ | Dilated ResNet | [[unet\|U-Net]] decoder | Sharp boundaries via skip connections |
 
 ### Dilated vs Strided vs Pooling
 
@@ -109,4 +109,4 @@ DeepLab v3+ combines both: ASPP for multi-scale context + a U-Net-style decoder 
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[feature-pyramid-networks]] · [[unet]] · [[arch-bottleneck-1x1]]*
+*See also: [[cnn-architectures-guide]] · [[feature-pyramid-networks]] · [[unet]] · [[arch-bottleneck-1x1]] · [[arch-residual-block]]*

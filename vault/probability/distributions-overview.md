@@ -28,7 +28,7 @@ related: [distributions-gaussian, maximum-entropy-principle, bayesian-inference,
 
 ### Key Discrete Distributions
 
-**Bernoulli:** PMF: $P(X=1) = p$, $P(X=0) = 1-p$. Mean: $p$, Variance: $p(1-p)$. Entropy: $-p\log p - (1-p)\log(1-p)$, maximized at $p=0.5$.
+**Bernoulli:** PMF: $P(X=1) = p$, $P(X=0) = 1-p$. Mean: $p$, Variance: $p(1-p)$. [[entropy-mutual-info|Entropy]]: $-p\log p - (1-p)\log(1-p)$, maximized at $p=0.5$.
 
 **Binomial:** PMF: $\binom{n}{k}p^k(1-p)^{n-k}$. Mean: $np$, Variance: $np(1-p)$. For large $n$, small $p$ with $np$ moderate → Poisson($\lambda = np$).
 
@@ -38,7 +38,7 @@ related: [distributions-gaussian, maximum-entropy-principle, bayesian-inference,
 
 ### Key Continuous Distributions
 
-**Uniform:** PDF: $1/(b-a)$ on $[a,b]$. Entropy: $\ln(b-a)$ — maximum entropy for bounded support.
+**Uniform:** PDF: $1/(b-a)$ on $[a,b]$. Entropy: $\ln(b-a)$ — [[maximum-entropy-principle|maximum entropy]] for bounded support.
 
 **Exponential:** PDF: $\lambda e^{-\lambda x}$, $x \geq 0$. Mean: $1/\lambda$, Variance: $1/\lambda^2$. Memoryless: $P(X > s+t | X > s) = P(X > t)$. Maximum entropy given fixed mean on $[0,\infty)$.
 
@@ -69,7 +69,7 @@ related: [distributions-gaussian, maximum-entropy-principle, bayesian-inference,
 | Categorical($\pi$) | Dirichlet($\alpha$) | Dirichlet($\alpha + n_k$) |
 | Gaussian($\mu$, known $\sigma^2$) | Gaussian($\mu_0, \tau^2$) | Gaussian (weighted average) |
 
-Conjugacy means the posterior is the same family as the prior — closed-form Bayesian update.
+Conjugacy means the posterior is the same family as the prior — closed-form [[bayesian-inference|Bayesian]] update.
 
 ### Beta and Dirichlet Distributions
 
@@ -114,7 +114,7 @@ If $X$ has PDF $p_X(x)$ and $Y = g(X)$ is a differentiable bijection:
 
 $$p_Y(y) = p_X(g^{-1}(y))\,|\det J_{g^{-1}}(y)|$$
 
-The Jacobian determinant accounts for volume stretching. **Normalizing flows** (Rezende & Mohamed, 2015) compose many such transforms to convert a simple Gaussian into a complex distribution, with exact likelihood via the Jacobian: $\log p_X(x) = \log p_Z(f(x)) + \log|\det J_f(x)|$.
+The Jacobian determinant accounts for volume stretching. **[[normalizing-flows|Normalizing flows]]** (Rezende & Mohamed, 2015) compose many such transforms to convert a simple Gaussian into a complex distribution, with exact likelihood via the Jacobian: $\log p_X(x) = \log p_Z(f(x)) + \log|\det J_f(x)|$.
 
 Affine coupling layers (RealNVP, Dinh et al. 2017) achieve $O(d)$ Jacobian computation by partitioning dimensions. Autoregressive flows (MAF/IAF, Papamakarios et al. 2017) have tractable density but slow sampling or vice versa — the architecture determines which direction is cheap.
 
@@ -130,4 +130,4 @@ The distribution of the maximum of $n$ i.i.d. random variables converges to one 
 
 ---
 
-*See also: [[distributions-gaussian]] · [[maximum-entropy-principle]] · [[bayesian-inference]] · [[entropy-mutual-info]]*
+*See also: [[distributions-gaussian]] · [[maximum-entropy-principle]] · [[bayesian-inference]] · [[entropy-mutual-info]] · [[normalizing-flows]]*

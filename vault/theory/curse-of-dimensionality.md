@@ -51,7 +51,7 @@ This is why raw high-dimensional data (images = thousands of pixels) needs featu
 
 **Immediate implications for ML:**
 - KNN classifiers degrade as $d$ increases
-- Covariance estimation requires at least $d$ samples; with $n \ll d$ the sample covariance is rank-deficient
+- Covariance estimation requires at least $d$ samples; with $n \ll d$ the sample covariance is [[linear-algebra-fundamentals|rank]]-deficient
 - Kernel density estimation accuracy degrades exponentially with $d$
 
 ---
@@ -62,17 +62,17 @@ This is why raw high-dimensional data (images = thousands of pixels) needs featu
 
 | Problem | Solution |
 |---------|----------|
-| Distance-based methods degrade | Reduce dimensionality first (PCA, UMAP) |
+| Distance-based methods degrade | Reduce dimensionality first ([[eigenvalues-pca\|PCA]], UMAP) |
 | Covariance estimation fails | Regularized covariance; work in dual space |
 | KNN inefficient in high $d$ | Approximate nearest neighbor (FAISS, HNSW) |
-| Density estimation fails | Flow models or VAEs; avoid histograms |
+| Density estimation fails | Flow models or [[variational-autoencoders\|VAEs]]; avoid histograms |
 | Raw pixel features unreliable | CNN embeddings; pretrained features |
 
 **Regularized covariance estimation:** shrinkage toward identity: $\hat{\Sigma}_{\text{reg}} = (1-\alpha)\hat{\Sigma}_\text{sample} + \alpha I$ (Ledoit-Wolf). The optimal $\alpha$ minimizes the Frobenius error to the true covariance asymptotically and can be estimated analytically.
 
 **KDE convergence rate:** the estimator's MSE scales as $n^{-4/(4+d)}$ — exponentially worse per sample. In 1D: $n^{-4/5}$. In 10D: $n^{-4/14} = n^{-2/7}$. In 100D: effectively $n^0$ — no convergence. This is why histogram-based density estimation is useless for $d > 5$.
 
-**The Gaussian typical set:** in high-dimensional Gaussians, probability mass concentrates on a thin shell at radius $\approx\sqrt{d}$. Although density is highest at the mean, the volume at radius $\sqrt{d}$ is so much larger that almost all probability mass lies there. The "typical set" in information theory: the region where $-\log p(x) \approx H(X)$ (entropy). This shell structure is why MCMC sampling in high dimensions must traverse long distances — the mode is atypically rare.
+**The Gaussian typical set:** in high-dimensional [[distributions-gaussian|Gaussians]], probability mass concentrates on a thin shell at radius $\approx\sqrt{d}$. Although density is highest at the mean, the volume at radius $\sqrt{d}$ is so much larger that almost all probability mass lies there. The "typical set" in information theory: the region where $-\log p(x) \approx H(X)$ (entropy). This shell structure is why MCMC sampling in high dimensions must traverse long distances — the mode is atypically rare.
 
 **Approximate nearest neighbors:** FAISS (Johnson et al., 2017) uses product quantization (PQ) — partition the vector into subvectors, quantize each independently, look up distances in compressed space. HNSW (Hierarchical Navigable Small World) builds a multi-layer graph where higher layers have fewer nodes and provide coarse navigation; lower layers have all nodes for precise search. Both achieve sub-linear query time at the cost of approximate results.
 
@@ -101,4 +101,4 @@ for all pairs from $n$ points. This is the theoretical basis for random hashing 
 
 ---
 
-*See also: [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[math-svd]] · [[distributions-gaussian]] · [[kernel-methods]]*
+*See also: [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[math-svd]] · [[distributions-gaussian]] · [[kernel-methods]] · [[variational-autoencoders]]*

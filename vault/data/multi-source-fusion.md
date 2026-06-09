@@ -133,7 +133,7 @@ Fusion module → fused features → task head → prediction
 **Concatenation + MLP**: simplest, just concatenate and pass through MLP.
 $$f_{fused} = \text{MLP}([f_S; f_D; f_I])$$
 
-**Cross-attention (Transformer fusion)**:
+**[[attention-mechanism|Cross-attention]] (Transformer fusion)**:
 Satellite features as queries; drone + in-situ as keys and values. The satellite tokens attend to fine-grained drone information.
 ```
 Q = W_Q f_S   (satellite as query — what context do I need?)
@@ -189,7 +189,7 @@ Before any fusion, all data must be:
    - Use area-weighted average (not nearest neighbor) to preserve reflectance statistics
 
 3. **Radiometrically calibrated**:
-   - Satellite: atmospheric correction (DN → surface reflectance)
+   - Satellite: [[satellite-imagery-preprocessing|atmospheric correction]] (DN → surface reflectance)
    - Drone: calibration panel measurements → reflectance conversion
 
 4. **Temporally matched**: use satellite composite from same date/week as drone survey.
@@ -203,7 +203,7 @@ You likely have drone data for a small subset of the area (e.g., 50 field sites 
 2. Use satellite alone at landscape scale → predict landscape-scale trait/habitat maps
 3. Use drone-calibrated site predictions as "soft labels" for satellite-only training
 
-This is analogous to **teacher-student learning**: the drone+satellite fusion model (teacher) trains the satellite-only model (student) at landscape scale.
+This is analogous to **[[knowledge-distillation|teacher-student learning]]**: the drone+satellite fusion model (teacher) trains the satellite-only model (student) at landscape scale.
 
 ---
 
@@ -274,4 +274,4 @@ Treat optical (Sentinel-2) and SAR (Sentinel-1) images of the same location as p
 
 ## See Also
 
-[[earth-observation-fundamentals]], [[satellite-imagery-preprocessing]], [[vlm-architectures]], [[biodiversity-ml]], [[remote-sensing-foundation-models]]
+[[earth-observation-fundamentals]], [[satellite-imagery-preprocessing]], [[vlm-architectures]], [[biodiversity-ml]], [[remote-sensing-foundation-models]], [[attention-mechanism]], [[knowledge-distillation]], [[clip]]

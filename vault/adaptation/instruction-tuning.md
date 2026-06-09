@@ -13,7 +13,7 @@ related: [rlhf, lora-quantization, transfer-learning, autoregressive-models, reg
 
 ## Fundamental
 
-A pretrained language model (GPT, LLaMA) is trained on next-token prediction over raw text. It learns to continue text — not to follow instructions. Given "Write a summary of this article:", a raw pretrained model may respond by continuing with more instructions or producing irrelevant text.
+A pretrained language model (GPT, LLaMA) is trained on [[autoregressive-models|next-token prediction]] over raw text. It learns to continue text — not to follow instructions. Given "Write a summary of this article:", a raw pretrained model may respond by continuing with more instructions or producing irrelevant text.
 
 **Instruction tuning** (also called supervised fine-tuning, SFT) bridges this gap by fine-tuning the model on curated (instruction, response) pairs. After SFT, the model learns the format: "given an instruction, produce a helpful response."
 
@@ -21,7 +21,7 @@ SFT is the first step in the alignment pipeline:
 ```
 Pretraining → SFT → Reward model training → RL fine-tuning (PPO)
 ```
-RLHF requires a well-behaved SFT model as the starting point.
+[[rlhf|RLHF]] requires a well-behaved SFT model as the starting point.
 
 ---
 
@@ -44,7 +44,7 @@ After LLaMA's release, the community built instruction-following models cheaply:
 **Alpaca (Stanford, 2023):**
 1. Start with LLaMA-7B (pretrained).
 2. Generate 52,000 (instruction, input, output) triples using GPT-3.5 (self-instruct method).
-3. Fine-tune LLaMA-7B on these 52K examples using standard cross-entropy.
+3. Fine-tune LLaMA-7B on these 52K examples using standard [[loss-cross-entropy|cross-entropy]].
 Cost: ~$600 to generate the dataset + ~$100 to fine-tune.
 
 **Vicuna (Berkeley, 2023):** fine-tune LLaMA-13B on ~70K conversations collected from ShareGPT (ChatGPT conversations shared publicly). Multi-turn dialogue; qualitatively impressive results.
@@ -128,4 +128,4 @@ SFT is almost always done first. RLHF/DPO then refines the SFT model to match hu
 
 ---
 
-*See also: [[rlhf]] · [[lora-quantization]] · [[transfer-learning]] · [[autoregressive-models]]*
+*See also: [[rlhf]] · [[lora-quantization]] · [[transfer-learning]] · [[autoregressive-models]] · [[loss-cross-entropy]]*

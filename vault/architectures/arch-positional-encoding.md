@@ -13,7 +13,7 @@ related: [attention-mechanism, arch-kv-cache]
 
 ## Fundamental
 
-Self-attention is permutation-equivariant: shuffle the input tokens and the outputs shuffle identically. Attention has no built-in notion of order. "The dog bit the man" ≠ "The man bit the dog," but vanilla attention cannot tell them apart.
+[[attention-mechanism|Self-attention]] is permutation-equivariant: shuffle the input tokens and the outputs shuffle identically. Attention has no built-in notion of order. "The dog bit the man" ≠ "The man bit the dog," but vanilla attention cannot tell them apart.
 
 **Solution:** inject position information into token embeddings before attention.
 
@@ -25,7 +25,7 @@ $$PE(t, 2i) = \sin\left(\frac{t}{10000^{2i/d_{\text{model}}}}\right), \qquad PE(
 
 Add to the token embedding: $x_t \leftarrow x_t + PE(t, :)$
 
-**Design rationale:** dimensions cycle at different frequencies — low dimensions (small $i$) cycle fast (nearby positions differ), high dimensions cycle slowly (useful for global position). Analogous to binary encoding: low bits toggle fast, high bits toggle slow. The base $10000$ ensures the last dimension has period $\approx 62{,}832$ tokens — larger than typical sequences.
+**Design rationale:** dimensions cycle at different frequencies — low dimensions (small $i$) cycle fast (nearby positions differ), high dimensions cycle slowly (useful for global position). This is the [[fourier-transform|Fourier]] principle applied to discrete positions: each dimension is a sinusoidal basis function at a different frequency. The base $10000$ ensures the last dimension has period $\approx 62{,}832$ tokens — larger than typical sequences.
 
 **Worked example** ($d = 4$, $t = 1$):
 
@@ -46,7 +46,7 @@ At $t = 100$: dims 0–1 have completed ~16 full cycles (fine-grained); dims 2�
 
 Train a lookup table $E_{\text{pos}} \in \mathbb{R}^{T_{\max} \times d}$ where row $t$ = position embedding for position $t$.
 
-Used in BERT, GPT-2, ViT. Slightly better on fixed-length tasks. Cannot generalize beyond $T_{\max}$ without fine-tuning — attempting longer sequences produces out-of-distribution embeddings.
+Used in [[bert-mlm|BERT]], GPT-2, [[vision-transformer|ViT]]. Slightly better on fixed-length tasks. Cannot generalize beyond $T_{\max}$ without fine-tuning — attempting longer sequences produces out-of-distribution embeddings.
 
 ### ALiBi: Attention with Linear Biases
 
@@ -87,7 +87,14 @@ $$R_{\Theta,t}^{(i)} = \begin{bmatrix} \cos(t\theta_i) & -\sin(t\theta_i) \\ \si
 
 $$\tilde{q}_t^\top \tilde{k}_s = q_t^\top R_{\Theta,t-s}\, k_s = f(q_t, k_s, t-s)$$
 
-Proof: $R_{\Theta,t}^\top R_{\Theta,s} = R_{\Theta,s-t}$ — orthogonal matrices with this frequency structure commute in the right way. The inner product extracts only the relative angle.
+> [!tip] Why $R_{\Theta,t}^\top R_{\Theta,s} = R_{\Theta,s-t}$ ([[linear-algebra-fundamentals]])
+> A 2D rotation by angle $\alpha$ has transpose $R_\alpha^\top = R_{-\alpha}$ (rotating backwards is the inverse rotation).
+> Rotation matrices are a group under multiplication: $R_\alpha R_\beta = R_{\alpha+\beta}$.
+> Therefore: $R_t^\top R_s = R_{-t} R_s = R_{s-t}$.
+> RoPE applies this independently to each pair of dimensions $(2i, 2i+1)$ with angle $t\theta_i$.
+> The inner product becomes $\tilde{q}_t^\top \tilde{k}_s = q_t^\top R_t^\top R_s k_s = q_t^\top R_{s-t} k_s$ — only the distance $s-t$ survives.
+
+The inner product extracts only the relative angle.
 
 **Why this is better than additive PE:** absolute position embeddings encode $t$ and $s$ separately; the model must learn to compute $t - s$ implicitly. RoPE encodes relative distance directly into the attention score — the model sees relative positions natively.
 
@@ -95,10 +102,10 @@ Proof: $R_{\Theta,t}^\top R_{\Theta,s} = R_{\Theta,s-t}$ — orthogonal matrices
 
 Extending beyond training length: if trained at context $L$, directly applying RoPE to $L' > L$ tokens extrapolates poorly (the model has not seen those frequencies).
 
-**NTK-aware scaling (LocalLLaMA, 2023):** scale the base from $10000$ to $10000 \cdot (L'/L)^{d/(d-2)}$. This ensures frequencies at the new length $L'$ behave like frequencies at the training length $L$ under the Neural Tangent Kernel approximation.
+**NTK-aware scaling (LocalLLaMA, 2023):** scale the base from $10000$ to $10000 \cdot (L'/L)^{d/(d-2)}$. This ensures frequencies at the new length $L'$ behave like frequencies at the training length $L$ under the [[neural-tangent-kernel|Neural Tangent Kernel]] approximation.
 
 **YaRN (Peng et al., 2023):** additionally applies attention temperature scaling (divide by $\sqrt{n}$ where $n$ is the scale factor) to counteract the softmax getting sharper at longer distances. Achieves near-perfect extrapolation to 128K context from 4K training.
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]]*
+*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[bert-mlm]] · [[vision-transformer]] · [[fourier-transform]] · [[neural-tangent-kernel]]*

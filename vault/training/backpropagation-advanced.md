@@ -25,9 +25,9 @@ $$\frac{\partial L}{\partial x^{(0)}} = J_1^T J_2^T \cdots J_L^T \frac{\partial 
 
 This product is the mathematical root cause of vanishing and exploding gradients.
 
-**Vanishing gradients:** if each Jacobian $J_l$ has singular values $\sigma_l < 1$, the product shrinks exponentially. For sigmoid activations, $\sigma'(z) \leq 0.25$ — after 10 layers, gradients shrink by $0.25^{10} \approx 10^{-6}$.
+**Vanishing gradients:** if each Jacobian $J_l$ has singular values $\sigma_l < 1$, the product shrinks exponentially. For [[activation-sigmoid-tanh|sigmoid]] activations, $\sigma'(z) \leq 0.25$ — after 10 layers, gradients shrink by $0.25^{10} \approx 10^{-6}$.
 
-**Exploding gradients:** if singular values $\sigma_l > 1$ throughout, the product grows exponentially — catastrophic in RNNs.
+**Exploding gradients:** if singular values $\sigma_l > 1$ throughout, the product grows exponentially — catastrophic in [[rnn-lstm|RNNs]].
 
 **Weight initialization and variance preservation:** for a layer $y = Wx$, $\text{Var}(y_i) = n_{in} \cdot \text{Var}(W_{ij}) \cdot \text{Var}(x_j)$. For variance to be preserved, we need $\text{Var}(W_{ij}) = 1/n_{in}$.
 
@@ -41,7 +41,7 @@ This product is the mathematical root cause of vanishing and exploding gradients
 **Gradient flow through softmax:** the Jacobian of softmax $y_i = e^{x_i}/\sum_j e^{x_j}$ is:
 $$\frac{\partial y_i}{\partial x_j} = y_i(\delta_{ij} - y_j), \quad J_{softmax} = \text{diag}(y) - yy^T$$
 
-When composed with cross-entropy $L = -\sum_k t_k \log y_k$, the result simplifies beautifully: $\frac{\partial L}{\partial x_i} = y_i - t_i$. This is why softmax + cross-entropy is the canonical output pairing — the gradient is prediction minus label.
+When composed with [[loss-cross-entropy|cross-entropy]] $L = -\sum_k t_k \log y_k$, the result simplifies beautifully: $\frac{\partial L}{\partial x_i} = y_i - t_i$. This is why [[activation-softmax|softmax]] + cross-entropy is the canonical output pairing — the gradient is prediction minus label.
 
 *Saturation warning:* when one logit dominates ($y \approx (1,0,\ldots,0)$), gradients for non-maximum classes are near zero. The model has "decided" and stops learning from those classes, contributing to overconfidence and poor calibration.
 
@@ -51,7 +51,7 @@ When composed with cross-entropy $L = -\sum_k t_k \log y_k$, the result simplifi
 
 Backprop through a conv layer is itself a convolution — the same hardware-efficient operation.
 
-**Gradient flow through batch normalization:** BN introduces sample-interdependence in its Jacobian. For $\hat{x}_i = (x_i - \mu_B)/\sqrt{\sigma_B^2+\epsilon}$ and $y_i = \gamma\hat{x}_i + \beta$:
+**Gradient flow through [[normalization-layers|batch normalization]]:** BN introduces sample-interdependence in its Jacobian. For $\hat{x}_i = (x_i - \mu_B)/\sqrt{\sigma_B^2+\epsilon}$ and $y_i = \gamma\hat{x}_i + \beta$:
 
 $$\frac{\partial L}{\partial x_i} = \frac{\gamma}{\sqrt{\sigma_B^2+\epsilon}}\left[\frac{\partial L}{\partial y_i} - \frac{1}{m}\sum_j \frac{\partial L}{\partial y_j} - \hat{x}_i \cdot \frac{1}{m}\sum_j \frac{\partial L}{\partial y_j}\hat{x}_j\right]$$
 
@@ -72,7 +72,12 @@ torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 **Backpropagation through time (BPTT) for RNNs:** unrolling $T$ steps gives:
 $$\frac{\partial L}{\partial h_0} = \prod_{t=1}^T \frac{\partial h_t}{\partial h_{t-1}} \cdot \frac{\partial L}{\partial h_T}, \quad \frac{\partial h_t}{\partial h_{t-1}} = W_{hh}^T \cdot \text{diag}(\sigma'(z_t))$$
 
-For $T = 100$ steps, this product causes catastrophic vanishing or exploding regardless of activation choice. This is the fundamental motivation for LSTM gating and transformer self-attention.
+For $T = 100$ steps, this product causes catastrophic vanishing or exploding regardless of activation choice. This is the fundamental motivation for LSTM gating and transformer [[attention-mechanism|self-attention]].
+
+> [!tip] How LSTM gating breaks the vanishing-gradient chain ([[rnn-lstm]])
+> An LSTM maintains a **cell state** $c_t$ that flows through time with only additive updates:
+> $c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t$
+> where $f_t \in (0,1)^d$ is the forget gate (learned per-timestep). The gradient of the loss w.r.t. $c_{t-1}$ is $f_t$ — not a matrix product through $\tanh'$. When $f_t \approx 1$, the gradient flows back with near-unit magnitude for as many steps as the forget gate stays open, sidestepping the compounding shrinkage that kills vanilla RNN gradients.
 
 ---
 
@@ -80,7 +85,7 @@ For $T = 100$ steps, this product causes catastrophic vanishing or exploding reg
 
 **The edge of stability phenomenon (Cohen et al., 2021):** during gradient descent training of neural networks, the sharpness (largest eigenvalue of the Hessian $\lambda_\text{max}$) progressively increases until it reaches $2/\eta$ and then stabilizes there — the "edge of stability." Beyond this threshold, vanilla GD diverges; SGD noise and the adaptive normalization in Adam prevent it empirically. This explains why small learning rates are not always safer: they allow the loss landscape to become sharper, and the model ends up in a sharper (worse-generalizing) region.
 
-**Neural tangent kernel (NTK) and infinite-width limit:** for infinitely wide networks, gradient descent training is described by the NTK $\Theta(x, x') = \sum_l \frac{\partial f(x)}{\partial \theta_l} \cdot \frac{\partial f(x')}{\partial \theta_l}$, which remains constant throughout training (kernel regime). The NTK view explains why wide networks converge to global minima and generalizes kernel regression theory to neural networks (Jacot et al., 2018). Finite networks deviate from the NTK regime — they are in the "feature learning" regime where representations change during training, empirically explaining why practical networks outperform their NTK predictions.
+**[[neural-tangent-kernel|Neural tangent kernel (NTK)]] and infinite-width limit:** for infinitely wide networks, gradient descent training is described by the NTK $\Theta(x, x') = \sum_l \frac{\partial f(x)}{\partial \theta_l} \cdot \frac{\partial f(x')}{\partial \theta_l}$, which remains constant throughout training (kernel regime). The NTK view explains why wide networks converge to global minima and generalizes kernel regression theory to neural networks (Jacot et al., 2018). Finite networks deviate from the NTK regime — they are in the "feature learning" regime where representations change during training, empirically explaining why practical networks outperform their NTK predictions.
 
 **Gradient pathologies in transformers:** in pre-norm transformers, the residual stream grows in norm throughout the forward pass (the residual accumulation problem). At depth $L$, the norm of the residual can scale as $O(\sqrt{L})$, causing gradient scales to differ between layers. This motivates $\mu$P (maximal update parameterization, Yang et al., 2022), which rescales weights to ensure activation and gradient norms are independent of width and depth, enabling hyperparameters to transfer across model scales — a key technique used in scaling large language models.
 
@@ -90,4 +95,4 @@ For $T = 100$ steps, this product causes catastrophic vanishing or exploding reg
 
 ---
 
-*See also: [[backpropagation]] · [[normalization-layers]] · [[attention-mechanism]] · [[optimizer-adam]]*
+*See also: [[backpropagation]] · [[normalization-layers]] · [[attention-mechanism]] · [[optimizer-adam]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[neural-tangent-kernel]] · [[rnn-lstm]]*

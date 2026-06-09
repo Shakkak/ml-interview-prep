@@ -32,7 +32,7 @@ $$\nabla_x \mathcal{L} = 0 \quad\text{(stationarity)}, \qquad \nabla_\lambda \ma
 
 **Shadow price interpretation:** $\lambda$ measures how much the optimal value $f^*$ changes per unit relaxation of the constraint: $\frac{df^*}{dc}\big|_{h(x)=c, c=0} = -\lambda$. In economics, $\lambda$ is the marginal cost of the constraint.
 
-**PCA example:** maximize $w^\top \Sigma w$ subject to $\|w\|^2 = 1$. Lagrangian: $w^\top \Sigma w - \lambda(w^\top w - 1)$. Stationarity: $\Sigma w = \lambda w$ — the optimal direction is an eigenvector of $\Sigma$ with eigenvalue $\lambda$ equal to the maximum variance achieved.
+**[[eigenvalues-pca|PCA]] example:** maximize $w^\top \Sigma w$ subject to $\|w\|^2 = 1$. Lagrangian: $w^\top \Sigma w - \lambda(w^\top w - 1)$. Stationarity: $\Sigma w = \lambda w$ — the optimal direction is an eigenvector of $\Sigma$ with eigenvalue $\lambda$ equal to the maximum variance achieved.
 
 ---
 
@@ -40,7 +40,7 @@ $$\nabla_x \mathcal{L} = 0 \quad\text{(stationarity)}, \qquad \nabla_\lambda \ma
 
 ### KKT Conditions for Inequality Constraints
 
-For the general problem, the **KKT conditions** are necessary for optimality (and sufficient for convex problems):
+For the general problem, the **KKT conditions** are necessary for optimality (and sufficient for [[math-convexity-jensen|convex]] problems):
 
 **1. Stationarity:**
 $$\nabla f(x^*) + \sum_i \mu_i \nabla g_i(x^*) + \sum_j \lambda_j \nabla h_j(x^*) = 0$$
@@ -84,7 +84,7 @@ $$\max_\alpha \sum_i \alpha_i - \frac{1}{2}\sum_i \sum_j \alpha_i \alpha_j y_i y
 Slater's condition holds for linearly separable data, so strong duality gives $d^* = f^*$.
 
 **Three key insights from the dual:**
-1. **Kernel trick:** the objective depends only on inner products $x_i^\top x_j$ — replace with $k(x_i, x_j)$ to get nonlinear SVMs without changing the optimization structure.
+1. **[[kernel-methods|Kernel trick]]:** the objective depends only on inner products $x_i^\top x_j$ — replace with $k(x_i, x_j)$ to get nonlinear SVMs without changing the optimization structure.
 2. **Support vectors via complementary slackness:** $\alpha_i g_i = 0$. Points inside the margin have $g_i < 0 \Rightarrow \alpha_i = 0$. Only points on the margin ($y_i(w^\top x_i + b) = 1$, $\alpha_i > 0$) determine $w = \sum \alpha_i y_i x_i$. These are the **support vectors**.
 3. **Prediction:** $\hat{y} = \text{sign}\!\left(\sum_i \alpha_i y_i k(x_i, x) + b\right)$ — only the (sparse) support vectors contribute.
 
@@ -130,4 +130,4 @@ This gives a practical **optimality certificate**: after running any optimizatio
 
 ---
 
-*See also: [[math-convexity-jensen]] · [[kernel-methods]] · [[matrix-calculus]] · [[regularization-weight-decay]]*
+*See also: [[math-convexity-jensen]] · [[kernel-methods]] · [[matrix-calculus]] · [[regularization-weight-decay]] · [[eigenvalues-pca]]*

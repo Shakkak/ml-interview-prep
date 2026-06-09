@@ -19,21 +19,21 @@ $$p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^T p(x_t \mid x_1, \ldots, x_{t-1})$$
 
 This is always exact — no approximation. Each token is predicted from all preceding tokens.
 
-**Training objective** (next-token prediction, causal language modeling):
+**Training objective** ([[loss-cross-entropy|next-token prediction]], causal language modeling):
 $$\mathcal{L} = -\frac{1}{T}\sum_{t=1}^T \log p_\theta(x_t \mid x_1, \ldots, x_{t-1})$$
 
 This is fully **self-supervised** — labels are the tokens themselves, shifted by one position. Any text corpus is a valid training set. This is the key reason LLMs scale: internet-scale text provides almost unlimited self-supervised training signal.
 
 ### GPT Architecture
 
-GPT is a stack of transformer decoder blocks with **causal (masked) self-attention**. Position $t$ cannot attend to positions $> t$:
+GPT is a stack of transformer decoder blocks with **causal (masked) [[attention-mechanism|self-attention]]**. Position $t$ cannot attend to positions $> t$:
 
 $$A_{ij} = \begin{cases}\text{softmax}(QK^T/\sqrt{d_k})_{ij} & i \geq j \\ 0 & i < j\end{cases}$$
 
 **Key design choices in GPT:**
 - **Pre-norm:** LayerNorm before attention/FFN (more stable gradients at scale)
-- **GELU/SwiGLU** in FFN layers (smoother than ReLU)
-- **Learned positional embeddings** (GPT-2) or **RoPE** (LLaMA, Mistral, GPT-4)
+- **[[activation-gelu-swish|GELU/SwiGLU]]** in FFN layers (smoother than ReLU)
+- **Learned [[arch-positional-encoding|positional embeddings]]** (GPT-2) or **RoPE** (LLaMA, Mistral, GPT-4)
 - **Weight tying:** input embedding matrix = output unembedding matrix (reduces parameters, works well)
 - **No bias** in attention/FFN weight matrices (marginal efficiency improvement)
 
@@ -66,7 +66,7 @@ Common subwords get their own token; rare words are split into subword pieces. B
 
 Without a cache: generating token $t$ requires processing the entire prefix $x_1, \ldots, x_{t-1}$ from scratch — $O(T^2)$ total cost for a sequence of length $T$.
 
-With KV cache: keys and values from previous positions are stored. Each new token requires only $O(d^2)$ per new token. Memory cost: $O(L \cdot T \cdot d)$ for $L$ layers.
+With [[arch-kv-cache|KV cache]]: keys and values from previous positions are stored. Each new token requires only $O(d^2)$ per new token. Memory cost: $O(L \cdot T \cdot d)$ for $L$ layers.
 
 At scale: LLaMA-65B generating 2048 tokens uses ~8 GB for the KV cache in FP16. This memory cost — not compute — often limits maximum batch size and context length during inference.
 
@@ -102,4 +102,4 @@ The hidden dimension must be set to $8d/3$ (not the standard $4d$) to keep param
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[arch-positional-encoding]] · [[bert-mlm]] · [[rlhf]]*
+*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[arch-positional-encoding]] · [[bert-mlm]] · [[rlhf]] · [[loss-cross-entropy]] · [[activation-gelu-swish]]*

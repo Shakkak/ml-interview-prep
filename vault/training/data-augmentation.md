@@ -53,20 +53,20 @@ Labels are mixed proportional to the masked area ratio $\lambda$. CutMix preserv
 
 **RandAugment** (Cubuk et al., 2020) uses just two global hyperparameters: $N$ (number of augmentations to apply, typically 2) and $M$ (magnitude, searched on a small grid, typically $M \in [5, 30]$). At each step, $N$ operations are randomly sampled from a fixed list of $K$ ops and applied with magnitude $M$. This achieves AutoAugment-level performance without the 15,000 GPU-hour search cost — the key insight is that the specific policy matters less than applying diverse augmentations at the right magnitude.
 
-**AutoAugment** (Cubuk et al., 2019) frames augmentation as an RL search problem: a controller RNN samples policies over a space of 16 operation types, evaluated on a proxy model (CIFAR-10), updated by PPO. Discovered policies emphasize color operations (Equalize, Posterize) and geometric ops (Rotate, ShearX), and transfer well to other datasets. In practice, the pre-searched AutoAugment policies are used rather than re-running the search.
+**AutoAugment** (Cubuk et al., 2019) frames augmentation as an RL search problem: a controller [[rnn-lstm|RNN]] samples policies over a space of 16 operation types, evaluated on a proxy model (CIFAR-10), updated by PPO. Discovered policies emphasize color operations (Equalize, Posterize) and geometric ops (Rotate, ShearX), and transfer well to other datasets. In practice, the pre-searched AutoAugment policies are used rather than re-running the search.
 
 **Test-Time Augmentation (TTA):** at inference, apply multiple augmentations (horizontal flip, multi-scale crops, 90° rotations), run the model on each, and average predictions. Reduces prediction variance — the model is less likely to make a high-confidence error on an unlucky crop. Cost: $k$ forward passes per test example, so useful when accuracy matters more than speed (competitions, medical diagnosis).
 
-**MC Dropout TTA:** at inference, keep dropout active and run $k$ forward passes. Prediction variance estimates epistemic uncertainty (model uncertainty from limited data). Lower cost than full augmentation TTA and provides calibrated uncertainty estimates.
+**MC [[regularization-dropout|Dropout]] TTA:** at inference, keep dropout active and run $k$ forward passes. Prediction variance estimates epistemic uncertainty (model uncertainty from limited data). Lower cost than full augmentation TTA and provides calibrated uncertainty estimates.
 
 ---
 
 ## Advanced
 
-**Augmentation design for self-supervised learning:** contrastive methods (SimCLR, MoCo) depend critically on augmentation. Two views of the same image must share semantic content but differ in appearance. SimCLR's ablation (Chen et al., 2020) ranks augmentation importance:
+**Augmentation design for self-supervised learning:** [[contrastive-learning|contrastive methods]] (SimCLR, MoCo) depend critically on augmentation. Two views of the same image must share semantic content but differ in appearance. [[self-supervised-overview|SimCLR]]'s ablation (Chen et al., 2020) ranks augmentation importance:
 1. Random cropping — most important, forces semantic invariance
 2. Strong color distortion — removes color as a shortcut feature
-3. Gaussian blur — useful for ViTs, less for ResNets
+3. Gaussian blur — useful for [[vision-transformer|ViTs]], less for ResNets
 4. Grayscale
 
 Without strong color augmentation, the model learns a trivial color histogram representation. The *composition* of cropping and color jitter together is more important than either alone: their joint distribution creates views that are semantically identical but visually very different.
@@ -83,4 +83,4 @@ This directly optimizes for augmentation robustness (corruption robustness on Im
 
 ---
 
-*See also: [[regularization-dropout]] · [[regularization-label-smoothing]] · [[contrastive-learning]] · [[feature-preprocessing]]*
+*See also: [[regularization-dropout]] · [[regularization-label-smoothing]] · [[contrastive-learning]] · [[feature-preprocessing]] · [[vision-transformer]] · [[rnn-lstm]]*

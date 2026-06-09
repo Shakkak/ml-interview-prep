@@ -31,7 +31,7 @@ Maximizing log-likelihood = minimizing MSE. Choosing MSE as loss implicitly assu
 - Large errors are disproportionately bad (quadratic penalty)
 - Image reconstruction (pixel regression)
 
-**Do not use MSE for classification** — MSE on logits or probabilities has gradient behavior that does not match the classification objective; use cross-entropy instead.
+**Do not use MSE for classification** — MSE on logits or probabilities has gradient behavior that does not match the classification objective; use [[loss-cross-entropy|cross-entropy]] instead.
 
 ---
 
@@ -50,11 +50,11 @@ $$\mathbf{w}^*_\text{ridge} = \left(\frac{1}{n}\mathbf{X}^\top\mathbf{X} + \lamb
 
 The $\lambda\mathbf{I}$ term ensures invertibility even when $\mathbf{X}^\top\mathbf{X}$ is rank-deficient (collinear features or $p > n$).
 
-**MSE for image generation produces blurry outputs:** MSE averages over all plausible reconstructions. If multiple values of a pixel are plausible (e.g., texture, fine details), the MSE-optimal prediction is their mean — which is blurry. Perceptual losses (LPIPS), adversarial losses (GANs), and diffusion model objectives produce sharper results by avoiding this averaging.
+**MSE for image generation produces blurry outputs:** MSE averages over all plausible reconstructions. If multiple values of a pixel are plausible (e.g., texture, fine details), the MSE-optimal prediction is their mean — which is blurry. Perceptual losses (LPIPS), adversarial losses (GANs), and [[diffusion-models|diffusion model]] objectives produce sharper results by avoiding this averaging.
 
 **Properties summary:**
 
-| | MSE (L2) | L1 | Huber |
+| | MSE (L2) | L1 | [[loss-huber\|Huber]] |
 |---|---|---|---|
 | Gradient near 0 | Small (fast convergence) | Constant (slow) | Small (fast) |
 | Gradient for outliers | Large (unstable) | Bounded | Bounded |
@@ -78,4 +78,4 @@ The second term regularizes against predicting infinite variance. This naturally
 
 ---
 
-*See also: [[loss-huber]] · [[loss-cross-entropy]] · [[bayesian-inference]]*
+*See also: [[loss-huber]] · [[loss-cross-entropy]] · [[bayesian-inference]] · [[diffusion-models]]*

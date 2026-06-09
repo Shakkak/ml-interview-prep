@@ -60,7 +60,7 @@ $\min \mathcal{L}_{\text{task}} + \lambda R(w)$ is equivalent to $\min \mathcal{
 
 ### AdamW vs Adam + L2
 
-With standard Adam + L2 in the loss, the gradient $\nabla \mathcal{L} + \lambda w$ passes through Adam's adaptive scaling — divided by $\sqrt{\hat{v}} + \epsilon$. Parameters with large gradient history receive *less* L2 push. This is unintended.
+With standard [[optimizer-adam|Adam]] + L2 in the loss, the gradient $\nabla \mathcal{L} + \lambda w$ passes through Adam's adaptive scaling — divided by $\sqrt{\hat{v}} + \epsilon$. Parameters with large gradient history receive *less* L2 push. This is unintended.
 
 **AdamW** decouples weight decay from the gradient:
 
@@ -85,7 +85,7 @@ Cross-validate on a log scale: $\{10^{-5}, 10^{-4}, 10^{-3}, 10^{-2}, 10^{-1}\}$
 
 ### Bayesian Interpretation
 
-L2 and L1 regularization are MAP estimation with specific priors over weights:
+L2 and L1 regularization are [[bayesian-inference|MAP]] estimation with specific priors over weights:
 
 - **L2 (ridge):** $w_i \sim \mathcal{N}(0, 1/\lambda)$. The Gaussian prior penalizes large deviations from zero quadratically. The MAP objective $-\log p(w|X,y) = \mathcal{L}_{\text{CE}} + \frac{\lambda}{2}\|w\|^2$.
 - **L1 (lasso):** $w_i \sim \text{Laplace}(0, 1/\lambda)$. The Laplace prior has heavier tails and a sharp peak at zero, which induces sparsity — the prior assigns finite probability mass to exactly-zero weights.
@@ -106,7 +106,7 @@ For linear regression trained with gradient descent, after $t$ steps from $w_0 =
 
 $$w(t) \approx (X^\top X + \frac{1}{\eta t}I)^{-1}X^\top y$$
 
-This is the ridge regression solution with $\lambda_{\text{eff}} = 1/(\eta t)$. Fewer training steps → larger effective $\lambda$ → stronger regularization. This is the formal equivalence between early stopping and weight decay in the linear case (Goodfellow et al., §7.8). In neural networks, the relationship is approximate but qualitatively holds.
+This is the ridge regression solution with $\lambda_{\text{eff}} = 1/(\eta t)$. Fewer training steps → larger effective $\lambda$ → stronger regularization. This is the formal equivalence between [[regularization-early-stopping|early stopping]] and weight decay in the linear case (Goodfellow et al., §7.8). In neural networks, the relationship is approximate but qualitatively holds.
 
 ---
 

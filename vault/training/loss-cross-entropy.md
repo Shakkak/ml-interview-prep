@@ -4,7 +4,7 @@ tags: [loss, classification, probability, information-theory]
 aliases: [log loss, NLL loss, categorical cross-entropy]
 difficulty: 1
 status: complete
-related: [loss-kl-divergence, entropy-mutual-info, sigmoid-softmax, backpropagation]
+related: [loss-kl-divergence, entropy-mutual-info, activation-softmax, activation-sigmoid-tanh, backpropagation]
 ---
 
 # Cross-Entropy Loss
@@ -17,7 +17,7 @@ Cross-entropy measures the average number of bits needed to encode samples from 
 
 $$H(p, q) = -\sum_c p_c \log q_c$$
 
-In classification: $p$ = true distribution (one-hot labels), $q$ = model predictions (softmax probabilities).
+In classification: $p$ = true distribution (one-hot labels), $q$ = model predictions ([[activation-softmax|softmax]] probabilities).
 
 **Binary cross-entropy** for label $y \in \{0, 1\}$ and predicted probability $\hat{y} \in (0,1)$:
 $$L_{BCE} = -\left[y \log \hat{y} + (1-y)\log(1-\hat{y})\right]$$
@@ -45,7 +45,7 @@ $$\arg\min_q H(p, q) = \arg\max_q \mathbb{E}_p[\log q] = \arg\max_q \sum_i \log 
 
 Training with cross-entropy = MLE of model parameters. The choice of loss function implicitly specifies the assumed noise distribution: cross-entropy corresponds to a categorical (multinomial) likelihood.
 
-**Connection to KL divergence:**
+**Connection to [[loss-kl-divergence|KL divergence]]:**
 $$H(p, q) = H(p) + D_{KL}(p \,\|\, q)$$
 
 Minimizing cross-entropy = minimizing KL divergence between label distribution and model (since $H(p)$ is constant w.r.t. model parameters).
@@ -72,4 +72,4 @@ The reverse KL term $H(q, p) = -\sum_c q_c \log p_c$ bounds the gradient of nois
 
 ---
 
-*See also: [[loss-kl-divergence]] · [[entropy-mutual-info]] · [[loss-focal]] · [[regularization-label-smoothing]]*
+*See also: [[loss-kl-divergence]] · [[entropy-mutual-info]] · [[loss-focal]] · [[regularization-label-smoothing]] · [[activation-softmax]]*

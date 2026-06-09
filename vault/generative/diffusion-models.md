@@ -13,7 +13,7 @@ related: [variational-autoencoders, bayesian-inference, unet, normalizing-flows,
 
 ## Fundamental
 
-The key insight behind diffusion: **it is easy to destroy an image** (add Gaussian noise step by step until it becomes pure noise). **Learning to reverse this** — predict the noise added at each step — is a tractable supervised regression problem. Chain many small reverse steps together to generate from pure noise.
+The key insight behind diffusion: **it is easy to destroy an image** (add [[distributions-gaussian|Gaussian]] noise step by step until it becomes pure noise). **Learning to reverse this** — predict the noise added at each step — is a tractable supervised regression problem. Chain many small reverse steps together to generate from pure noise.
 
 ### The Forward Process
 
@@ -27,15 +27,22 @@ $\beta_t$ is the noise schedule (small, increases over time). After $T=1000$ ste
 
 $$\boxed{x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon, \quad \epsilon \sim \mathcal{N}(0,I)}$$
 
+> [!tip] Why the noise telescopes to $\sqrt{1-\bar\alpha_t}$ ([[distributions-gaussian]])
+> Each step: $x_t = \sqrt{\alpha_t}\,x_{t-1} + \sqrt{1-\alpha_t}\,\epsilon_t$.
+> After two steps: $x_2 = \sqrt{\alpha_1\alpha_2}\,x_0 + \underbrace{\sqrt{\alpha_2(1-\alpha_1)}\,\epsilon_1 + \sqrt{1-\alpha_2}\,\epsilon_2}_{\text{two independent Gaussians}}$.
+> Two independent Gaussians with variances $a$ and $b$ sum to one Gaussian with variance $a + b$ (closure under addition).
+> Variance of the combined noise: $\alpha_2(1-\alpha_1) + (1-\alpha_2) = 1 - \alpha_1\alpha_2 = 1 - \bar\alpha_2$.
+> By induction, after $t$ steps: noise variance $= 1 - \bar\alpha_t$, giving $\epsilon_{\text{combined}} = \sqrt{1-\bar\alpha_t}\,\epsilon$ with $\epsilon \sim \mathcal{N}(0,I)$.
+
 This allows sampling $x_t$ directly from $x_0$ without simulating all $t$ intermediate steps — critical for efficient training.
 
 ### Training Objective (DDPM Simplified Loss)
 
-Train a U-Net $\epsilon_\theta(x_t, t)$ to predict the noise $\epsilon$ that was added:
+Train a [[unet|U-Net]] $\epsilon_\theta(x_t, t)$ to predict the noise $\epsilon$ that was added:
 
 $$\boxed{\mathcal{L}_{\text{simple}} = \mathbb{E}_{t,\,x_0,\,\epsilon}\left[\|\epsilon - \epsilon_\theta(\sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon,\, t)\|^2\right]}$$
 
-**Algorithm:** (1) sample $x_0$ from data; (2) sample random $t$ and noise $\epsilon$; (3) compute $x_t$; (4) predict $\hat\epsilon = \epsilon_\theta(x_t, t)$; (5) backprop on MSE. Just supervised regression — no adversarial training, no posterior approximation.
+**Algorithm:** (1) sample $x_0$ from data; (2) sample random $t$ and noise $\epsilon$; (3) compute $x_t$; (4) predict $\hat\epsilon = \epsilon_\theta(x_t, t)$; (5) backprop on [[loss-mse|MSE]]. Just supervised regression — no adversarial training, no [[bayesian-inference|posterior]] approximation.
 
 ---
 
@@ -83,7 +90,7 @@ This unification, formalized via Stochastic Differential Equations (Song et al.,
 
 ### Latent Diffusion Models (LDM / Stable Diffusion)
 
-Running diffusion in pixel space at 512×512 costs $\approx 512^2 \times T$ operations per training step. **LDM** (Rombach et al., 2022) runs diffusion in the **latent space of a pre-trained VAE**:
+Running diffusion in pixel space at 512×512 costs $\approx 512^2 \times T$ operations per training step. **LDM** (Rombach et al., 2022) runs diffusion in the **latent space of a pre-trained [[variational-autoencoders|VAE]]**:
 
 1. Train a VAE encoder $\mathcal{E}$ and decoder $\mathcal{D}$ on images.
 2. Compress image: $z = \mathcal{E}(x)$, $z \in \mathbb{R}^{64 \times 64 \times 4}$ (8× spatial compression).
@@ -91,7 +98,7 @@ Running diffusion in pixel space at 512×512 costs $\approx 512^2 \times T$ oper
 
 Compute cost reduction: $(512/64)^2 = 64\times$ fewer spatial positions. The diffusion model never sees pixels — only the 64×64 latent code. The VAE decoder reconstructs the final image from the denoised latent.
 
-Stable Diffusion's U-Net has 860M parameters and operates on 64×64 latent features. Text conditioning is injected via cross-attention (CLIP ViT-L/14 text embeddings). This architecture became the standard for all subsequent open-source text-to-image models.
+Stable Diffusion's U-Net has 860M parameters and operates on 64×64 latent features. Text conditioning is injected via [[attention-mechanism|cross-attention]] ([[clip|CLIP]] ViT-L/14 text embeddings). This architecture became the standard for all subsequent open-source text-to-image models.
 
 ### Why Diffusion Dominates GANs
 
@@ -108,4 +115,4 @@ The only remaining advantage of GANs is single-step inference. Consistency Model
 
 ---
 
-*See also: [[variational-autoencoders]] · [[unet]] · [[normalizing-flows]] · [[bayesian-inference]]*
+*See also: [[variational-autoencoders]] · [[unet]] · [[normalizing-flows]] · [[bayesian-inference]] · [[distributions-gaussian]] · [[attention-mechanism]] · [[clip]] · [[loss-mse]]*

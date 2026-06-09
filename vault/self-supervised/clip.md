@@ -18,13 +18,13 @@ CLIP (Radford et al., OpenAI 2021) learns visual representations by predicting w
 **Dual-encoder architecture:**
 
 ```
-Image x  →  Image Encoder (ViT or ResNet)  →  image embedding e_I  (L2-normalised)
+Image x  →  Image Encoder ([[vision-transformer|ViT]] or ResNet)  →  image embedding e_I  (L2-normalised)
 Text  t  →  Text  Encoder (Transformer)   →  text  embedding e_T  (L2-normalised)
 ```
 
 Similarity is cosine similarity: $s(x,t) = e_I \cdot e_T$. A learnable temperature parameter $\tau$ scales similarities before softmax (initialised to $1/0.07 \approx 14.3$).
 
-**Training objective — symmetric InfoNCE:**
+**Training objective — symmetric [[loss-nt-xent|InfoNCE]]:**
 
 Given a batch of $N$ (image, text) pairs, construct an $N \times N$ similarity matrix. Diagonal entries are correct pairs; off-diagonal entries are negatives.
 
@@ -102,7 +102,7 @@ Weaknesses:
 
 $$\mathcal{L}_{\text{InfoNCE}} \ge \log N - I(X;T)$$
 
-Minimising the InfoNCE loss maximises a lower bound on mutual information $I(X;T)$ between images and text. CLIP learns representations that capture all information shared between modalities — which is exactly semantic content. However, the bound is loose: maximising $I(X;T)$ can also be achieved by encoding nuisance information shared between image and caption (e.g., photographic style), not just semantics.
+Minimising the InfoNCE loss maximises a lower bound on [[entropy-mutual-info|mutual information]] $I(X;T)$ between images and text. CLIP learns representations that capture all information shared between modalities — which is exactly semantic content. However, the bound is loose: maximising $I(X;T)$ can also be achieved by encoding nuisance information shared between image and caption (e.g., photographic style), not just semantics.
 
 **The compositionality failure:** CLIP embeddings are order-insensitive to a surprising degree. Thrush et al. (2022) showed CLIP confuses "dog biting man" with "man biting dog" — both produce similar cosine similarities because the embeddings mix the token representations into a global average that lacks relational structure. This is a fundamental limitation of bag-of-words-style embedding approaches, not a data issue.
 
@@ -114,10 +114,10 @@ $$\mathcal{L} = -\sum_{i,j} \left[y_{ij} \log \sigma(s_{ij}/\tau + b) + (1-y_{ij
 
 where $y_{ij} = 1$ iff pair $(i,j)$ is matched. Unlike InfoNCE, this does not require a softmax over all negatives in the batch — each pair is treated independently. This removes the large-batch requirement (works with batch 256) while improving performance. The key difference: InfoNCE competes each positive against all batch negatives; SigLIP treats every pair as an independent binary classification.
 
-**EVA-CLIP (Fang et al., 2023):** scales to 18B parameters by combining CLIP's contrastive objective with masked image modeling as a secondary pretraining task. The dual objective forces the encoder to simultaneously learn discriminative cross-modal features (from contrastive) and dense reconstructive features (from masking), producing representations that excel at both retrieval and dense prediction tasks.
+**EVA-CLIP (Fang et al., 2023):** scales to 18B parameters by combining CLIP's [[contrastive-learning|contrastive]] objective with masked image modeling as a secondary [[self-supervised-overview|pretraining]] task. The dual objective forces the encoder to simultaneously learn discriminative cross-modal features (from contrastive) and dense reconstructive features (from masking), producing representations that excel at both retrieval and dense prediction tasks.
 
 **Why CLIP features transfer to detection and segmentation better than supervised ImageNet features:** CLIP's text supervision creates semantically meaningful feature spaces that align with category boundaries humans care about. ImageNet supervision creates feature spaces optimized for 1000 fixed categories. When transferred to detection tasks with different category sets, CLIP features generalize better because they encode concept-level semantics from natural language descriptions rather than fixed category indices.
 
 ---
 
-*See also: [[contrastive-learning]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[blip]]*
+*See also: [[contrastive-learning]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[blip]] · [[loss-nt-xent]] · [[entropy-mutual-info]] · [[vision-transformer]]*

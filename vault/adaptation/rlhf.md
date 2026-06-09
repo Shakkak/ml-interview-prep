@@ -13,9 +13,9 @@ related: [bayesian-inference, lora-quantization, attention-mechanism]
 
 ## Fundamental
 
-A language model trained only on next-token prediction learns to continue any text. It has no concept of "what the user wants." Given "How do I bake a cake?" it might continue with more questions rather than an answer.
+A language model trained only on [[autoregressive-models|next-token prediction]] learns to continue any text. It has no concept of "what the user wants." Given "How do I bake a cake?" it might continue with more questions rather than an answer.
 
-**Supervised fine-tuning (SFT) alone isn't enough:** demonstrations are expensive to collect at scale, hard to define all axes of "good response" (helpful, harmless, honest, concise), and the model can overfit to the demonstration distribution.
+**[[instruction-tuning|Supervised fine-tuning (SFT)]] alone isn't enough:** demonstrations are expensive to collect at scale, hard to define all axes of "good response" (helpful, harmless, honest, concise), and the model can overfit to the demonstration distribution.
 
 **RLHF's solution:** use human *preferences* (comparisons between outputs) rather than direct demonstrations. Much cheaper to collect and more expressive.
 
@@ -54,7 +54,7 @@ Optimize the policy to maximize reward while staying close to the SFT model:
 
 $$\max_\theta \mathbb{E}_{x, y \sim \pi_\theta}\left[r_\phi(x,y) - \beta \cdot \log\frac{\pi_\theta(y|x)}{\pi_{SFT}(y|x)}\right]$$
 
-The KL penalty $\beta \cdot D_{KL}(\pi_\theta || \pi_{SFT})$ prevents the policy from drifting too far and exploiting gaps in the reward model.
+The [[loss-kl-divergence|KL penalty]] $\beta \cdot D_{KL}(\pi_\theta || \pi_{SFT})$ prevents the policy from drifting too far and exploiting gaps in the reward model.
 
 ---
 
@@ -107,4 +107,4 @@ Base LM → SFT Model
 
 ---
 
-*See also: [[bayesian-inference]] · [[lora-quantization]] · [[attention-mechanism]]*
+*See also: [[bayesian-inference]] · [[lora-quantization]] · [[attention-mechanism]] · [[instruction-tuning]] · [[loss-kl-divergence]]*

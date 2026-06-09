@@ -16,7 +16,7 @@ ImageNet contains photos taken from eye level, with typical subjects (animals, o
 - Objects at very different scales (individual plants, cities, continents in the same dataset)
 - Contains physical signals (reflectance, radar backscatter) rather than perceptual color
 
-A CLIP ViT-L pretrained on 400M image-text pairs from the internet knows what "forest" looks like from a hiking trail photo. Its representation of a Sentinel-2 false-color composite of a boreal forest is far weaker.
+A [[clip|CLIP]] [[vision-transformer|ViT-L]] pretrained on 400M image-text pairs from the internet knows what "forest" looks like from a hiking trail photo. Its representation of a Sentinel-2 false-color composite of a boreal forest is far weaker.
 
 ### 1.2 Spectral Mismatch
 
@@ -34,7 +34,7 @@ Satellite data has a temporal dimension — the same location imaged weekly for 
 
 Masked Autoencoders (MAE) randomly mask patches of an image and reconstruct them. For EO:
 - Works on raw multispectral patches — no need for text captions
-- Self-supervised: uses only the unlabeled satellite imagery
+- [[self-supervised-overview|Self-supervised]]: uses only the unlabeled satellite imagery
 - Billions of satellite patches are freely available (Sentinel-2, Landsat)
 
 The encoder learns representations that capture spectral-spatial patterns useful for downstream tasks.
@@ -85,7 +85,7 @@ This allows the model to understand "this pixel represents 10 m × 10 m" vs "thi
 
 **Paper**: "RemoteCLIP: A Vision-Language Foundation Model for Remote Sensing" (Liu et al., 2023)
 
-**What it does**: CLIP adapted to remote sensing via contrastive pretraining on remote sensing image-text pairs.
+**What it does**: [[clip|CLIP]] adapted to remote sensing via [[contrastive-learning|contrastive pretraining]] on remote sensing image-text pairs.
 
 **Data**: collected from:
 - Remote sensing image captioning datasets (UCMD, RSICD, RSITMD)
@@ -106,7 +106,7 @@ This allows the model to understand "this pixel represents 10 m × 10 m" vs "thi
 
 **Training signal**: image patch at location $(lat, lon)$ must be aligned with the location encoding of $(lat, lon)$. The location encoder uses spherical harmonics to represent position on the globe.
 
-**Use case**: meta-learning for geospatial tasks. Given a new location, retrieve similar training locations using location embeddings. Enables few-shot learning for species distribution modelling: find locations with similar environments → use observations from those locations.
+**Use case**: meta-learning for geospatial tasks. Given a new location, retrieve similar training locations using location embeddings. Enables few-shot learning for [[biodiversity-ml|species distribution modelling]]: find locations with similar environments → use observations from those locations.
 
 **Key insight**: geographic location is itself rich information. A point in the Amazon rainforest and one in the Sahara will have completely different ecological contexts even if their images look similar due to cloud cover.
 
@@ -114,7 +114,7 @@ This allows the model to understand "this pixel represents 10 m × 10 m" vs "thi
 
 **Paper**: "Foundation Models for Generalist Geospatial Artificial Intelligence" (Jakubik et al., 2023)
 
-**What it does**: a 100M-parameter ViT foundation model for geospatial data, pretrained by IBM and NASA.
+**What it does**: a 100M-parameter [[vision-transformer|ViT]] foundation model for geospatial data, pretrained by IBM and NASA.
 
 **Architecture**: ViT with 3D patch embedding — treats time as a third dimension alongside height and width:
 - Input: (T=3, C=6, H=224, W=224) — 3 time steps, 6 Sentinel-2 bands, 224×224 spatial
@@ -143,7 +143,7 @@ features = encoder(time_series_tensor)  # → (B, num_patches, embed_dim)
 
 **Paper**: "GeoChat: Grounded Large Vision-Language Model for Remote Sensing" (Kuckreja et al., 2023)
 
-**What it does**: a VLM specifically designed for remote sensing images, supporting:
+**What it does**: a [[vlm-architectures|VLM]] specifically designed for remote sensing images, supporting:
 - Image-level QA ("What is the land use in this image?")
 - Region-level QA ("Describe the vegetation at [350, 180, 420, 240]")
 - Grounded detection ("Where are the buildings?")

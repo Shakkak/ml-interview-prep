@@ -28,9 +28,9 @@ Early strides multiply the RF of all subsequent layers. A stride-2 layer in laye
 
 | Architecture | Year | Top-1 | Params | Key Innovation |
 |---|:-:|:-:|:-:|---|
-| AlexNet | 2012 | 63.3% | 60M | ReLU, dropout, GPU |
+| AlexNet | 2012 | 63.3% | 60M | [[activation-relu-variants\|ReLU]], [[regularization-dropout\|dropout]], GPU |
 | VGG-16 | 2014 | 74.4% | 138M | Systematic depth with 3×3 |
-| ResNet-50 | 2015 | 76.1% | 25M | Residual connections |
+| ResNet-50 | 2015 | 76.1% | 25M | [[arch-residual-block\|Residual connections]] |
 | Inception-v3 | 2016 | 78.8% | 24M | Multi-scale parallel paths |
 | MobileNetV2 | 2018 | 72.0% | 3.4M | Inverted residual, linear bottleneck |
 | EfficientNet-B7 | 2019 | 84.3% | 66M | Compound scaling |
@@ -80,7 +80,7 @@ $$d = \alpha^\phi, \quad w = \beta^\phi, \quad r = \gamma^\phi, \quad \text{subj
 
 The constraint ensures doubling $\phi$ (overall scale) roughly doubles FLOPs. Constants $\alpha=1.2, \beta=1.1, \gamma=1.15$ are found by grid search on the small baseline (B0). B0-B7 are obtained by increasing $\phi = 0, 1, \ldots, 7$.
 
-EfficientNet-B7 achieves 84.3% ImageNet top-1 with 8.4× fewer parameters than the previous state of the art at the same accuracy. Every variant includes SE blocks (reduction $r=4$), making channel attention a core architectural component.
+EfficientNet-B7 achieves 84.3% ImageNet top-1 with 8.4× fewer parameters than the previous state of the art at the same accuracy. Every variant includes [[squeeze-excitation|SE blocks]] (reduction $r=4$), making channel attention a core architectural component.
 
 ---
 
@@ -88,7 +88,7 @@ EfficientNet-B7 achieves 84.3% ImageNet top-1 with 8.4× fewer parameters than t
 
 ### ConvNeXt: Closing the Gap to Vision Transformers
 
-The 2022 ConvNeXt paper (Liu et al.) asked: can a pure CNN match Swin Transformer if we apply every modern design choice from the transformer world? The answer was yes — and the analysis reveals why ViTs outperformed ResNets: it was architecture design, not the attention mechanism.
+The 2022 ConvNeXt paper (Liu et al.) asked: can a pure CNN match Swin Transformer if we apply every modern design choice from the transformer world? The answer was yes — and the analysis reveals why [[vision-transformer|ViTs]] outperformed ResNets: it was architecture design, not the attention mechanism.
 
 Cumulative improvement from ResNet-50 baseline → ConvNeXt:
 
@@ -100,8 +100,8 @@ Cumulative improvement from ResNet-50 baseline → ConvNeXt:
 | Depthwise conv | 3×3 conv → depthwise 3×3 | +0.1% |
 | Large kernel | 3×3 DW → **7×7 DW** (matching ViT attention span) | +0.3% |
 | Inverted bottleneck | Standard → wide-narrow-wide | +0.1% |
-| Normalization | BatchNorm → **LayerNorm** (1 per block) | +0.1% |
-| Fewer activations | Three ReLUs → **one GELU** per block | +0.1% |
+| Normalization | BatchNorm → [[normalization-layers\|**LayerNorm**]] (1 per block) | +0.1% |
+| Fewer activations | Three ReLUs → **one [[activation-gelu-swish\|GELU]]** per block | +0.1% |
 
 ConvNeXt-T matches Swin-T at identical FLOPs. The critical changes were large depthwise kernels (expanding local context) and LayerNorm (which avoids BN's batch-size dependency and dead neuron issues in small batches).
 
@@ -121,11 +121,11 @@ Later work (EfficientNetV2, 2021) found that early layers should use MBConv (eff
 
 At the same dataset size and FLOPs, ResNet variants (particularly ResNet-RS and ResNetV2 with modern training) match or exceed ViT-B/16 trained from scratch on ImageNet-1k. ViT's advantage emerges with:
 1. Much larger datasets (ImageNet-21k, JFT-300M)
-2. Self-supervised pretraining (MAE, DINO) which exploits ViT's global attention for better features
+2. Self-supervised pretraining ([[self-supervised-overview|MAE, DINO]]) which exploits ViT's global attention for better features
 3. Tasks requiring global reasoning (VQA, long-range segmentation)
 
 ConvNeXt demonstrated that the right comparison is not CNN vs. transformer but rather: for a given compute budget and dataset size, what architecture family gives the best features? The answer is still task-dependent.
 
 ---
 
-*See also: [[arch-residual-block]] · [[arch-bottleneck-1x1]] · [[arch-depthwise-separable]] · [[squeeze-excitation]] · [[feature-pyramid-networks]] · [[vision-transformer]]*
+*See also: [[arch-residual-block]] · [[arch-bottleneck-1x1]] · [[arch-depthwise-separable]] · [[squeeze-excitation]] · [[feature-pyramid-networks]] · [[vision-transformer]] · [[normalization-layers]] · [[activation-relu-variants]] · [[regularization-dropout]] · [[activation-gelu-swish]] · [[self-supervised-overview]]*

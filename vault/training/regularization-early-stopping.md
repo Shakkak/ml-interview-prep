@@ -63,7 +63,7 @@ Training loss keeps falling; validation diverges from epoch 30. With patience = 
 
 Early in training: high bias (underfits). Late in training: high variance (overfits). Early stopping finds the sweet spot.
 
-This is not just heuristic — for linear models with gradient descent, early stopping and L2 regularization select the **same effective parameter subspace** (Goodfellow et al., *Deep Learning* §7.8). The number of gradient steps is the implicit regularization budget, analogous to $1/\lambda$.
+This is not just heuristic — for linear models with gradient descent, early stopping and [[regularization-weight-decay|L2 regularization]] select the **same effective parameter subspace** (Goodfellow et al., *Deep Learning* §7.8). The number of gradient steps is the implicit regularization budget, analogous to $1/\lambda$.
 
 ### Comparison with Explicit Regularization
 
@@ -74,11 +74,11 @@ This is not just heuristic — for linear models with gradient descent, early st
 | Val set quality | Noisy signal if val is small | More stable |
 | When to combine | Always — they are complementary |
 
-Weight decay + dropout + early stopping are not redundant; each attacks overfitting from a different angle.
+Weight decay + [[regularization-dropout|dropout]] + early stopping are not redundant; each attacks overfitting from a different angle.
 
 ### Interaction with Learning Rate Schedules
 
-With **cosine annealing** ending at step $T$: LR decays to $\eta_{\min}$ — training naturally slows near the end. Early stopping is less critical but checkpoint selection still matters.
+With **[[optimizer-lr-schedules|cosine annealing]]** ending at step $T$: LR decays to $\eta_{\min}$ — training naturally slows near the end. Early stopping is less critical but checkpoint selection still matters.
 
 With **constant LR**: validation loss divergence is the primary guard. Monitor closely.
 
@@ -106,9 +106,9 @@ If you tune patience, $\lambda$, or architecture choices by running many early-s
 
 Fix:
 1. Use a proper held-out test set for final evaluation.
-2. Use nested cross-validation for hyperparameter search.
+2. Use nested [[cross-validation]] for hyperparameter search.
 3. Use a separate calibration split distinct from the hyperparameter-tuning split.
 
 ---
 
-*See also: [[regularization-dropout]] · [[regularization-weight-decay]] · [[optimizer-lr-schedules]] · [[bias-variance-double-descent]] · [[spectral-bias]]*
+*See also: [[regularization-dropout]] · [[regularization-weight-decay]] · [[optimizer-lr-schedules]] · [[bias-variance-double-descent]] · [[spectral-bias]] · [[cross-validation]]*

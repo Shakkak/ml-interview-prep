@@ -23,7 +23,14 @@ For continuous distributions: $D_{KL}(p \,\|\, q) = \int p(x) \log \frac{p(x)}{q
 - **Asymmetric:** $D_{KL}(p \,\|\, q) \neq D_{KL}(q \,\|\, p)$ — direction matters critically
 - **Not a distance:** no triangle inequality
 
-**Connection to cross-entropy:** $D_{KL}(p \,\|\, q) = H(p, q) - H(p)$. Minimizing KL divergence = minimizing cross-entropy (since $H(p)$ is constant w.r.t. model parameters).
+> [!tip] Why KL divergence is always ≥ 0 ([[math-convexity-jensen]])
+> Since $\log$ is concave, Jensen's inequality gives $\mathbb{E}[\log X] \leq \log(\mathbb{E}[X])$.
+> Set $X = q(x)/p(x)$ and take the expectation under $p$:
+> $\mathbb{E}_p\!\left[\log\frac{q}{p}\right] \leq \log\!\left(\mathbb{E}_p\!\left[\frac{q}{p}\right]\right) = \log\!\left(\sum_x p(x)\frac{q(x)}{p(x)}\right) = \log\!\left(\sum_x q(x)\right) = \log 1 = 0$
+> Therefore $D_{KL}(p\,\|\,q) = \mathbb{E}_p[\log p/q] = -\mathbb{E}_p[\log q/p] \geq 0$.
+> Equality holds iff $q/p$ is constant everywhere — i.e., $p = q$.
+
+**Connection to cross-entropy:** $D_{KL}(p \,\|\, q) = H(p, q) - H(p)$. Minimizing KL divergence = minimizing [[loss-cross-entropy|cross-entropy]] (since $H(p)$ is constant w.r.t. model parameters).
 
 **Worked numerical example:** $p = [0.4, 0.4, 0.2]$, $q = [0.5, 0.3, 0.2]$:
 $$D_{KL}(p\,\|\,q) = 0.4\log\frac{0.4}{0.5} + 0.4\log\frac{0.4}{0.3} + 0.2\log(1) = -0.089 + 0.115 + 0 = 0.026 \text{ nats}$$
@@ -40,7 +47,7 @@ $$D_{KL}(p\,\|\,q) = 0.4\log\frac{0.4}{0.5} + 0.4\log\frac{0.4}{0.3} + 0.2\log(1
 
 For a bimodal $p$: forward KL gives a broad $q$ that sits between the modes; reverse KL gives a narrow $q$ that sits on one mode.
 
-**Gaussian KL (used in VAEs):** for $q = \mathcal{N}(\mu, \sigma^2)$ and $p = \mathcal{N}(0, 1)$:
+**Gaussian KL (used in [[variational-autoencoders|VAEs]]):** for $q = \mathcal{N}(\mu, \sigma^2)$ and $p = \mathcal{N}(0, 1)$:
 $$D_{KL}(q \,\|\, p) = \frac{1}{2}\left(\mu^2 + \sigma^2 - \log\sigma^2 - 1\right)$$
 
 For $d$-dimensional diagonal Gaussian: $D_{KL} = \frac{1}{2}\sum_{j=1}^d \left(\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1\right)$.
@@ -51,9 +58,9 @@ Minimum at $\mu=0, \sigma=1$: substituting gives $\frac{1}{2}(0+1-0-1) = 0$. Thi
 
 | Context | Which KL | Purpose |
 |---------|----------|---------|
-| VAE regularization | $D_{KL}(q_\phi \,\|\, p)$ | Force posterior toward prior |
+| VAE regularization | $D_{KL}(q_\phi \,\|\, p)$ | Force [[bayesian-inference\|posterior]] toward prior |
 | RLHF KL penalty | $D_{KL}(\pi_\theta \,\|\, \pi_{SFT})$ | Keep policy near base model |
-| Knowledge distillation | $D_{KL}(p_\text{teacher} \,\|\, p_\text{student})$ | Student matches teacher |
+| [[knowledge-distillation\|Knowledge distillation]] | $D_{KL}(p_\text{teacher} \,\|\, p_\text{student})$ | Student matches teacher |
 | Variational inference | $D_{KL}(q \,\|\, p)$ | Approximate posterior (reverse KL) |
 
 ---

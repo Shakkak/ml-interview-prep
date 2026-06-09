@@ -19,7 +19,7 @@ Raw features are often on incompatible scales, skewed, or in representations the
 
 ### Scaling Methods
 
-**Standardization (Z-score):** $\tilde{x} = (x - \mu)/\sigma$. Output: mean 0, std 1. Does not bound the range — outliers survive in $z$-score space. Use when the feature is approximately Gaussian or when you want to preserve outlier information.
+**Standardization (Z-score):** $\tilde{x} = (x - \mu)/\sigma$. Output: mean 0, std 1. Does not bound the range — outliers survive in $z$-score space. Use when the feature is approximately [[distributions-gaussian|Gaussian]] or when you want to preserve outlier information.
 
 **Min-max scaling:** $\tilde{x} = (x - x_{\min})/(x_{\max} - x_{\min}) \in [0, 1]$. Guaranteed bounded range. One extreme outlier compresses all other values into a tiny sub-range — fragile to outliers in the training set.
 
@@ -43,11 +43,11 @@ Generalization of the log transform to a family parametrized by $\lambda$:
 
 $$\tilde{x} = \begin{cases} (x^\lambda - 1)/\lambda & \lambda \neq 0 \\ \log x & \lambda = 0 \end{cases}$$
 
-Find $\lambda$ that makes $\tilde{x}$ most Gaussian by MLE on training data. The log transform is the $\lambda = 0$ special case. Box-Cox requires $x > 0$; Yeo-Johnson extends it to negative values.
+Find $\lambda$ that makes $\tilde{x}$ most Gaussian by [[statistical-inference-mle|MLE]] on training data. The log transform is the $\lambda = 0$ special case. Box-Cox requires $x > 0$; Yeo-Johnson extends it to negative values.
 
 ### Why Scaling Helps Gradient Descent
 
-For a linear model with loss $\frac{1}{2}\|Xw - y\|^2$, the Hessian is $H = X^\top X$. Gradient descent convergence requires $O(\kappa(H))$ steps where $\kappa = \lambda_{\max}/\lambda_{\min}$ is the condition number. If feature 1 has variance $10^6$ and feature 2 has variance 1, then $\kappa(H) \approx 10^6$ and convergence is extremely slow (elongated loss contours). After standardization, eigenvalues are equal, $\kappa \approx 1$, and gradient descent converges in far fewer steps.
+For a linear model with loss $\frac{1}{2}\|Xw - y\|^2$, the Hessian is $H = X^\top X$. Gradient descent convergence requires $O(\kappa(H))$ steps where $\kappa = \lambda_{\max}/\lambda_{\min}$ is the [[eigenvalues-pca|condition number]]. If feature 1 has variance $10^6$ and feature 2 has variance 1, then $\kappa(H) \approx 10^6$ and convergence is extremely slow (elongated loss contours). After standardization, eigenvalues are equal, $\kappa \approx 1$, and gradient descent converges in far fewer steps.
 
 ### Categorical Features
 
@@ -58,7 +58,7 @@ For a linear model with loss $\frac{1}{2}\|Xw - y\|^2$, the Hessian is $H = X^\t
 | Target encoding | High cardinality (1000 cities) | Data leakage if naively applied |
 | Learned embeddings | High cardinality in DL models | Requires enough data per category |
 
-**Target encoding safety:** replace category $c$ with $\mathbb{E}[y \mid x=c]$ estimated using **cross-validation** — never compute on the same fold being predicted. Optionally add regularization: $\hat{\mu}_c = \frac{n_c \bar{y}_c + m \bar{y}}{n_c + m}$ where $m$ is a smoothing factor (blends toward the global mean for rare categories).
+**Target encoding safety:** replace category $c$ with $\mathbb{E}[y \mid x=c]$ estimated using **[[cross-validation]]** — never compute on the same fold being predicted. Optionally add regularization: $\hat{\mu}_c = \frac{n_c \bar{y}_c + m \bar{y}}{n_c + m}$ where $m$ is a smoothing factor (blends toward the global mean for rare categories).
 
 ### Missing Values
 
@@ -111,4 +111,4 @@ Salary prediction, house price prediction, and reaction time modeling all fit th
 
 ---
 
-*See also: [[linear-algebra-fundamentals]] · [[distributions-gaussian]] · [[statistical-inference-mle]] · [[distributions-overview]]*
+*See also: [[linear-algebra-fundamentals]] · [[distributions-gaussian]] · [[statistical-inference-mle]] · [[distributions-overview]] · [[eigenvalues-pca]] · [[cross-validation]]*

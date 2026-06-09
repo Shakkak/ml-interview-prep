@@ -50,7 +50,7 @@ Given centered data matrix $X \in \mathbb{R}^{N \times d}$ (zero mean), the samp
 
 **Goal:** find unit vector $w$ that maximizes projected variance $w^\top \Sigma w$.
 
-**Lagrangian:** $\mathcal{L}(w, \lambda) = w^\top \Sigma w - \lambda(w^\top w - 1)$.
+**[[lagrangian-optimization|Lagrangian]]:** $\mathcal{L}(w, \lambda) = w^\top \Sigma w - \lambda(w^\top w - 1)$.
 
 $\partial \mathcal{L}/\partial w = 0$: $2\Sigma w = 2\lambda w$, so $\Sigma w = \lambda w$.
 
@@ -64,12 +64,12 @@ $$\frac{\lambda_k}{\sum_{i=1}^d \lambda_i} = \frac{\lambda_k}{\text{tr}(\Sigma)}
 
 ### PCA via SVD (Numerically Preferred)
 
-SVD of the data matrix: $X = U\Sigma V^\top$. Then $\frac{1}{N}X^\top X = V\frac{\Sigma^2}{N}V^\top$, so:
+[[math-svd|SVD]] of the data matrix: $X = U\Sigma V^\top$. Then $\frac{1}{N}X^\top X = V\frac{\Sigma^2}{N}V^\top$, so:
 - **Principal directions** = right singular vectors $V$
 - **Eigenvalues** = $\sigma_i^2 / N$
 - **Scores** = $U\Sigma = XV$
 
-SVD is numerically superior to forming $X^\top X$ because squaring the matrix worsens the condition number: $\kappa(X^\top X) = \kappa(X)^2$. A 4-digit accurate $X$ becomes an 8-digit problem after squaring, potentially losing all significant digits in small eigenvalues.
+SVD is numerically superior to forming $X^\top X$ because squaring the matrix worsens the [[linear-algebra-fundamentals|condition number]]: $\kappa(X^\top X) = \kappa(X)^2$. A 4-digit accurate $X$ becomes an 8-digit problem after squaring, potentially losing all significant digits in small eigenvalues.
 
 ### Whitening
 
@@ -85,7 +85,7 @@ ZCA whitening minimizes $\mathbb{E}[\|\tilde{x} - x\|^2]$ over all whitening tra
 
 ### Kernel PCA
 
-Standard PCA finds linear structure. **Kernel PCA** implicitly maps to a feature space $\phi: \mathbb{R}^d \to \mathcal{H}$ and performs PCA there via the kernel trick $k(x_i, x_j) = \phi(x_i)^\top \phi(x_j)$.
+Standard PCA finds linear structure. **Kernel PCA** implicitly maps to a feature space $\phi: \mathbb{R}^d \to \mathcal{H}$ and performs PCA there via the [[kernel-methods|kernel trick]] $k(x_i, x_j) = \phi(x_i)^\top \phi(x_j)$.
 
 **Centering in feature space:** $\tilde{K} = K - \mathbf{1}_N K - K\mathbf{1}_N + \mathbf{1}_N K\mathbf{1}_N$ where $(\mathbf{1}_N)_{ij} = 1/N$.
 
@@ -115,4 +115,4 @@ As $\sigma^2 \to 0$: probabilistic PCA recovers standard PCA exactly. As $\sigma
 
 ---
 
-*See also: [[math-svd]] · [[linear-algebra-fundamentals]] · [[lagrangian-optimization]] · [[matrix-calculus]] · [[feature-preprocessing]]*
+*See also: [[math-svd]] · [[linear-algebra-fundamentals]] · [[lagrangian-optimization]] · [[matrix-calculus]] · [[feature-preprocessing]] · [[kernel-methods]]*

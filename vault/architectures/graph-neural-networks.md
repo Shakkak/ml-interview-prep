@@ -43,7 +43,7 @@ After $K$ layers, each node representation aggregates information from its $K$-h
 
 ### GCN: Spectral Convolution as Spatial Averaging
 
-GCN (Kipf & Welling, 2017) derives its update rule from spectral graph theory, but the result simplifies to a spatially interpretable operation:
+GCN (Kipf & Welling, 2017) derives its update rule from [[eigenvalues-pca|spectral graph theory]], but the result simplifies to a spatially interpretable operation:
 
 $$H^{(k+1)} = \sigma\!\left(\tilde{D}^{-1/2} \tilde{A}\, \tilde{D}^{-1/2} H^{(k)} W^{(k)}\right)$$
 
@@ -61,7 +61,7 @@ $$h_v^{(k)} = \sigma\!\left(W^{(k)} \cdot \text{CONCAT}\!\left[h_v^{(k-1)},\ \te
 
 Two changes from GCN: (1) sample a fixed-size neighborhood $\mathcal{N}_s(v)$ instead of using all neighbors (enables mini-batch training on giant graphs like Pinterest's 3B-node graph), and (2) concatenate the node's own representation with the aggregated neighbor representation instead of averaging — preserving the node's identity.
 
-AGG options: mean (equivalent to GCN), LSTM over randomly ordered neighbors (breaks permutation-invariance but often works empirically), or max pooling of MLP outputs.
+AGG options: mean (equivalent to GCN), [[rnn-lstm|LSTM]] over randomly ordered neighbors (breaks permutation-invariance but often works empirically), or max pooling of MLP outputs.
 
 ### GAT: Attention-Weighted Neighbors
 
@@ -103,7 +103,7 @@ The learnable $\epsilon$ allows the model to interpolate between ignoring ($\eps
 
 Going beyond 1-WL requires either: (1) $k$-WL methods operating on $k$-tuples of nodes (exponential cost), or (2) injecting structural position information.
 
-**Laplacian eigenvector positional encodings (LSPE):** compute the eigenvectors of the graph Laplacian $L = D - A$ (sorted by eigenvalue). Assign node $v$ its eigenvector entry as a positional feature. These eigenfeatures distinguish nodes that 1-WL cannot, because they encode global graph structure — similar to how sinusoidal encodings place tokens in a global coordinate system.
+**Laplacian eigenvector positional encodings (LSPE):** compute the eigenvectors of the graph Laplacian $L = D - A$ (sorted by eigenvalue). Assign node $v$ its eigenvector entry as a positional feature. These eigenfeatures distinguish nodes that 1-WL cannot, because they encode global graph structure — similar to how [[arch-positional-encoding|sinusoidal encodings]] place tokens in a global coordinate system.
 
 **Random walk positional encodings:** $\text{RW}_{v,k} = [A^k]_{vv}$ — the probability of returning to $v$ after $k$ steps. Cheap to compute, captures local topology.
 
@@ -128,4 +128,4 @@ Going beyond 1-WL requires either: (1) $k$-WL methods operating on $k$-tuples of
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[contrastive-learning]] · [[feature-pyramid-networks]]*
+*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[contrastive-learning]] · [[feature-pyramid-networks]] · [[eigenvalues-pca]] · [[linear-algebra-fundamentals]] · [[rnn-lstm]]*

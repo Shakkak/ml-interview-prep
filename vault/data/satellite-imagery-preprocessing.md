@@ -4,7 +4,7 @@ tags: [satellite-preprocessing, radiometric-calibration, cloud-masking, normaliz
 aliases: [Remote Sensing Preprocessing, EO Data Preprocessing, Satellite Data Preparation]
 ---
 
-This file covers every preprocessing step needed to transform raw satellite data into model-ready tensors — from raw digital numbers to normalized patches ready for a vision-language model. Written for someone starting from zero with satellite data.
+This file covers every preprocessing step needed to transform raw satellite data into model-ready tensors — from raw digital numbers to normalized patches ready for a [[vlm-architectures|vision-language model]]. Written for someone starting from zero with satellite data.
 
 ## 1. The Preprocessing Pipeline at a Glance
 
@@ -251,9 +251,9 @@ For fine-tuned VLMs:
 1. **Early fusion**: concatenate all 13 bands as a 13-channel tensor; use a patch embedding that accepts 13 channels instead of 3. Requires modifying the vision encoder.
 2. **Late fusion**: encode RGB separately + encode NDVI separately + combine embeddings downstream.
 3. **Multiple RGB composites**: create true-color + false-color → pass both through CLIP separately → combine embeddings.
-4. **PCA reduction**: reduce 13 bands to 3 principal components. Maximizes variance but components have no intuitive spectral meaning.
+4. **[[eigenvalues-pca|PCA]] reduction**: reduce 13 bands to 3 principal components. Maximizes variance but components have no intuitive spectral meaning.
 
-**Practical recommendation for CLIP inference**: true-color RGB, normalized to ImageNet statistics. Fine-tune on domain data if budget allows.
+**Practical recommendation for [[clip|CLIP]] inference**: true-color RGB, normalized to ImageNet statistics. Fine-tune on domain data if budget allows.
 
 ---
 
@@ -301,7 +301,7 @@ Standard augmentations from natural image ML remain valid, with some satellite-s
 | Random horizontal / vertical flip | ✅ | No canonical orientation in satellite imagery |
 | Random rotation (any angle) | ✅ | Satellite imagery is north-up but CNNs don't need it |
 | Colour jitter (on RGB only) | ⚠️ | Can destroy spectral relationships; be conservative |
-| CutMix / MixUp | ✅ | Works well for multi-label land cover |
+| [[data-augmentation\|CutMix / MixUp]] | ✅ | Works well for multi-label land cover |
 | Random crop | ✅ | Useful if chips are larger than model input |
 | Temporal jitter | ✅ | Use slightly different time window for compositing |
 | Band dropout | ✅ | Simulate missing bands; improves robustness |
@@ -325,4 +325,4 @@ Hyperspectral ML models often use 1D CNN across the spectral dimension first, th
 
 ## See Also
 
-[[earth-observation-fundamentals]], [[multi-source-fusion]], [[remote-sensing-foundation-models]], [[vlm-architectures]], [[clip]]
+[[earth-observation-fundamentals]], [[multi-source-fusion]], [[remote-sensing-foundation-models]], [[vlm-architectures]], [[clip]], [[eigenvalues-pca]], [[data-augmentation]]

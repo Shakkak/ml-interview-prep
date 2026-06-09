@@ -15,7 +15,7 @@ related: [loss-cross-entropy, loss-dice, evaluation-metrics-guide]
 
 **The problem:** in single-stage object detectors (SSD, RetinaNet), the model evaluates ~100,000 candidate boxes per image. The vast majority are background (easy negatives). A typical ratio: 1 positive : 1000 negatives.
 
-With standard cross-entropy, easy negatives have small individual loss (e.g., 0.001 each), but $1000 \times 0.001 = 1.0$ total — the gradient is completely dominated by background. The model learns to predict background well and fails on actual objects.
+With standard [[loss-cross-entropy|cross-entropy]], easy negatives have small individual loss (e.g., 0.001 each), but $1000 \times 0.001 = 1.0$ total — the gradient is completely dominated by background. The model learns to predict background well and fails on actual objects.
 
 **Focal Loss** (Lin et al., 2017, RetinaNet) down-weights easy examples:
 $$FL(p_t) = -(1-p_t)^\gamma \log(p_t)$$
@@ -71,7 +71,7 @@ The factor $(1-p_t)^\gamma$ appears in the gradient, confirming that easy exampl
 
 **Equalization Loss** (Tan et al., 2020) for long-tail recognition: focal loss down-weights easy examples globally. For long-tail datasets where rare categories always appear as "hard" (few training examples), focal loss paradoxically hurts them by increasing the gradient ratio toward frequent/easy classes. Equalization Loss instead suppresses gradients from backgrounds and suppresses negatives from categories with fewer than $\lambda$ total instances, directly addressing the frequency imbalance rather than the difficulty imbalance.
 
-**VariFocal Loss** (Zhang et al., 2021) for detection quality estimation: standard focal loss uses binary foreground/background labels. VariFocal Loss uses an asymmetric formulation where the modulating factor depends on the Intersection-over-Union (IoU) quality score:
+**VariFocal Loss** (Zhang et al., 2021) for detection quality estimation: standard focal loss uses binary foreground/background labels. VariFocal Loss uses an asymmetric formulation where the modulating factor depends on the Intersection-over-Union ([[evaluation-metrics-guide|IoU]]) quality score:
 $$VFL(p, q) = \begin{cases} -q(q\log(p) + (1-q)\log(1-p)) & q > 0 \text{ (foreground)} \\ -(1-p)^\gamma \log(1-p) & q = 0 \text{ (background)} \end{cases}$$
 This trains the classification head to also predict localization quality, used in YOLOX and TOOD for joint classification-localization confidence.
 

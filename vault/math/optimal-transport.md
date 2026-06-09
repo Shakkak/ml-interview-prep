@@ -25,7 +25,7 @@ where $\Gamma(p,q)$ is the set of all **joint distributions** (transport plans) 
 
 **Example:** $p = \delta_{0}$ (all mass at 0), $q = \delta_{1}$ (all mass at 1):
 - $W_1(p, q) = 1$ (move the mass one unit)
-- $D_{KL}(p \| q) = \infty$ (KL divergence is infinite for non-overlapping supports)
+- $D_{KL}(p \| q) = \infty$ ([[loss-kl-divergence|KL divergence]] is infinite for non-overlapping supports)
 - $JS(p, q) = \log 2$ (a constant, providing zero gradient)
 
 **Key advantage over KL/JS:** Wasserstein distance is finite and provides meaningful gradients even when the two distributions have **disjoint supports** — a critical property for generative model training.
@@ -50,7 +50,7 @@ The general Wasserstein-$p$ distance:
 
 $$W_p(p, q) = \left(\inf_{\gamma \in \Gamma(p,q)} \mathbb{E}_{(x,y)\sim\gamma}[\|x - y\|^p]\right)^{1/p}$$
 
-$W_2$ uses squared distances and is especially natural for Gaussians:
+$W_2$ uses squared distances and is especially natural for [[distributions-gaussian|Gaussians]]:
 
 $$W_2^2(\mathcal{N}(\mu_1, \Sigma_1), \mathcal{N}(\mu_2, \Sigma_2)) = \|\mu_1 - \mu_2\|^2 + \text{tr}\!\left(\Sigma_1 + \Sigma_2 - 2(\Sigma_1^{1/2}\Sigma_2\Sigma_1^{1/2})^{1/2}\right)$$
 
@@ -58,7 +58,7 @@ The Bures metric on Gaussian distributions. $W_2$ geometry has applications in d
 
 ### WGAN: Wasserstein Distance for Generative Adversarial Networks
 
-Standard Generative Adversarial Networks (GANs) minimize the Jensen-Shannon (JS) divergence between real distribution $p_r$ and generator distribution $p_g$. When $p_r$ and $p_g$ have disjoint supports (common early in training), $JS(p_r \| p_g) = \log 2$ — a constant that provides **zero gradient** to the generator.
+Standard [[generative-adversarial-networks|Generative Adversarial Networks (GANs)]] minimize the Jensen-Shannon (JS) divergence between real distribution $p_r$ and generator distribution $p_g$. When $p_r$ and $p_g$ have disjoint supports (common early in training), $JS(p_r \| p_g) = \log 2$ — a constant that provides **zero gradient** to the generator.
 
 **WGAN** (Arjovsky et al., 2017) replaces JS with $W_1$:
 
@@ -81,7 +81,7 @@ Computing exact $W_p$ requires solving a linear program — $O(n^3)$ for $n$ sup
 
 $$W_\epsilon(p, q) = \min_{\gamma \in \Gamma(p,q)} \langle C, \gamma \rangle - \epsilon H(\gamma)$$
 
-where $C_{ij} = \|x_i - y_j\|^2$ is the cost matrix and $H(\gamma) = -\sum_{ij} \gamma_{ij} \log \gamma_{ij}$ is the transport plan's entropy.
+where $C_{ij} = \|x_i - y_j\|^2$ is the cost matrix and $H(\gamma) = -\sum_{ij} \gamma_{ij} \log \gamma_{ij}$ is the transport plan's [[entropy-mutual-info|entropy]].
 
 The solution satisfies $\gamma_{ij}^* = u_i K_{ij} v_j$ where $K_{ij} = e^{-C_{ij}/\epsilon}$, and **Sinkhorn iterations** alternate:
 
@@ -112,4 +112,4 @@ FID is thus a Wasserstein-2 distance in feature space, which is why it is more s
 
 ---
 
-*See also: [[generative-adversarial-networks]] · [[loss-kl-divergence]] · [[normalizing-flows]] · [[entropy-mutual-info]]*
+*See also: [[generative-adversarial-networks]] · [[loss-kl-divergence]] · [[normalizing-flows]] · [[entropy-mutual-info]] · [[distributions-gaussian]]*

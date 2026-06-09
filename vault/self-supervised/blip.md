@@ -13,7 +13,7 @@ related: [clip, attention-mechanism, self-supervised-overview, contrastive-learn
 
 ## Fundamental
 
-CLIP excels at retrieval and zero-shot classification but has two fundamental gaps:
+[[clip|CLIP]] excels at retrieval and zero-shot classification but has two fundamental gaps:
 1. **No text generation.** CLIP is a dual encoder — it can score image-text pairs but cannot generate captions or answers.
 2. **Noisy web data.** Internet image-text pairs often have misaligned or irrelevant captions. CLIP learns to tolerate this noise.
 
@@ -33,7 +33,7 @@ Image → Visual Encoder (ViT)
     └──────────────────────────────────────┘
 ```
 
-**ITC (contrastive):** aligns image and text embeddings — same InfoNCE loss as CLIP. Pulls matched pairs together in embedding space.
+**ITC (contrastive):** aligns image and text embeddings — same [[loss-nt-xent|InfoNCE loss]] as CLIP. Pulls matched pairs together in embedding space.
 
 **ITM (matching):** a binary classifier that takes fused image+text features and predicts whether the pair is genuinely matched. Uses hard negative mining: the closest non-matching pair is used as the negative.
 
@@ -84,7 +84,7 @@ The **Q-Former (Querying Transformer):** a lightweight transformer bridging the 
 Image → Frozen ViT → Q-Former → Frozen LLM
 ```
 
-The Q-Former has $N = 32$ learnable **query tokens** that interact with image features via cross-attention. These 32 tokens extract the most task-relevant visual information and pass it to the LLM as soft visual prompts. Only the Q-Former is trained.
+The Q-Former has $N = 32$ learnable **query tokens** that interact with image features via [[attention-mechanism|cross-attention]]. These 32 tokens extract the most task-relevant visual information and pass it to the LLM as soft visual prompts. Only the Q-Former is trained.
 
 **Why freeze everything?** Training a 7B+ LLM end-to-end with image data is prohibitively expensive and often catastrophically forgets language capabilities. Freezing preserves both encoders and forces the Q-Former to learn the alignment — a tractable, parameter-efficient objective.
 
@@ -106,7 +106,7 @@ Stage 2 — Vision-to-language generative learning (frozen ViT + frozen LLM, tra
 
 ## Advanced
 
-**Information bottleneck perspective on Q-Former:** the 32 query tokens act as a learned bottleneck between $\sim$196 image patch features and the LLM. The Q-Former is forced to extract the most language-relevant visual information, discarding visual details irrelevant to language generation. This is analogous to the projection head in contrastive learning — the bottleneck protects the frozen LLM from low-level visual noise.
+**Information bottleneck perspective on Q-Former:** the 32 query tokens act as a learned bottleneck between $\sim$196 image patch features and the LLM. The Q-Former is forced to extract the most language-relevant visual information, discarding visual details irrelevant to language generation. This is analogous to the projection head in [[contrastive-learning]] — the bottleneck protects the frozen LLM from low-level visual noise.
 
 **Shared weights between encoder and decoder in BLIP:** the text encoder (bidirectional attention) and decoder (causal attention) share all transformer parameters. Only the attention mask differs. This is parameter-efficient but creates a subtle training challenge: the same parameters must work for both attention patterns simultaneously. The model converges because bidirectional and causal modes access different attention score regions — bidirectional attends future tokens, causal does not. This weight-sharing trick was also used in UNITER and ViLBERT but BLIP systematizes it across three objectives.
 
@@ -118,4 +118,4 @@ Stage 2 — Vision-to-language generative learning (frozen ViT + frozen LLM, tra
 
 ---
 
-*See also: [[clip]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[contrastive-learning]]*
+*See also: [[clip]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[loss-nt-xent]]*

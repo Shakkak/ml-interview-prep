@@ -42,7 +42,7 @@ where $\text{sim}(u,v) = \frac{u^T v}{\|u\|\|v\|}$ (cosine similarity) and $\tau
 
 **Temperature effect:** low $\tau$ (< 0.1) concentrates loss on the hardest negatives — more discriminative representations but unstable training. High $\tau$ (> 0.5) distributes loss uniformly — smoother optimization but weaker signal. Typical: $\tau = 0.07$–$0.1$.
 
-**Connection to InfoNCE and mutual information:**
+**Connection to InfoNCE and [[entropy-mutual-info|mutual information]]:**
 
 $$\mathcal{I}(z^+; z^{++}) \geq \log K - \mathcal{L}_{NCE}$$
 
@@ -112,12 +112,12 @@ where $C$ is the cross-correlation matrix between embeddings of the two views. F
 
 VICReg makes the collapse-prevention mechanism explicit rather than implicit, enabling theoretical analysis.
 
-**DINO (Caron et al., 2021) — self-distillation with ViT:**
+**DINO (Caron et al., 2021) — self-distillation with [[vision-transformer|ViT]]:**
 - Student: processes small crops (local view)
 - Teacher: EMA of student, processes large crops (global view)
-- Loss: cross-entropy between student and teacher output distributions
+- Loss: [[loss-cross-entropy|cross-entropy]] between student and teacher output distributions
 
-DINO ViT features show emergent segmentation properties without any supervision — the `[CLS]` token attention maps segment semantically coherent objects. This wasn't explicitly trained; it emerges from the self-distillation objective forcing the student to predict global semantics from local views.
+DINO ViT features show emergent segmentation properties without any supervision — the `[CLS]` token's [[attention-mechanism|attention maps]] segment semantically coherent objects. This wasn't explicitly trained; it emerges from the self-distillation objective forcing the student to predict global semantics from local views.
 
 **DINOv2 (Oquab et al., 2023):** scales DINO to large curated datasets (LVD-142M) with a combination of SSL objectives. Produces universal visual features used as frozen backbones for many downstream tasks. Key finding: at sufficient scale with curated data, SSL features match or exceed supervised ImageNet features for dense prediction tasks (depth estimation, segmentation), not just classification.
 
@@ -125,4 +125,4 @@ DINO ViT features show emergent segmentation properties without any supervision 
 
 ---
 
-*See also: [[bayesian-inference]] · [[attention-mechanism]] · [[backpropagation]] · [[self-supervised-overview]]*
+*See also: [[bayesian-inference]] · [[attention-mechanism]] · [[backpropagation]] · [[self-supervised-overview]] · [[loss-cross-entropy]] · [[entropy-mutual-info]] · [[vision-transformer]]*

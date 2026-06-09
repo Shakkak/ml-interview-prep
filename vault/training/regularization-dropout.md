@@ -56,7 +56,7 @@ Standard (4×4 map):    DropBlock (3×3 block):
 
 More effective regularization, especially at high-resolution feature maps. Keep rate parameter $\gamma$ (fraction of blocks to drop) is typically set inversely proportional to block size to maintain the same expected sparsity.
 
-**Dropout interaction with BatchNorm:** dropout changes the variance of activations, which disrupts BatchNorm's running statistics. If using BatchNorm, reduce or remove dropout. If both are needed, place dropout *after* the activation and *before* BatchNorm in the layer order.
+**Dropout interaction with BatchNorm:** dropout changes the variance of activations, which disrupts BatchNorm's running statistics. If using [[normalization-layers|BatchNorm]], reduce or remove dropout. If both are needed, place dropout *after* the activation and *before* BatchNorm in the layer order.
 
 **MC Dropout for uncertainty estimation** (Gal & Ghahramani, 2016): keep dropout active at inference and run $T$ forward passes. The variance of predictions estimates **epistemic uncertainty** (model uncertainty from limited data):
 $$\text{uncertainty} \approx \text{Var}_{t=1}^T[f_t(x)]$$
@@ -77,8 +77,8 @@ Used in medical imaging, autonomous driving — domains where knowing *when the 
 
 **Curriculum dropout (Morerio et al., 2017):** the optimal dropout rate changes during training. Early in training, low dropout allows rapid feature learning. Late in training, high dropout enforces stronger regularization. Curriculum dropout starts with $p=0$ and gradually increases to the target rate following a schedule (e.g., linear or sigmoid). Reported improvements of 0.5–1% on CIFAR-10/100 and better convergence stability. The intuition: early aggressive dropout wastes capacity before the network has learned basic features.
 
-**Dropout vs weight decay on overparameterized networks:** on modern large models, weight decay alone is often sufficient regularization — dropout adds limited benefit and can slow convergence. The shift away from dropout in transformers (LLMs use $p=0.1$ or none, whereas ResNets used $p=0.5$) reflects the move to overparameterized regimes where implicit regularization from SGD noise and weight decay dominate. For fine-tuning, reducing or removing dropout is often beneficial since the pretrained features are already regularized.
+**Dropout vs weight decay on overparameterized networks:** on modern large models, [[regularization-weight-decay|weight decay]] alone is often sufficient regularization — dropout adds limited benefit and can slow convergence. The shift away from dropout in transformers (LLMs use $p=0.1$ or none, whereas ResNets used $p=0.5$) reflects the move to overparameterized regimes where implicit regularization from SGD noise and weight decay dominate. For fine-tuning, reducing or removing dropout is often beneficial since the pretrained features are already regularized.
 
 ---
 
-*See also: [[regularization-weight-decay]] · [[normalization-layers]] · [[bias-variance-double-descent]]*
+*See also: [[regularization-weight-decay]] · [[normalization-layers]] · [[bias-variance-double-descent]] · [[ensemble-methods]] · [[bayesian-inference]]*

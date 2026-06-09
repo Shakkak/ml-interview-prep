@@ -17,7 +17,7 @@ $$\text{ReLU}(x) = \max(0, x)$$
 
 Gradient: $1$ if $x > 0$, else $0$. Computationally trivial.
 
-**Why ReLU replaced sigmoid in hidden layers:** sigmoid's maximum gradient is 0.25 — every layer multiplies the gradient by at most 0.25. For 10 layers, the gradient at layer 1 is at most $(0.25)^{10} \approx 10^{-6}$ of the final gradient. ReLU passes the full gradient through active neurons. It introduced the modern era of deep networks.
+**Why ReLU replaced [[activation-sigmoid-tanh|sigmoid]] in hidden layers:** sigmoid's maximum gradient is 0.25 — every layer multiplies the gradient by at most 0.25. For 10 layers, the gradient at layer 1 is at most $(0.25)^{10} \approx 10^{-6}$ of the final gradient. ReLU passes the full gradient through active neurons. It introduced the modern era of deep networks.
 
 **The dying ReLU problem:** if a neuron's pre-activation is negative for *all* training examples, its gradient is permanently 0 — the neuron is dead. Causes: large learning rate pushing $w \cdot x + b < 0$ for all inputs, or very negative bias initialization. Magnitude: 5–40% of neurons in poorly-tuned networks.
 
@@ -35,7 +35,7 @@ Typical $\alpha = 0.01$. Gradient is $\alpha$ (not 0) for negative inputs — ne
 
 $$\text{ELU}(x) = \begin{cases} x & x \geq 0 \\ \alpha(e^x - 1) & x < 0 \end{cases}$$
 
-Typical $\alpha = 1.0$. Smooth at $x = 0$. The negative region drives mean activations toward zero — beneficial for batch normalization. Cost: $e^x$ computation.
+Typical $\alpha = 1.0$. Smooth at $x = 0$. The negative region drives mean activations toward zero — beneficial for [[normalization-layers|batch normalization]]. Cost: $e^x$ computation.
 
 ### Numerical Comparison
 
@@ -86,8 +86,8 @@ Solving these simultaneous constraints yields the specific $(\lambda, \alpha)$ v
 | PReLU | No | No | No | Learned |
 | ELU | No | No | Yes | Near zero |
 | SELU | No | No | Yes | Exactly zero |
-| GELU / Swish | No | No | Yes | Near zero |
+| [[activation-gelu-swish\|GELU / Swish]] | No | No | Yes | Near zero |
 
 ---
 
-*See also: [[activation-gelu-swish]] · [[activation-sigmoid-tanh]] · [[backpropagation-advanced]]*
+*See also: [[activation-gelu-swish]] · [[activation-sigmoid-tanh]] · [[backpropagation-advanced]] · [[normalization-layers]] · [[backpropagation]]*

@@ -41,7 +41,7 @@ No unbiased estimator can have variance smaller than $1/I(\theta)$. For $n$ i.i.
 
 For $p=0.5$, $n=100$: $\text{Var}(\hat{p}) \geq 0.0025$, SD $\geq 0.05$.
 
-**MLE achieves this bound asymptotically** — MLE is the most efficient unbiased estimator. As $n \to \infty$: $\sqrt{n}(\hat\theta_{MLE} - \theta^*) \to \mathcal{N}(0, I(\theta^*)^{-1})$.
+**[[statistical-inference-mle|MLE]] achieves this bound asymptotically** — MLE is the most efficient unbiased estimator. As $n \to \infty$: $\sqrt{n}(\hat\theta_{MLE} - \theta^*) \to \mathcal{N}(0, I(\theta^*)^{-1})$.
 
 ### Fisher Information for Gaussians
 
@@ -61,7 +61,7 @@ For $\theta \in \mathbb{R}^d$:
 
 $$F(\theta) = \mathbb{E}_x\!\left[\nabla_\theta \log p(x;\theta)\; \nabla_\theta \log p(x;\theta)^\top\right] = -\mathbb{E}_x\!\left[\nabla^2_\theta \log p(x;\theta)\right]$$
 
-$F$ is a $d \times d$ positive semi-definite matrix. It equals both the expected outer product of the score vector and the expected negative Hessian of the log-likelihood.
+$F$ is a $d \times d$ positive semi-definite matrix. It equals both the expected outer product of the score vector and the expected negative [[matrix-calculus|Hessian]] of the log-likelihood.
 
 ### The Natural Gradient
 
@@ -75,7 +75,7 @@ where $g = \nabla_\theta L$ is the gradient and $F^{-1}g$ is the **natural gradi
 
 **Key property:** the natural gradient is invariant to parameterization — reparameterizing the model does not change the update direction (unlike ordinary gradient).
 
-**Why:** natural gradient solves $\min_{\delta\theta} g^\top \delta\theta$ subject to $D_{KL}(p_\theta \| p_{\theta+\delta\theta}) \leq \epsilon$ — it takes the steepest descent step in distribution space, not parameter space.
+**Why:** natural gradient solves $\min_{\delta\theta} g^\top \delta\theta$ subject to $D_{KL}(p_\theta \| p_{\theta+\delta\theta}) \leq \epsilon$ — it takes the steepest descent step in [[loss-kl-divergence|distribution space]], not parameter space.
 
 ### Fisher Information and KL Divergence
 
@@ -103,7 +103,7 @@ Computing and inverting $F \in \mathbb{R}^{d \times d}$ requires $O(d^2)$ storag
 
 ### Practical Approximations: Diagonal Fisher (Adam)
 
-Adam's second moment $v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$ is an exponential moving average of $g_i^2$ — a running estimate of the diagonal Fisher. Adam's update $g_t / \sqrt{v_t}$ approximates $F^{-1}g$. This is a first-order diagonal approximation that ignores all off-diagonal curvature.
+[[optimizer-adam|Adam]]'s second moment $v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$ is an exponential moving average of $g_i^2$ — a running estimate of the diagonal Fisher. Adam's update $g_t / \sqrt{v_t}$ approximates $F^{-1}g$. This is a first-order diagonal approximation that ignores all off-diagonal curvature.
 
 ### K-FAC (Kronecker-Factored Approximate Curvature)
 
@@ -129,8 +129,8 @@ The observed Fisher information at the MLE:
 
 $$\hat{F} = -\nabla^2_\theta \log p(D|\hat\theta_{MLE})$$
 
-is the curvature of the negative log-likelihood at the mode. The Laplace approximation to the Bayesian posterior uses this as the precision of a Gaussian approximation: $p(\theta|D) \approx \mathcal{N}(\hat\theta_{MLE}, \hat{F}^{-1})$. This is the basis for post-hoc Bayesian deep learning (Ritter et al., 2018) and for Bayesian optimization acquisition functions that require predictive variance.
+is the curvature of the negative log-likelihood at the mode. The Laplace approximation to the [[bayesian-inference|Bayesian posterior]] uses this as the precision of a Gaussian approximation: $p(\theta|D) \approx \mathcal{N}(\hat\theta_{MLE}, \hat{F}^{-1})$. This is the basis for post-hoc Bayesian deep learning (Ritter et al., 2018) and for Bayesian optimization acquisition functions that require predictive variance.
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[matrix-calculus]] · [[optimizer-adam]] · [[entropy-mutual-info]] · [[bayesian-inference]]*
+*See also: [[statistical-inference-mle]] · [[matrix-calculus]] · [[optimizer-adam]] · [[entropy-mutual-info]] · [[bayesian-inference]] · [[loss-kl-divergence]]*

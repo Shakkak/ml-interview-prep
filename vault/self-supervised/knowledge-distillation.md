@@ -29,8 +29,8 @@ Higher $\tau$ flattens the distribution, making small probabilities (inter-class
 
 $$\mathcal{L} = (1-\alpha)\,\mathcal{L}_{CE}(y, p^S) + \alpha\,\tau^2\,D_{KL}(p^T \| p^S)$$
 
-- First term: standard cross-entropy against the hard label $y$
-- Second term: KL divergence against soft teacher targets
+- First term: standard [[loss-cross-entropy|cross-entropy]] against the hard label $y$
+- Second term: [[loss-kl-divergence|KL divergence]] against soft teacher targets
 - $\tau^2$ factor: compensates for gradient magnitude reduction from temperature scaling
 - $\alpha \in [0,1]$: balance between hard and soft loss; typically $\alpha=0.9$
 
@@ -99,7 +99,7 @@ Key insight: the distillation token attends to different patches than `[CLS]` �
 
 **Self-distillation (Born-Again Networks, Furlanello et al., 2018):** distill from the same architecture — the student has identical capacity to the teacher. Counterintuitively, this improves performance. The student trained on soft targets from the first-generation model produces a better second-generation model, and averaging an ensemble of born-again networks outperforms the original. The explanation: the soft targets act as implicit data augmentation, smoothing the loss landscape and preventing overfitting to label noise.
 
-**DINO (Caron et al., 2021) — self-supervised self-distillation:**
+**DINO (Caron et al., 2021) — [[self-supervised-overview|self-supervised]] self-distillation:**
 
 ```
 Online ("student"): updated by gradient descent
@@ -124,4 +124,4 @@ This transfers the structure of the teacher's representation space (not just ind
 
 ---
 
-*See also: [[lora-quantization]] · [[loss-cross-entropy]] · [[self-supervised-overview]] · [[contrastive-learning]]*
+*See also: [[lora-quantization]] · [[loss-cross-entropy]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[loss-kl-divergence]]*

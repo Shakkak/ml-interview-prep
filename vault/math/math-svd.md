@@ -48,7 +48,7 @@ $$A = \begin{bmatrix}1/\sqrt{2} & -1/\sqrt{2}\\1/\sqrt{2} & 1/\sqrt{2}\end{bmatr
 
 ### Best Low-Rank Approximation (Eckart-Young Theorem)
 
-The best rank-$k$ approximation of $A$ in Frobenius norm is:
+The best rank-$k$ approximation of $A$ in [[linear-algebra-fundamentals|Frobenius norm]] is:
 
 $$A_k = \sum_{i=1}^k \sigma_i u_i v_i^\top = U_k \Sigma_k V_k^\top$$
 
@@ -64,9 +64,9 @@ $\|A - A_1\|_F^2 = (3-2)^2 + (1-2)^2 + (1-2)^2 + (3-2)^2 = 4 = \sigma_2^2$ ✓
 
 ### Applications in ML
 
-**PCA connection:** the right singular vectors $V$ are the principal directions. Project data onto top-$k$: multiply by $V_k$ (first $k$ columns). Variance explained by component $i$ = $\sigma_i^2 / \sum_j \sigma_j^2$ (computed from the data matrix $X$, not the covariance matrix, saving an $O(d^3)$ eigendecomposition).
+**[[eigenvalues-pca|PCA]] connection:** the right singular vectors $V$ are the principal directions. Project data onto top-$k$: multiply by $V_k$ (first $k$ columns). Variance explained by component $i$ = $\sigma_i^2 / \sum_j \sigma_j^2$ (computed from the data matrix $X$, not the covariance matrix, saving an $O(d^3)$ eigendecomposition).
 
-**LoRA fine-tuning:** pretrained weight matrix $W_0 \in \mathbb{R}^{d \times d}$. Instead of full fine-tuning (updating $d^2$ parameters), add a low-rank update: $W = W_0 + \Delta W$, $\Delta W = BA$ where $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times d}$, $r \ll d$. Parameter count: $2dr \ll d^2$. The constraint that $\Delta W$ is rank-$r$ is justified by the empirical observation that weight updates during fine-tuning concentrate in a low-rank subspace (Aghajanyan et al., 2020 on intrinsic dimensionality).
+**[[lora-quantization|LoRA]] fine-tuning:** pretrained weight matrix $W_0 \in \mathbb{R}^{d \times d}$. Instead of full fine-tuning (updating $d^2$ parameters), add a low-rank update: $W = W_0 + \Delta W$, $\Delta W = BA$ where $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times d}$, $r \ll d$. Parameter count: $2dr \ll d^2$. The constraint that $\Delta W$ is rank-$r$ is justified by the empirical observation that weight updates during fine-tuning concentrate in a low-rank subspace (Aghajanyan et al., 2020 on intrinsic dimensionality).
 
 **Matrix compression:** replace $W$ with $W_k = U_k \Sigma_k V_k^\top$. Storage: $k(m+n)$ vs $mn$ original. Compression ratio $= mn / k(m+n)$. For a square matrix, ratio $= n/(2k)$ — rank-50 approximation of a $1000 \times 1000$ matrix saves 90% of storage.
 
@@ -90,7 +90,7 @@ $$\text{sr}(A) = \frac{\|A\|_F^2}{\|A\|_2^2} = \frac{\sum_i \sigma_i^2}{\sigma_1
 
 If $\text{sr}(A) \ll \min(m,n)$: most energy is concentrated in the top singular values. The matrix behaves like a low-rank matrix for practical purposes.
 
-**Empirical finding (Aghajanyan et al., 2020):** fine-tuning directions for BERT on NLP tasks have intrinsic dimension $\sim 200$ even though the full parameter space has $\sim 110M$ dimensions. The fine-tuning gradient trajectories lie in a low-dimensional subspace of parameter space — justifying LoRA's rank-$r$ constraint.
+**Empirical finding (Aghajanyan et al., 2020):** fine-tuning directions for [[bert-mlm|BERT]] on NLP tasks have intrinsic dimension $\sim 200$ even though the full parameter space has $\sim 110M$ dimensions. The fine-tuning gradient trajectories lie in a low-dimensional subspace of parameter space — justifying LoRA's rank-$r$ constraint.
 
 **Singular value spectrum diagnostics:**
 - Flat spectrum ($\sigma_i \approx$ const): near-random matrix (e.g., random initialization). No low-rank structure.
@@ -123,4 +123,4 @@ Convergence rate for the top singular vector: $O((\sigma_2/\sigma_1)^t)$ — exp
 
 ---
 
-*See also: [[eigenvalues-pca]] · [[linear-algebra-fundamentals]] · [[lora-quantization]] · [[backpropagation-advanced]]*
+*See also: [[eigenvalues-pca]] · [[linear-algebra-fundamentals]] · [[lora-quantization]] · [[backpropagation-advanced]] · [[bert-mlm]]*

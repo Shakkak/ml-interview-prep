@@ -71,11 +71,11 @@ Intuition: if $G_d$ cannot tell which domain a feature came from, the feature do
 
 **Practical strategies:**
 
-**Fine-tuning (easiest):** collect a small labeled target dataset, fine-tune the model. Requires labeled target data.
+**[[transfer-learning|Fine-tuning]] (easiest):** collect a small labeled target dataset, fine-tune the model. Requires labeled target data.
 
 **Batch normalization adaptation:** update BN statistics on unlabeled target data without changing weights. Effective because BN statistics capture domain-specific statistics (contrast, brightness distribution).
 
-**Test-time adaptation (TTA):** at test time, update BN statistics or a subset of model parameters using the test batch. TENT (Wang et al., 2021) minimizes entropy of predictions on test batches.
+**Test-time adaptation (TTA):** at test time, update BN statistics or a subset of model parameters using the test batch. TENT (Wang et al., 2021) minimizes [[entropy-mutual-info|entropy]] of predictions on test batches.
 
 **Self-training / pseudo-labels:** run the model on unlabeled target data, use high-confidence predictions as labels, retrain. Risk: confirmation bias (wrong confident predictions reinforce errors). Fix: confidence threshold + consistency regularization.
 
@@ -103,8 +103,8 @@ Computationally simpler than adversarial training, works well when covariate shi
 
 **Test-time training (TTT):** at test time, take gradient steps on the model itself using a self-supervised auxiliary loss (e.g., rotation prediction) on each test batch. Unlike TENT (which only updates BN statistics), TTT updates all parameters. Risk: catastrophic forgetting of source domain knowledge. Requires careful learning rate control.
 
-**Foundation model approach:** large pretrained models (CLIP, DINOv2) trained on diverse internet data are inherently robust to many distribution shifts because they've seen similar shifts during pretraining. Zero-shot CLIP transfer often matches or exceeds specialized domain adaptation methods, suggesting that data diversity during pretraining can substitute for explicit adaptation. This challenges the traditional DA framing — the future may be "pretrain broadly" rather than "adapt specifically."
+**Foundation model approach:** large pretrained models ([[clip|CLIP]], DINOv2) trained on diverse internet data are inherently robust to many distribution shifts because they've seen similar shifts during pretraining. Zero-shot CLIP transfer often matches or exceeds specialized domain adaptation methods, suggesting that data diversity during pretraining can substitute for explicit adaptation. This challenges the traditional DA framing — the future may be "pretrain broadly" rather than "adapt specifically."
 
 ---
 
-*See also: [[transfer-learning]] · [[bias-variance-double-descent]] · [[generative-vs-discriminative]] · [[contrastive-learning]] · [[regularization-dropout]]*
+*See also: [[transfer-learning]] · [[bias-variance-double-descent]] · [[generative-vs-discriminative]] · [[contrastive-learning]] · [[regularization-dropout]] · [[clip]] · [[entropy-mutual-info]]*

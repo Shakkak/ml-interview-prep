@@ -23,7 +23,7 @@ The log-odds can take any real value, so a linear model is appropriate here. Sol
 
 $$P(y=1|x) = \frac{e^z}{1+e^z} = \sigma(z) = \frac{1}{1+e^{-z}}$$
 
-The sigmoid is not an arbitrary output function — it is forced by the assumption that log-odds are linear in features.
+The [[activation-sigmoid-tanh|sigmoid]] is not an arbitrary output function — it is forced by the assumption that log-odds are linear in features.
 
 **Odds ratios.** For a one-unit increase in feature $x_j$, the log-odds increases by $w_j$, so the odds are multiplied by $e^{w_j}$:
 
@@ -51,7 +51,7 @@ The likelihood for $n$ binary observations is $\prod_i \hat{p}_i^{y_i}(1-\hat{p}
 
 $$\ell(w) = \sum_{i=1}^n \left[y_i \log\sigma(z_i) + (1-y_i)\log(1-\sigma(z_i))\right] = -\mathcal{L}_{CE}$$
 
-Maximizing log-likelihood equals minimizing binary cross-entropy. The gradient is elegant:
+Maximizing log-likelihood equals minimizing binary [[loss-cross-entropy|cross-entropy]]. The gradient is elegant:
 
 $$\frac{\partial \ell}{\partial w} = \sum_{i=1}^n (y_i - \sigma(z_i))\, x_i = \sum_i (\text{label} - \text{prediction}) \cdot x_i$$
 
@@ -65,16 +65,16 @@ With $\eta=0.1$: $w_1 \leftarrow 0.05$, $w_2 \leftarrow -0.05$. Feature 1 gets p
 
 ### Regularization and Extensions
 
-**L2 regularization** (ridge logistic regression): adds $\lambda\|w\|^2$ to the loss. Prevents extreme log-odds, improves calibration. In scikit-learn: `C = 1/λ` (note: inverse regularization strength).
+**[[regularization-weight-decay|L2 regularization]]** (ridge logistic regression): adds $\lambda\|w\|^2$ to the loss. Prevents extreme log-odds, improves calibration. In scikit-learn: `C = 1/λ` (note: inverse regularization strength).
 
 **L1 regularization**: produces sparse weights — features with small coefficients are zeroed out. Natural for feature selection in high-dimensional problems.
 
-**Multinomial (softmax) extension.** For $K > 2$ classes:
+**Multinomial ([[activation-softmax|softmax]]) extension.** For $K > 2$ classes:
 $$P(y=k|x) = \frac{e^{w_k^\top x + b_k}}{\sum_{j=1}^K e^{w_j^\top x + b_j}}$$
 
 The softmax is the multi-class generalization of the sigmoid. Loss: categorical cross-entropy. The $K$-class model has $K-1$ identifiable parameters (one class is the reference).
 
-**Non-linear decision boundaries:** add polynomial features ($x_1^2, x_1 x_2, \ldots$) before logistic regression, or use a kernel (kernelized logistic regression). Quadratic features give elliptical decision boundaries; RBF kernel gives arbitrary boundaries.
+**Non-linear decision boundaries:** add polynomial features ($x_1^2, x_1 x_2, \ldots$) before logistic regression, or use a [[kernel-methods|kernel]] (kernelized logistic regression). Quadratic features give elliptical decision boundaries; RBF kernel gives arbitrary boundaries.
 
 **When to use logistic regression:**
 
@@ -99,7 +99,7 @@ Logistic regression is a **Generalized Linear Model (GLM)** with Bernoulli distr
 
 For Bernoulli: $A(\eta) = \log(1 + e^\eta)$, so $\mu = A'(\eta) = \sigma(\eta) = p$. The logit link is the **canonical link** for the Bernoulli family, making logistic regression the natural choice.
 
-This unification means logistic regression inherits the asymptotic theory of GLMs: the MLE is consistent, asymptotically normal, and achieves the Cramér-Rao bound.
+This unification means logistic regression inherits the asymptotic theory of GLMs: the [[statistical-inference-mle|MLE]] is consistent, asymptotically normal, and achieves the [[fisher-information|Cramér-Rao bound]].
 
 ### Perfect Separation and the Hauck-Donner Effect
 
@@ -115,8 +115,8 @@ Logistic regression is a single-layer neural network with sigmoid activation and
 
 Feature engineering in logistic regression does the same job as hidden layers in neural networks — both map raw inputs to a space where the classes are linearly separable. Logistic regression with hand-crafted features was competitive with neural networks for NLP tasks until 2012–2015. The resurgence of neural networks is largely about **representation learning**: networks learn the feature transformation rather than having it hand-specified.
 
-Modern use: **linear probing** (train logistic regression on frozen neural network embeddings) is the standard protocol for evaluating self-supervised representation quality (e.g., SimCLR, DINO, MAE). The quality of the learned features is measured precisely by how well a logistic regression head can exploit them.
+Modern use: **linear probing** (train logistic regression on frozen neural network embeddings) is the standard protocol for evaluating self-supervised representation quality (e.g., [[contrastive-learning|SimCLR]], DINO, MAE). The quality of the learned features is measured precisely by how well a logistic regression head can exploit them.
 
 ---
 
-*See also: [[activation-sigmoid-tanh]] · [[loss-cross-entropy]] · [[regularization-weight-decay]] · [[statistical-inference-mle]] · [[kernel-methods]]*
+*See also: [[activation-sigmoid-tanh]] · [[loss-cross-entropy]] · [[regularization-weight-decay]] · [[statistical-inference-mle]] · [[kernel-methods]] · [[activation-softmax]] · [[fisher-information]] · [[contrastive-learning]]*

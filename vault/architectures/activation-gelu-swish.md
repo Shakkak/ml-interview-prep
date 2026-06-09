@@ -13,13 +13,13 @@ related: [activation-relu-variants, activation-sigmoid-tanh, normalization-layer
 
 ## Fundamental
 
-ReLU is non-differentiable at 0 and has zero gradient for $x < 0$. For transformers and modern architectures, smoother activations improve gradient flow and empirical performance.
+[[activation-relu-variants|ReLU]] is non-differentiable at 0 and has zero gradient for $x < 0$. For transformers and modern architectures, smoother activations improve gradient flow and empirical performance.
 
 **GELU (Gaussian Error Linear Unit):**
 
 $$\text{GELU}(x) = x \cdot \Phi(x) \qquad \text{where} \quad \Phi(x) = \frac{1}{2}\left[1 + \text{erf}\left(\frac{x}{\sqrt{2}}\right)\right]$$
 
-**Intuition:** the output is the input multiplied by the probability that a standard Gaussian sample is less than $x$. For large positive $x$, $\Phi(x) \approx 1$ (pass through); for large negative $x$, $\Phi(x) \approx 0$ (suppress). This is stochastic gating made deterministic. Used in BERT, GPT-2/3, ViT.
+**Intuition:** the output is the input multiplied by the probability that a standard [[distributions-gaussian|Gaussian]] sample is less than $x$ (i.e., $\Phi(x)$ is the Gaussian CDF). For large positive $x$, $\Phi(x) \approx 1$ (pass through); for large negative $x$, $\Phi(x) \approx 0$ (suppress). This is stochastic gating made deterministic. Used in [[bert-mlm|BERT]], GPT-2/3, ViT.
 
 **Swish / SiLU:**
 
@@ -75,7 +75,7 @@ Gate Linear Unit (GLU) splits the input in two and multiplicatively gates one ha
 
 $$\text{GLU}(x, W, V) = \sigma(xW) \otimes (xV)$$
 
-**SwiGLU** replaces sigmoid with Swish (used in LLaMA, PaLM, Mistral):
+**SwiGLU** replaces [[activation-sigmoid-tanh|sigmoid]] with Swish (used in LLaMA, PaLM, Mistral):
 
 $$\text{SwiGLU}(x, W, V) = \text{Swish}(xW) \otimes (xV)$$
 
@@ -92,8 +92,8 @@ This is why LLaMA intermediate sizes are multiples of $\frac{8}{3}$ of the model
 
 ### Connection to Attention
 
-Both attention (softmax-weighted sum) and SwiGLU (element-wise gating) are multiplicative interactions. The attention mechanism gates *values* based on *query-key compatibility*; SwiGLU gates *hidden features* based on the same input. Modern architectures stack both: attention for inter-token mixing, SwiGLU-FFN for per-token nonlinear transformation.
+Both [[attention-mechanism|attention]] (softmax-weighted sum) and SwiGLU (element-wise gating) are multiplicative interactions. The attention mechanism gates *values* based on *query-key compatibility*; SwiGLU gates *hidden features* based on the same input. Modern architectures stack both: attention for inter-token mixing, SwiGLU-FFN for per-token nonlinear transformation.
 
 ---
 
-*See also: [[activation-relu-variants]] · [[activation-sigmoid-tanh]] · [[attention-mechanism]]*
+*See also: [[activation-relu-variants]] · [[activation-sigmoid-tanh]] · [[attention-mechanism]] · [[distributions-gaussian]] · [[bert-mlm]]*

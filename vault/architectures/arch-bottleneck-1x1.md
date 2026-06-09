@@ -24,7 +24,7 @@ Equivalent to applying the same fully-connected layer to every spatial position.
 
 **Three primary uses:**
 1. Channel reduction (bottleneck) — reduce before expensive 3×3 conv
-2. Channel expansion — grow capacity (MobileNet inverted bottleneck)
+2. Channel expansion — grow capacity ([[arch-depthwise-separable|MobileNet]] inverted bottleneck)
 3. Cross-channel mixing — after depthwise conv (which is per-channel only)
 
 ---
@@ -62,7 +62,7 @@ Total: 375K → 144K. The full Inception network achieves ~12× computation savi
 
 ### FPN Lateral Connections
 
-Feature Pyramid Networks use 1×1 convs to align channel counts before adding top-down features:
+[[feature-pyramid-networks|Feature Pyramid Networks]] use 1×1 convs to align channel counts before adding top-down features:
 
 ```
 C5 (2048 ch) → 1×1 → P5 (256 ch)
@@ -95,7 +95,7 @@ MobileNetV2 **inverts** this: narrow → wide → narrow.
 32 ch → 1×1 expand (→192) → 3×3 depthwise (→192) → 1×1 project (→32) + skip
 ```
 
-Rationale: depthwise convolution has limited expressive power per channel. Expanding first (factor 6) gives more feature channels for the depthwise filter, then the pointwise projection compresses back. ReLU is applied after the expansion but **not** after the projection — information is not discarded at the narrow bottleneck.
+Rationale: depthwise convolution has limited expressive power per channel. Expanding first (factor 6) gives more feature channels for the depthwise filter, then the pointwise projection compresses back. [[activation-relu-variants|ReLU]] is applied after the expansion but **not** after the projection — information is not discarded at the narrow bottleneck.
 
 ### Network-in-Network and Global Average Pooling
 
@@ -103,4 +103,4 @@ The $1 \times 1$ conv was introduced in Network-in-Network (Lin et al., 2013) as
 
 ---
 
-*See also: [[arch-residual-block]] · [[arch-depthwise-separable]] · [[feature-pyramid-networks]] · [[cnn-architectures-guide]]*
+*See also: [[arch-residual-block]] · [[arch-depthwise-separable]] · [[feature-pyramid-networks]] · [[cnn-architectures-guide]] · [[activation-relu-variants]]*

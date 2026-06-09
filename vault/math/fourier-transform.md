@@ -37,7 +37,7 @@ $F[3] = \overline{F[1]} = -2 - 2i$ (conjugate symmetry for real signals).
 
 $$h = f * g \quad \Longleftrightarrow \quad H[k] = F[k] \cdot G[k]$$
 
-**Convolution in space/time equals pointwise multiplication in frequency.** This is the most important property: an $O(N^2)$ spatial convolution becomes $O(N)$ pointwise multiplication after the FFT. Large blurs (wide Gaussian kernel, motion blur) are always computed via FFT in practice.
+**Convolution in space/time equals pointwise multiplication in frequency.** This is the most important property: an $O(N^2)$ spatial convolution becomes $O(N)$ pointwise multiplication after the FFT. Large blurs (wide [[distributions-gaussian|Gaussian]] kernel, motion blur) are always computed via FFT in practice.
 
 ---
 
@@ -140,4 +140,4 @@ Modern audio deep learning (Whisper, wav2vec 2.0, AudioMAE) uses 80-channel log-
 
 ---
 
-*See also: [[spectral-bias]] · [[dilated-convolution]] · [[feature-preprocessing]] · [[attention-mechanism]]*
+*See also: [[spectral-bias]] · [[dilated-convolution]] · [[feature-preprocessing]] · [[attention-mechanism]] · [[distributions-gaussian]]*

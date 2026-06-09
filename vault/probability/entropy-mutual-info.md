@@ -87,7 +87,7 @@ $I(X; Y) = 0.882 - 0.291 = 0.591$ nats — knowing whether someone carries an um
 
 **ICA (Independent Component Analysis):** minimize $I(s_1, s_2, \ldots, s_n)$ — find components that are maximally independent.
 
-**Feature selection (information gain):** $I(X; Y)$ where $Y$ is the target label. Used in decision trees. Features with high MI with the label are informative.
+**Feature selection (information gain):** $I(X; Y)$ where $Y$ is the target label. Used in [[decision-trees|decision trees]] to choose splits — see that file for the worked information-gain calculation. Features with high MI with the label are informative.
 
 **VAE / ELBO:** the ELBO contains $I(x; z)$ implicitly — the reconstruction term encourages the latent code to preserve information about the input.
 
@@ -123,7 +123,7 @@ Tishby & Schwartz-Ziv (2017) claimed deep networks undergo distinct compression 
 
 ### Connection to VAE and β-VAE
 
-The Variational Autoencoder (VAE) Evidence Lower Bound (ELBO) can be written as:
+The [[variational-autoencoders|Variational Autoencoder (VAE)]] Evidence Lower Bound (ELBO) can be written as:
 
 $$\mathcal{L}_{VAE} = \mathbb{E}_{q(z|x)}[\log p(x|z)] - D_{KL}(q(z|x) \| p(z))$$
 
@@ -163,4 +163,4 @@ The Rényi-2 divergence connects to Gaussian kernel density estimators and maxim
 
 ---
 
-*See also: [[loss-cross-entropy]] · [[loss-kl-divergence]] · [[loss-nt-xent]] · [[bayesian-inference]] · [[maximum-entropy-principle]]*
+*See also: [[loss-cross-entropy]] · [[loss-kl-divergence]] · [[loss-nt-xent]] · [[bayesian-inference]] · [[maximum-entropy-principle]] · [[variational-autoencoders]] · [[decision-trees]]*

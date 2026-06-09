@@ -19,11 +19,11 @@ All self-supervised methods define a pretext task that forces the encoder to lea
 |--------|-----------|---------|
 | **Contrastive** | Push positive pairs together, negative pairs apart | SimCLR, MoCo, CLIP |
 | **Non-contrastive** | Push positive pairs together, prevent collapse | BYOL, SimSiam, Barlow Twins |
-| **Masked Prediction** | Predict masked parts of the input | MAE, BEiT, BERT (text) |
+| **Masked Prediction** | Predict masked parts of the input | MAE, BEiT, [[bert-mlm\|BERT (text)]] |
 
 **Why self-supervised learning works:** pretext tasks are designed so that solving them requires capturing semantic content. Two augmented views of the same image must share the object identity — an encoder that maps both to similar representations must have learned what the object is. The key insight is that the pretext task implicitly defines the invariances the representation should have.
 
-**The projection head principle:** all modern contrastive and non-contrastive methods add a projection head $g$ on top of the encoder $f$: $z = g(f(x))$. Training minimizes loss in $z$-space; evaluation uses $h = f(x)$ (without $g$). The projection head absorbs augmentation-specific invariances that would be harmful for downstream tasks. The encoder retains richer information because it doesn't need to be augmentation-invariant itself.
+**The projection head principle:** all modern [[contrastive-learning|contrastive]] and non-contrastive methods add a projection head $g$ on top of the encoder $f$: $z = g(f(x))$. Training minimizes loss in $z$-space; evaluation uses $h = f(x)$ (without $g$). The projection head absorbs augmentation-specific invariances that would be harmful for downstream tasks. The encoder retains richer information because it doesn't need to be augmentation-invariant itself.
 
 **Practical selection guide:**
 
@@ -37,7 +37,7 @@ Do you have labeled data?
         ├── Limited GPU memory / small batch size?
         │     └── Yes → BYOL / SimSiam / Barlow Twins
         └── Multi-modal (text+image)?
-              └── CLIP (contrastive across modalities)
+              └── [[clip\|CLIP]] (contrastive across modalities)
 ```
 
 ---
@@ -68,7 +68,7 @@ where $C$ is the cross-correlation matrix between embeddings of two views. Diago
 
 Masked prediction is a special case of denoising autoencoders with a specific corruption: replacing tokens with a mask token.
 
-BERT's masking (15% of text tokens): forces learning of language statistics necessary for prediction. MAE's masking (75% of image patches): forces learning of image statistics (object structure, spatial relationships) necessary for reconstruction.
+[[bert-mlm|BERT]]'s masking (15% of text tokens): forces learning of language statistics necessary for prediction. MAE's masking (75% of image patches): forces learning of image statistics (object structure, spatial relationships) necessary for reconstruction.
 
 **Why images need higher masking ratios than text:** text tokens are semantically dense — each word carries meaning. Masking 15% provides significant context removal. Image patches are spatially redundant — adjacent patches are highly correlated. Masking 15% of patches can be solved by local interpolation without understanding content. Need 75% to make local interpolation insufficient.
 
@@ -98,7 +98,7 @@ Compute:            Medium               Medium                Low (25% encoding
 
 **DINO — emergent properties from self-distillation:**
 
-DINO (Caron et al., 2021) trains a student ViT on small crops to predict the teacher ViT's output on large crops (teacher = EMA of student). The emergent property: DINO ViT representations without any supervision learn to segment objects — the `[CLS]` attention maps attend to semantically coherent regions. This wasn't explicitly trained; it arises because the self-distillation objective forces the student to predict global (large-crop) semantics from local (small-crop) features, requiring understanding of object identity.
+DINO (Caron et al., 2021) trains a student [[vision-transformer|ViT]] on small crops to predict the teacher ViT's output on large crops (teacher = EMA of student). The emergent property: DINO ViT representations without any supervision learn to segment objects — the `[CLS]` [[attention-mechanism|attention maps]] attend to semantically coherent regions. This wasn't explicitly trained; it arises because the self-distillation objective forces the student to predict global (large-crop) semantics from local (small-crop) features, requiring understanding of object identity.
 
 DINOv2 scales this to large datasets with curated training and produces excellent general-purpose visual features used as frozen backbones. Key finding: at sufficient scale with curated data, SSL features match or exceed supervised features for dense prediction tasks (depth, segmentation), not just classification.
 
@@ -132,4 +132,4 @@ This provides the first theoretical justification for why contrastive SSL repres
 
 ---
 
-*See also: [[contrastive-learning]] · [[attention-mechanism]] · [[bayesian-inference]] · [[bert-mlm]] · [[knowledge-distillation]]*
+*See also: [[contrastive-learning]] · [[attention-mechanism]] · [[bayesian-inference]] · [[bert-mlm]] · [[knowledge-distillation]] · [[clip]] · [[vision-transformer]]*

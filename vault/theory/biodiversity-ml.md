@@ -146,7 +146,7 @@ Standard training on this data produces models that are excellent at common spec
 
 **Class-balanced sampling**: oversample rare classes and undersample common ones during training. Simple but effective baseline.
 
-**Focal Loss**: reduces the loss weight for easy (well-classified) examples, forcing the model to focus on hard (typically rare) classes:
+**[[loss-focal|Focal Loss]]**: reduces the loss weight for easy (well-classified) examples, forcing the model to focus on hard (typically rare) classes:
 $$FL(p_t) = -\alpha_t (1-p_t)^\gamma \log(p_t)$$
 where $\gamma > 0$ (typically 2) down-weights easy examples and $\alpha_t$ balances class frequencies.
 
@@ -160,7 +160,7 @@ where $\gamma > 0$ (typically 2) down-weights easy examples and $\alpha_t$ balan
 
 **Paper**: "BioCLIP: A Vision Foundation Model for the Tree of Life" (Stevens et al., 2024)
 
-Standard CLIP was trained on internet text — biological descriptions in that corpus are sparse and colloquial. BioCLIP is CLIP retrained specifically on biological images:
+Standard [[clip|CLIP]] was trained on internet text — biological descriptions in that corpus are sparse and colloquial. BioCLIP is CLIP retrained specifically on biological images:
 
 - **Training data**: 450K TreeOfLife-10M images (10M images from iNaturalist, spanning all life kingdoms)
 - **Text prompts**: hierarchical taxonomic names at multiple levels: kingdom → phylum → class → order → family → genus → species. Each image generates multiple text labels.
@@ -199,11 +199,11 @@ Traits correlate with spectral signatures because plant biochemistry controls ho
 
 **From RGB drone imagery**: less direct. Deep learning can learn correlations between leaf colour, texture, and traits — but performance drops significantly compared to hyperspectral.
 
-**From VLMs**: a VLM can be prompted "What is the leaf texture and colour? Is the plant stressed?" → these linguistic observations correlate with traits even without explicit numerical prediction. More useful for qualitative trait assignment than quantitative prediction.
+**From VLMs**: a [[vlm-architectures|VLM]] can be prompted "What is the leaf texture and colour? Is the plant stressed?" → these linguistic observations correlate with traits even without explicit numerical prediction. More useful for qualitative trait assignment than quantitative prediction.
 
 **Practical pipeline for trait mapping**:
 1. Fly drone over study area (RGB + possibly multispectral)
-2. Run plant detection (Grounding DINO → SAM) to get individual plant masks
+2. Run plant detection ([[open-vocabulary-detection|Grounding DINO]] → SAM) to get individual plant masks
 3. Crop and feed each plant to a trait prediction CNN (or VLM)
 4. Geo-reference predictions back to field coordinates
 5. Combine with Sentinel-2 time series for landscape-scale trait maps

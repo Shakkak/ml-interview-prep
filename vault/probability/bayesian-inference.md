@@ -38,7 +38,7 @@ $$\boxed{p(\theta | D) = \frac{p(D|\theta)\, p(\theta)}{p(D)}}$$
 
 ### Frequentist vs Bayesian
 
-**Frequentist:** Parameters $\theta$ are fixed but unknown constants. Probability = long-run frequency. MLE: $\hat{\theta} = \arg\max_\theta p(D|\theta)$.
+**Frequentist:** Parameters $\theta$ are fixed but unknown constants. Probability = long-run frequency. [[statistical-inference-mle|MLE]]: $\hat{\theta} = \arg\max_\theta p(D|\theta)$.
 
 **Bayesian:** Parameters $\theta$ are random variables. Probability = degree of belief. Start with prior $p(\theta)$, update with data to get posterior $p(\theta|D)$. Credible interval: "there is 95% probability that $\theta$ lies in this interval."
 
@@ -106,15 +106,15 @@ Deep neural networks typically only model aleatoric uncertainty (via softmax). B
 
 ### Approximate Inference: Variational Inference
 
-Replace the intractable posterior $p(\theta|D)$ with a simpler approximate distribution $q_\phi(\theta)$ from a tractable family (e.g., factored Gaussian). Minimize KL divergence:
+Replace the intractable posterior $p(\theta|D)$ with a simpler approximate distribution $q_\phi(\theta)$ from a tractable family (e.g., factored Gaussian). Minimize [[loss-kl-divergence|KL divergence]]:
 
 $$\phi^* = \arg\min_\phi D_{KL}(q_\phi(\theta) \,||\, p(\theta|D))$$
 
-This is equivalent to maximizing the ELBO. **VAEs are a deep learning application of variational inference** — the encoder learns $q_\phi(z|x)$ and the decoder implements $p_\theta(x|z)$.
+This is equivalent to maximizing the ELBO. **[[variational-autoencoders|VAEs]] are a deep learning application of variational inference** — the encoder learns $q_\phi(z|x)$ and the decoder implements $p_\theta(x|z)$.
 
 ### Approximate Inference: MCMC
 
-The Metropolis-Hastings algorithm samples from the posterior without computing $p(D)$:
+The [[sampling-methods|Metropolis-Hastings]] algorithm samples from the posterior without computing $p(D)$:
 
 1. Propose a new $\theta'$ near current $\theta$
 2. Accept with probability $\min\left(1, \frac{p(D|\theta')p(\theta')}{p(D|\theta)p(\theta)}\right)$
@@ -132,7 +132,7 @@ Gal & Ghahramani (2016) showed that a neural network with dropout applied at **t
 
 ### Laplace Approximation
 
-A classical deterministic approximation: fit a Gaussian centered at the MAP estimate $\hat{\theta}_{MAP}$ using the observed Fisher information matrix as the precision:
+A classical deterministic approximation: fit a Gaussian centered at the MAP estimate $\hat{\theta}_{MAP}$ using the observed [[fisher-information|Fisher information matrix]] as the precision:
 
 $$p(\theta|D) \approx \mathcal{N}(\hat{\theta}_{MAP},\; [-\nabla^2 \log p(\theta|D)|_{\hat{\theta}}]^{-1})$$
 
@@ -157,4 +157,4 @@ These frameworks are theoretically principled but computationally demanding at s
 
 ---
 
-*See also: [[variational-autoencoders]] · [[diffusion-models]] · [[backpropagation-advanced]] · [[statistical-inference-mle]] · [[sampling-methods]]*
+*See also: [[variational-autoencoders]] · [[diffusion-models]] · [[backpropagation-advanced]] · [[statistical-inference-mle]] · [[sampling-methods]] · [[fisher-information]] · [[loss-kl-divergence]]*

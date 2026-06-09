@@ -32,7 +32,7 @@ Detection and phrase grounding (linking noun phrases to image regions) are the s
 
 ```
 Image → Feature Extractor (Swin Transformer) → region features {r_i}
-Text → Bert-style encoder → phrase embeddings {t_j}
+Text → [[bert-mlm|BERT-style encoder]] → phrase embeddings {t_j}
 
 Grounding score: S_{ij} = r_i · t_j  (dot product)
 Loss: phrase-region contrastive loss + detection localization loss
@@ -65,7 +65,7 @@ Extends GLIP to also produce segmentation masks alongside the bounding boxes (si
 ### 3.1 DINO Background
 
 DETR-style detectors (DINO, DN-DETR) use:
-- Transformer encoder (cross-attention between image tokens)
+- [[attention-mechanism|Transformer encoder]] (cross-attention between image tokens)
 - A set of learned object queries
 - Transformer decoder: queries attend to image tokens to predict box + class
 
@@ -143,7 +143,7 @@ For each image patch token p_i:
   Box prediction: linear layer on p_i → (cx, cy, w, h)
 ```
 
-That's it. Take CLIP, remove the pooling, add a detection head per patch token, compute similarity against text embeddings.
+That's it. Take [[clip|CLIP]], remove the pooling, add a detection head per patch token, compute similarity against text embeddings.
 
 ### 4.2 Strengths and Weaknesses
 
@@ -180,7 +180,7 @@ Lightweight Mask Decoder:
   Outputs: 3 candidate masks (handles ambiguity) + confidence scores
 ```
 
-The image encoder runs once per image (expensive: ~15 GB VRAM for ViT-H). The decoder is fast (runs in milliseconds per prompt). This design enables interactive use: encode once, prompt many times.
+The image encoder runs once per image (expensive: ~15 GB VRAM for [[vision-transformer|ViT-H]]). The decoder is fast (runs in milliseconds per prompt). This design enables interactive use: encode once, prompt many times.
 
 ### 5.3 SA-1B Dataset
 

@@ -28,7 +28,7 @@ related: [statistical-inference-mle, distributions-gaussian, kernel-methods, bia
 
 **Parametric examples:** linear/logistic regression ($d+1$ parameters), neural networks (fixed architecture), naive Bayes (per-class mean/variance).
 
-**Non-parametric examples:** KNN (training set is the model), kernel density estimation, decision trees with no depth limit, Gaussian processes.
+**Non-parametric examples:** KNN (training set is the model), kernel density estimation, [[decision-trees|decision trees]] with no depth limit, Gaussian processes.
 
 ### K-Nearest Neighbors (KNN)
 
@@ -36,9 +36,9 @@ related: [statistical-inference-mle, distributions-gaussian, kernel-methods, bia
 
 **Properties:** no training phase; inference cost $O(nd)$ per query; decision boundary can be arbitrarily complex.
 
-**Bias-variance:** small $k$ → low bias, high variance. Large $k$ → high bias, low variance. Optimal $k$ balances these via cross-validation.
+**[[bias-variance-double-descent|Bias-variance]]:** small $k$ → low bias, high variance. Large $k$ → high bias, low variance. Optimal $k$ balances these via [[cross-validation]].
 
-**Curse of dimensionality:** in high dimensions all pairwise distances concentrate — KNN becomes meaningless without dimensionality reduction first.
+**[[curse-of-dimensionality|Curse of dimensionality]]:** in high dimensions all pairwise distances concentrate — KNN becomes meaningless without dimensionality reduction first.
 
 ### Kernel Density Estimation (KDE)
 
@@ -52,7 +52,7 @@ Each training point contributes a "bump" of probability. **Silverman's rule of t
 
 ### Gaussian Processes — Non-parametric Bayesian Models
 
-A GP places a prior over functions: $f \sim \mathcal{GP}(\mu, k)$. Any finite collection of function values is jointly Gaussian: $(f(x_1), \ldots, f(x_n)) \sim \mathcal{N}(\mu(X), K)$ where $K_{ij} = k(x_i, x_j)$.
+A GP places a prior over functions: $f \sim \mathcal{GP}(\mu, k)$. Any finite collection of function values is jointly [[distributions-gaussian|Gaussian]]: $(f(x_1), \ldots, f(x_n)) \sim \mathcal{N}(\mu(X), K)$ where $K_{ij} = k(x_i, x_j)$.
 
 **Posterior after observing $y = f(X) + \epsilon$, $\epsilon \sim \mathcal{N}(0, \sigma^2 I)$:**
 
@@ -73,7 +73,7 @@ Not a binary — there is a spectrum:
 |---|---|
 | Linear regression | Fully parametric |
 | Neural network (fixed arch) | Parametric |
-| SVM with RBF kernel | Semi-parametric (support vectors grow with $n$) |
+| [[kernel-methods\|SVM with RBF kernel]] | Semi-parametric (support vectors grow with $n$) |
 | Gaussian process | Non-parametric |
 | KNN | Non-parametric |
 
@@ -95,7 +95,7 @@ Not a binary — there is a spectrum:
 
 ### Neural Tangent Kernel: Neural Networks as GPs
 
-For infinitely wide neural networks, the limiting behavior under gradient descent is governed by the **Neural Tangent Kernel (NTK)**:
+For infinitely wide neural networks, the limiting behavior under gradient descent is governed by the **[[neural-tangent-kernel|Neural Tangent Kernel (NTK)]]**:
 
 $$K_\text{NTK}(x, x') = \mathbb{E}_{\theta\sim\text{init}}\left[\nabla_\theta f(x;\theta)^\top \nabla_\theta f(x';\theta)\right]$$
 
@@ -125,4 +125,4 @@ This means **infinitely wide neural networks are exactly equivalent to kernel re
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[kernel-methods]] · [[distributions-gaussian]] · [[bias-variance-double-descent]] · [[curse-of-dimensionality]]*
+*See also: [[statistical-inference-mle]] · [[kernel-methods]] · [[distributions-gaussian]] · [[bias-variance-double-descent]] · [[curse-of-dimensionality]] · [[neural-tangent-kernel]] · [[bayesian-inference]] · [[decision-trees]] · [[cross-validation]]*

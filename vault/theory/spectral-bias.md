@@ -17,7 +17,7 @@ related: [fourier-transform, bias-variance-double-descent, attention-mechanism, 
 
 > Neural networks trained with gradient descent learn low-frequency components of the target function first, and progressively fit higher-frequency components.
 
-**The empirical observation.** Train an MLP to fit $f(x) = \sin(3x) + 0.5\sin(10x) + 0.1\sin(30x)$. Track the Fourier spectrum of the error $f - \hat{f}(t)$ over training:
+**The empirical observation.** Train an MLP to fit $f(x) = \sin(3x) + 0.5\sin(10x) + 0.1\sin(30x)$. Track the [[fourier-transform|Fourier]] spectrum of the error $f - \hat{f}(t)$ over training:
 - **Early:** error dominated by low-frequency (3 Hz) components — these fit first.
 - **Mid:** 10 Hz component begins to fit.
 - **Late:** 30 Hz component fits last.
@@ -27,7 +27,7 @@ The network learns in frequency order: low → high.
 **Why this matters for practitioners:**
 - **Early stopping** = implicit low-pass filtering of the target: signal (smooth) fits before noise (irregular)
 - **Sharp edges, fine textures** are slow to learn and may need longer training
-- **Positional encodings** in transformers inject high-frequency information that would otherwise be learned slowly
+- **[[arch-positional-encoding|Positional encodings]]** in transformers inject high-frequency information that would otherwise be learned slowly
 
 **Practical implications table:**
 
@@ -45,7 +45,7 @@ The network learns in frequency order: low → high.
 
 ### NTK Analysis: Why Low Frequencies Come First
 
-For infinitely wide neural networks trained with gradient flow, training dynamics are governed by the **Neural Tangent Kernel (NTK)**:
+For infinitely wide neural networks trained with gradient flow, training dynamics are governed by the **[[neural-tangent-kernel|Neural Tangent Kernel (NTK)]]**:
 
 $$K(x, x') = \langle \nabla_\theta f(x;\theta), \nabla_\theta f(x';\theta) \rangle$$
 
@@ -100,7 +100,7 @@ The standard deviation $\sigma$ controls which frequencies are represented. This
 
 ### Spectral Bias in Transformers and Attention Dynamics
 
-The connection to transformers: attention sharpening over training mirrors spectral bias in MLPs.
+The connection to transformers: [[attention-mechanism|attention]] sharpening over training mirrors spectral bias in MLPs.
 
 **Early training:** attention weights are diffuse (high effective temperature) — the model attends broadly, capturing low-frequency spatial patterns (global structure).
 **Late training:** attention heads sharpen — attending to specific positions and local patterns (high-frequency relationships).
@@ -113,4 +113,4 @@ This also explains why **learned positional embeddings** (as in BERT) can underp
 
 ---
 
-*See also: [[fourier-transform]] · [[bias-variance-double-descent]] · [[attention-mechanism]] · [[arch-positional-encoding]]*
+*See also: [[fourier-transform]] · [[bias-variance-double-descent]] · [[attention-mechanism]] · [[arch-positional-encoding]] · [[neural-tangent-kernel]] · [[kernel-methods]]*

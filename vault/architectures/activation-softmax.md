@@ -46,11 +46,11 @@ The gradient of softmax is a matrix. For $p_i = \text{softmax}(z)_i$:
 
 $$\frac{\partial p_i}{\partial z_j} = p_i(\delta_{ij} - p_j)$$
 
-**Diagonal** ($i = j$): $\frac{\partial p_i}{\partial z_i} = p_i(1 - p_i)$ — identical in form to the sigmoid derivative.
+**Diagonal** ($i = j$): $\frac{\partial p_i}{\partial z_i} = p_i(1 - p_i)$ — identical in form to the [[activation-sigmoid-tanh|sigmoid]] derivative.
 
 **Off-diagonal** ($i \neq j$): $\frac{\partial p_i}{\partial z_j} = -p_i p_j$ — negative, because increasing $z_j$ pulls probability mass toward $p_j$ from all others.
 
-In practice, softmax + cross-entropy simplifies: the gradient of $L = -\sum_k y_k \log p_k$ w.r.t. logits is simply $p_k - y_k$ (predicted minus true probability). The Jacobian is never computed explicitly.
+In practice, softmax + [[loss-cross-entropy|cross-entropy]] simplifies: the gradient of $L = -\sum_k y_k \log p_k$ w.r.t. logits is simply $p_k - y_k$ (predicted minus true probability). The Jacobian is never computed explicitly.
 
 ### Numerical Stability
 
@@ -69,9 +69,9 @@ $$e^0=1,\ e^{-1}=0.368,\ e^{-1.9}=0.150,\ \text{sum}=1.518 \quad \to p=[0.659, 0
 |----------|---------|
 | Final layer, multi-class | Convert logits to probabilities |
 | Attention scores | Normalize attention weights over positions |
-| Knowledge distillation | Soft targets (high $\tau$) |
+| [[knowledge-distillation\|Knowledge distillation]] | Soft targets (high $\tau$) |
 | Gumbel-Softmax | Differentiable discrete sampling |
-| NT-Xent contrastive loss | Normalize similarity scores over negatives |
+| [[loss-nt-xent\|NT-Xent]] contrastive loss | Normalize similarity scores over negatives |
 
 ---
 
@@ -88,11 +88,11 @@ where $E_k$ is the energy of state $k$, $T$ is temperature, and $k$ is Boltzmann
 This connection is not cosmetic. It implies:
 - Logits are **negative energies** — the model assigns lower energy to more probable classes
 - Temperature $\tau$ has a precise physical meaning: low temperature = peaked around the ground state; high temperature = thermal disorder
-- KL divergence from a softmax distribution to a uniform distribution equals the **free energy** of the system
+- [[loss-kl-divergence|KL divergence]] from a softmax distribution to a uniform distribution equals the **free energy** of the system
 
 ### Temperature Scaling for Post-Hoc Calibration
 
-Neural networks trained with standard cross-entropy are often **overconfident**: a model that predicts 95% confidence is right only 80% of the time. The cause is that maximizing cross-entropy drives logits toward large magnitudes, saturating softmax near 1.0.
+Neural networks trained with standard cross-entropy are often **[[model-calibration|overconfident]]**: a model that predicts 95% confidence is right only 80% of the time. The cause is that maximizing cross-entropy drives logits toward large magnitudes, saturating softmax near 1.0.
 
 **Post-hoc temperature scaling** (Guo et al., 2017): after training, find a single scalar $T > 1$ on a held-out validation set that minimizes cross-entropy of $\text{softmax}(z/T)$ (model parameters frozen). The output probabilities shrink toward uniform, reducing overconfidence.
 
@@ -110,7 +110,7 @@ Sampling a discrete category from a softmax is non-differentiable. The Gumbel-So
 
 $$y_k = \frac{\exp((z_k + g_k)/\tau)}{\sum_j \exp((z_j + g_j)/\tau)}, \qquad g_k \sim \text{Gumbel}(0,1) = -\log(-\log U_k), \quad U_k \sim \text{Uniform}(0,1)$$
 
-**Why Gumbel noise:** the argmax of $(z_k + g_k)$ is distributed as a sample from $\text{Categorical}(\text{softmax}(z))$ — this is the Gumbel-max trick. Adding temperature makes the operation smooth and differentiable; gradients flow through the sampling. Used in VAEs with discrete latents, DALL-E, and neural architecture search.
+**Why Gumbel noise:** the argmax of $(z_k + g_k)$ is distributed as a sample from $\text{Categorical}(\text{softmax}(z))$ — this is the Gumbel-max trick. Adding temperature makes the operation smooth and differentiable; gradients flow through the sampling. Used in [[variational-autoencoders|VAEs]] with discrete latents, DALL-E, and neural architecture search.
 
 As $\tau \to 0$: Gumbel-Softmax converges to a one-hot vector (hard, non-differentiable argmax). Practical training uses a "straight-through" estimator: forward pass uses hard argmax, backward pass uses Gumbel-Softmax gradients.
 
@@ -120,4 +120,4 @@ In scaled dot-product attention, dividing by $\sqrt{d_k}$ before softmax is nece
 
 ---
 
-*See also: [[activation-sigmoid-tanh]] · [[loss-cross-entropy]] · [[attention-mechanism]] · [[loss-nt-xent]]*
+*See also: [[activation-sigmoid-tanh]] · [[loss-cross-entropy]] · [[attention-mechanism]] · [[loss-nt-xent]] · [[knowledge-distillation]] · [[loss-kl-divergence]] · [[variational-autoencoders]] · [[model-calibration]]*

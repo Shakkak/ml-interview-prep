@@ -28,6 +28,13 @@ $\gamma$ and $\beta$ are learned parameters that allow the network to undo norma
 
 **Training vs inference:** during training, use actual batch statistics. At inference, use exponential moving averages maintained during training: $\mu_{running} \leftarrow (1-\alpha)\mu_{running} + \alpha\mu_\mathcal{B}$. **Never forget `model.eval()`** before inference — using batch statistics on a single test sample gives output = 0 for all activations (every sample is its own mean).
 
+> [!warning] Forgetting `model.eval()` silently zeroes all BN outputs
+> With batch size 1 at inference, the batch mean $\mu_\mathcal{B} = x$ (the single sample is its own mean) and
+> $\sigma_\mathcal{B}^2 = 0$ (no variance in a one-element batch). Therefore $\hat{x} = (x - x)/\sqrt{0 + \epsilon} \approx 0$,
+> and the layer outputs $y = \gamma \cdot 0 + \beta = \beta$ for every input — a constant, regardless of the
+> actual activations. The model degrades silently: no error is thrown, predictions are just wrong.
+> Fix: always call `model.eval()` before inference to switch to stored running statistics.
+
 **Which dimensions are normalized:**
 
 ```
@@ -89,4 +96,4 @@ with $\alpha > 1$ and weights initialized smaller by factor $\beta < 1$. Theoret
 
 ---
 
-*See also: [[backpropagation-advanced]] · [[attention-mechanism]] · [[cnn-architectures-guide]]*
+*See also: [[backpropagation-advanced]] · [[attention-mechanism]] · [[cnn-architectures-guide]] · [[optimizer-adam]]*

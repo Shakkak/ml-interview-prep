@@ -15,7 +15,7 @@ related: [statistical-inference-mle, bayesian-inference, distributions-gaussian,
 
 **Discriminative model:** learns $p(y | x)$ directly — given input $x$, what is the probability of label $y$? Models the decision boundary between classes.
 
-**Generative model:** learns $p(x, y) = p(x | y)\,p(y)$ — how is data generated? Can derive $p(y|x)$ via Bayes' theorem if needed:
+**Generative model:** learns $p(x, y) = p(x | y)\,p(y)$ — how is data generated? Can derive $p(y|x)$ via [[bayesian-inference|Bayes' theorem]] if needed:
 
 $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
 
@@ -49,7 +49,7 @@ $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
 
 **Gaussian Discriminant Analysis (GDA) as generative:** assumes $p(x | y=k) = \mathcal{N}(x; \mu_k, \Sigma)$. Estimates $\mu_k$, $\Sigma$, and $p(y)$ from training data. Uses Bayes' theorem to classify.
 
-**The GDA-logistic connection:** if $p(x|y)$ is Gaussian and all classes share $\Sigma$, the Bayes-optimal classifier from GDA is logistic regression. GDA and logistic regression converge to the same boundary with infinite data — but GDA makes more assumptions and converges faster with small data.
+**The GDA-logistic connection:** if $p(x|y)$ is [[distributions-gaussian|Gaussian]] and all classes share $\Sigma$, the Bayes-optimal classifier from GDA is logistic regression. GDA and logistic regression converge to the same boundary with infinite data — but GDA makes more assumptions and converges faster with small data.
 
 ---
 
@@ -72,10 +72,10 @@ $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
 
 **Modern deep generative models:**
 
-- **VAE:** models $p(x) = \int p(x|z)p(z)dz$ with encoder $q(z|x)$ and decoder $p(x|z)$
+- **[[variational-autoencoders|VAE]]:** models $p(x) = \int p(x|z)p(z)dz$ with encoder $q(z|x)$ and decoder $p(x|z)$
 - **GAN:** implicit model of $p(x)$ via generator. Does not give explicit $p(x)$ — cannot evaluate likelihood
-- **Diffusion Models:** model $p(x)$ by learning to reverse a noise-adding process. Current state of the art for image generation
-- **Normalizing Flows:** exact $p(x)$ via invertible transformations. Used in anomaly detection and density estimation
+- **[[diffusion-models|Diffusion Models]]:** model $p(x)$ by learning to reverse a noise-adding process. Current state of the art for image generation
+- **[[normalizing-flows|Normalizing Flows]]:** exact $p(x)$ via invertible transformations. Used in anomaly detection and density estimation
 
 **Covariate shift sensitivity:** discriminative models that model $p(y|x)$ are more vulnerable to covariate shift ($P_S(x) \neq P_T(x)$) than generative models — a discriminative model trained on cats from one distribution may learn $x$-specific shortcuts rather than generalizable features. A generative model that explicitly models $p(x|y)$ can at least detect when $p_T(x)$ differs from $p_S(x)$ and flag inputs as OOD.
 
@@ -87,9 +87,9 @@ $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
 
 **The generative-discriminative spectrum — modern models blur the boundary:**
 
-- **CLIP:** jointly trained vision-language model; discriminative (contrastive) but enables generation by pairing with a decoder
+- **[[clip|CLIP]]:** jointly trained vision-language model; discriminative (contrastive) but enables generation by pairing with a decoder
 - **Diffusion classifiers:** use $p(x|y)$ from a diffusion model to classify — a generative model used discriminatively
-- **Self-supervised pretraining (MAE, BERT):** learns $p(x)$ structure (generative pretext) but is used discriminatively after fine-tuning
+- **Self-supervised pretraining (MAE, [[bert-mlm|BERT]]):** learns $p(x)$ structure (generative pretext) but is used discriminatively after fine-tuning
 - **Score-based models:** learn $\nabla_x \log p(x)$ (the score function) rather than $p(x)$ directly; enables generation without computing intractable normalizing constants
 
 **Energy-based models (EBMs):** define $p(x) \propto \exp(-E_\theta(x))$ where $E_\theta$ is a neural energy function. The normalization constant $Z = \int \exp(-E_\theta(x))dx$ is intractable. Training uses contrastive divergence (CD): sample from the model via MCMC to approximate the partition function gradient. EBMs are the most general framework but the hardest to train. Connection: logistic regression is a linear EBM; the classification boundary is a level set of the energy.
@@ -100,4 +100,4 @@ $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[bayesian-inference]] · [[distributions-gaussian]] · [[variational-autoencoders]] · [[diffusion-models]]*
+*See also: [[statistical-inference-mle]] · [[bayesian-inference]] · [[distributions-gaussian]] · [[variational-autoencoders]] · [[diffusion-models]] · [[normalizing-flows]] · [[clip]] · [[bert-mlm]]*

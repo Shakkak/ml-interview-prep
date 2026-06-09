@@ -72,12 +72,12 @@ When fine-tuning overwrites pretrained features with task-specific ones, losing 
 
 **Mitigations:**
 - **Low LR for earlier layers** (discriminative rates)
-- **Elastic Weight Consolidation (EWC):** add penalty $\lambda \sum_i F_i (\theta_i - \theta^*_i)^2$ where $F_i$ is Fisher information — penalizes changing weights important to the original task
+- **Elastic Weight Consolidation (EWC):** add penalty $\lambda \sum_i F_i (\theta_i - \theta^*_i)^2$ where $F_i$ is [[fisher-information|Fisher information]] — penalizes changing weights important to the original task
 - **Replay:** mix in a fraction of pretraining data during fine-tuning
 
 ### Parameter-Efficient Fine-Tuning (PEFT)
 
-For very large pretrained models (ViT-Large, CLIP, LLaMA), full fine-tuning is expensive. PEFT methods add a small number of trainable parameters while keeping pretrained weights frozen:
+For very large pretrained models ([[vision-transformer|ViT-Large]], [[clip|CLIP]], LLaMA), full fine-tuning is expensive. PEFT methods add a small number of trainable parameters while keeping pretrained weights frozen:
 
 - **LoRA:** decompose weight updates as $\Delta W = BA$ where $r \ll \min(d,k)$. Only $A$ and $B$ are trained. See [[lora-quantization]].
 - **Adapter layers:** small trainable MLP modules inside each transformer block.
@@ -89,10 +89,10 @@ Modern vision models are pretrained without ImageNet labels:
 
 | Method | Pretext Task | Key Idea |
 |--------|------------|---------|
-| DINO / DINOv2 | Self-distillation | Student-teacher with no labels |
+| DINO / DINOv2 | [[knowledge-distillation\|Self-distillation]] | Student-teacher with no labels |
 | MAE | Masked autoencoding | Reconstruct masked patches |
-| CLIP | Image-text contrastive | Match images to captions |
-| SimCLR / MoCo | Contrastive | Augmented views should be similar |
+| [[clip\|CLIP]] | Image-text contrastive | Match images to captions |
+| [[contrastive-learning\|SimCLR / MoCo]] | Contrastive | Augmented views should be similar |
 
 Advantage: pretraining on much larger unlabeled datasets (web-scale). Often outperforms ImageNet-supervised pretraining on downstream tasks.
 
@@ -105,4 +105,4 @@ Advantage: pretraining on much larger unlabeled datasets (web-scale). Often outp
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[self-supervised-overview]] · [[lora-quantization]] · [[normalization-layers]]*
+*See also: [[cnn-architectures-guide]] · [[self-supervised-overview]] · [[lora-quantization]] · [[normalization-layers]] · [[fisher-information]] · [[clip]] · [[contrastive-learning]] · [[vision-transformer]] · [[knowledge-distillation]]*

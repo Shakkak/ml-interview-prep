@@ -25,7 +25,7 @@ Each patch (flattened to $P^2 C$ values) is linearly projected to the model dime
 
 $$z_i = E \cdot \text{flatten}(\text{patch}_i), \quad E \in \mathbb{R}^{d \times P^2C}$$
 
-**ViT-B/16 on 224×224:** $N = 224^2/16^2 = 196$ patches. Each patch contains $16 \times 16 \times 3 = 768$ values projected to $d = 768$. The sequence length is 196 — dramatically shorter than the 50,176 individual pixels, making transformer attention tractable.
+**ViT-B/16 on 224×224:** $N = 224^2/16^2 = 196$ patches. Each patch contains $16 \times 16 \times 3 = 768$ values projected to $d = 768$. The sequence length is 196 — dramatically shorter than the 50,176 individual pixels, making [[attention-mechanism|transformer attention]] tractable.
 
 ### Class Token and Positional Embeddings
 
@@ -72,7 +72,7 @@ CNNs have three built-in inductive biases that act as implicit regularization on
 
 On ImageNet-1k (1.28M images), ViT-B/16 trained from scratch underperforms ResNet-50. The biases CNN bakes in are genuinely useful when data is limited — they constrain the function space to image-plausible solutions.
 
-**DeiT** (Touvron et al., 2021) showed that adding a **distillation token** (trained to mimic a CNN teacher's hard prediction) and aggressive augmentation (MixUp, CutMix, RandAugment) lets ViT-B/16 match ResNet on ImageNet-1k alone — bridging the data gap without more data.
+**DeiT** (Touvron et al., 2021) showed that adding a **[[knowledge-distillation|distillation]] token** (trained to mimic a CNN teacher's hard prediction) and aggressive augmentation ([[data-augmentation|MixUp, CutMix, RandAugment]]) lets ViT-B/16 match ResNet on ImageNet-1k alone — bridging the data gap without more data.
 
 ### Swin Transformer: Hierarchical ViT
 
@@ -92,14 +92,14 @@ Swin-L achieves 86.4% on ImageNet and state-of-the-art on COCO/ADE20K, matching 
 
 Early ViT layers exhibit **locally-focused attention** — [CLS] and patch tokens primarily attend to spatially nearby patches, mimicking CNN's local receptive fields. Later layers show **global semantic attention** — [CLS] attends to the most discriminative patches for the class.
 
-**DINO** (Caron et al., 2021) self-supervised training reveals a striking emergent behavior: without any labels, different attention heads specialize to different object parts. Head 3 might segment foreground from background; head 7 might localize the head of an animal; head 11 might track limb boundaries. The attention maps produce high-quality object segmentation masks despite zero segmentation supervision — evidence that ViT's global attention naturally learns semantic grouping when trained with appropriate self-supervised objectives.
+**[[self-supervised-overview|DINO]]** (Caron et al., 2021) self-supervised training reveals a striking emergent behavior: without any labels, different attention heads specialize to different object parts. Head 3 might segment foreground from background; head 7 might localize the head of an animal; head 11 might track limb boundaries. The attention maps produce high-quality object segmentation masks despite zero segmentation supervision — evidence that ViT's global attention naturally learns semantic grouping when trained with appropriate self-supervised objectives.
 
 **Why does DINO work?** The self-distillation objective (student's output matches a slow-moving teacher) combined with multi-crop training forces the model to predict consistent global features from local patches — implicitly training the model to associate patches belonging to the same object.
 
 ### MAE: Masked Autoencoder Pretraining
 
 MAE (He et al., 2021) pretrains ViT by masking 75% of patches and asking the encoder-decoder model to reconstruct the masked pixel values. Key design decisions:
-- **75% mask ratio** (much higher than BERT's 15%): image patches are highly redundant — predicting missing patches from 25% of context is still easy, so a high mask ratio is necessary to create a hard task.
+- **75% mask ratio** (much higher than [[bert-mlm|BERT]]'s 15%): image patches are highly redundant — predicting missing patches from 25% of context is still easy, so a high mask ratio is necessary to create a hard task.
 - **Asymmetric architecture:** the encoder operates only on the 25% visible patches (fast). The lightweight decoder reconstructs all 196 patches. The encoder sees far fewer tokens than a standard ViT — training is 3× faster.
 - **Pixel space prediction:** predict normalized pixel values directly, not discrete tokens.
 
@@ -125,4 +125,4 @@ RoPE and Swin's relative position bias handle this more elegantly: they are defi
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[cnn-architectures-guide]] · [[knowledge-distillation]] · [[clip]] · [[self-supervised-overview]]*
+*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[cnn-architectures-guide]] · [[knowledge-distillation]] · [[clip]] · [[self-supervised-overview]] · [[data-augmentation]] · [[bert-mlm]]*

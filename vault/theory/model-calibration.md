@@ -44,8 +44,8 @@ $\text{ECE} = \frac{2}{5}(0.15) + \frac{3}{5}(0.27) = 0.06 + 0.162 = 0.22$.
 
 ### Why Deep Networks Are Overconfident
 
-1. **Softmax amplifies logit differences:** $\text{softmax}(c \cdot z) \to \text{one-hot}(\arg\max z)$ as $c \to \infty$. Large logits → overconfident probabilities.
-2. **Cross-entropy incentivizes high confidence:** minimizing $-\log p_y$ pushes $p_y \to 1$.
+1. **[[activation-softmax|Softmax]] amplifies logit differences:** $\text{softmax}(c \cdot z) \to \text{one-hot}(\arg\max z)$ as $c \to \infty$. Large logits → overconfident probabilities.
+2. **[[loss-cross-entropy|Cross-entropy]] incentivizes high confidence:** minimizing $-\log p_y$ pushes $p_y \to 1$.
 3. **Modern architectures:** Guo et al. (2017) showed that BatchNorm, residual connections, and weight decay improve accuracy but worsen calibration — the gap between training-time confidence and test-time accuracy widens.
 4. **Overfitting:** a model that memorizes training labels with high confidence extrapolates that confidence beyond what test performance warrants.
 
@@ -76,7 +76,7 @@ Find $T > 1$ by minimizing NLL on a held-out validation set with $T$ as the only
 | Medical diagnosis | Confidence level determines urgency of follow-up |
 | Autonomous driving | Model must quantify its own uncertainty |
 | Fraud detection | Threshold tuning requires reliable probabilities |
-| Bayesian pipelines | Downstream inference requires calibrated likelihoods |
+| [[bayesian-inference|Bayesian]] pipelines | Downstream inference requires calibrated likelihoods |
 
 ---
 
@@ -116,4 +116,4 @@ for any test distribution, with no distributional assumptions. The coverage guar
 
 ---
 
-*See also: [[evaluation-metrics-guide]] · [[activation-softmax]] · [[regularization-label-smoothing]] · [[bayesian-inference]]*
+*See also: [[evaluation-metrics-guide]] · [[activation-softmax]] · [[regularization-label-smoothing]] · [[bayesian-inference]] · [[loss-cross-entropy]]*

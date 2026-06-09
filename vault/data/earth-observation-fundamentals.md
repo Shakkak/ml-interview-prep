@@ -266,7 +266,7 @@ with rasterio.open("sentinel2_scene.tif") as src:
 
 ## 8. Common Failure Modes in EO ML
 
-1. **Spectral shift between sensors**: a model trained on Sentinel-2 will fail on Landsat without domain adaptation — different bands, different sensor response functions
+1. **Spectral shift between sensors**: a model trained on Sentinel-2 will fail on Landsat without [[domain-adaptation]] — different bands, different sensor response functions
 2. **Seasonal distribution shift**: training on summer imagery and testing on winter imagery gives very different vegetation appearance
 3. **Geographic bias**: most labelled EO data is from Europe and North America — models may fail in tropical forests or African savanna
 4. **Cloud contamination**: pixels under thin cloud still have cloud signal; not all cloud masks are perfect
@@ -276,4 +276,4 @@ with rasterio.open("sentinel2_scene.tif") as src:
 
 ## See Also
 
-[[satellite-imagery-preprocessing]], [[multi-source-fusion]], [[remote-sensing-foundation-models]], [[biodiversity-ml]], [[clip]], [[blip]]
+[[satellite-imagery-preprocessing]], [[multi-source-fusion]], [[remote-sensing-foundation-models]], [[biodiversity-ml]], [[clip]], [[blip]], [[domain-adaptation]]

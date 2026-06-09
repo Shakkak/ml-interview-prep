@@ -13,11 +13,11 @@ related: [variational-autoencoders, generative-adversarial-networks, diffusion-m
 
 ## Fundamental
 
-VAEs optimize a **lower bound** on the likelihood (ELBO, not exact). GANs don't optimize likelihood at all — there is no way to evaluate $p(x)$ for a trained GAN. **Normalizing flows** achieve **exact, tractable likelihood** by constructing $p(x)$ as a sequence of invertible transformations from a simple base distribution.
+[[variational-autoencoders|VAEs]] optimize a **lower bound** on the likelihood (ELBO, not exact). [[generative-adversarial-networks|GANs]] don't optimize likelihood at all — there is no way to evaluate $p(x)$ for a trained GAN. **Normalizing flows** achieve **exact, tractable likelihood** by constructing $p(x)$ as a sequence of invertible transformations from a simple base distribution.
 
 ### Change of Variables
 
-Let $z \sim p_Z(z)$ be a simple distribution (e.g., $\mathcal{N}(0,I)$) and $x = f(z)$ where $f$ is invertible and differentiable. The density of $x$:
+Let $z \sim p_Z(z)$ be a simple distribution (e.g., [[distributions-gaussian|$\mathcal{N}(0,I)$]]) and $x = f(z)$ where $f$ is invertible and differentiable. The density of $x$:
 
 $$p_X(x) = p_Z(f^{-1}(x)) \cdot \left|\det\frac{\partial f^{-1}}{\partial x}\right|$$
 
@@ -74,7 +74,7 @@ $$y = Wz, \qquad \log|\det J| = h \cdot w \cdot \log|\det W|$$
 
 where $h, w$ are spatial dimensions. To compute $\det W$ efficiently, decompose $W = PLU$ (LU decomposition with permutation): $\det(W) = \det(U) = \prod_i U_{ii}$. This costs $O(c^3)$ once and $O(c)$ per forward pass.
 
-Glow also adds **ActNorm** (per-channel affine transform initialized from the first batch, replacing batch norm). Together: stable training, high-quality 256×256 image synthesis, smooth latent interpolation.
+Glow also adds **ActNorm** (per-channel affine transform initialized from the first batch, replacing [[normalization-layers|batch norm]]). Together: stable training, high-quality 256×256 image synthesis, smooth latent interpolation.
 
 ---
 
@@ -92,6 +92,11 @@ $$\frac{d\log p(z(t))}{dt} = -\text{tr}\left(\frac{\partial f_\theta}{\partial z
 
 Computing the full Jacobian trace costs $O(d^2)$ — but can be estimated unbiasedly in $O(d)$ using the Hutchinson trace estimator: $\text{tr}(A) \approx \epsilon^T A \epsilon$ for random $\epsilon$.
 
+> [!tip] Why $\epsilon^T A \epsilon$ is an unbiased estimate of $\text{tr}(A)$ ([[matrix-calculus]])
+> For any random vector $\epsilon$ with $\mathbb{E}[\epsilon\epsilon^T] = I$ (e.g., $\epsilon \sim \mathcal{N}(0,I)$ or $\epsilon_i \sim \pm 1$ Rademacher):
+> $\mathbb{E}[\epsilon^T A \epsilon] = \mathbb{E}\!\left[\sum_{ij} \epsilon_i A_{ij} \epsilon_j\right] = \sum_{ij} A_{ij}\,\mathbb{E}[\epsilon_i\epsilon_j] = \sum_{ij} A_{ij}\,\delta_{ij} = \sum_i A_{ii} = \text{tr}(A)$.
+> Computing $A\epsilon$ costs $O(d^2)$ for a dense $A$ — but here $A = \partial f/\partial z$ and the matrix-vector product can be computed via one JVP call without materialising $A$, making the full estimator $O(d)$.
+
 **Flow Matching** (Lipman et al., 2022) provides a simpler training objective that avoids simulating the ODE during training: directly regress the vector field $f_\theta$ on analytically computable conditional vector fields $u_t(x|x_0)$. This yields training as simple as DDPM but produces a continuous flow that can be simulated exactly at test time.
 
 ### Comparison to Other Generative Models
@@ -104,7 +109,7 @@ Computing the full Jacobian trace costs $O(d^2)$ — but can be estimated unbias
 | Exact latent inference | Approx | ✗ | Via DDIM | ✓ |
 | Architecture constraint | Encoder-decoder | $G$/$D$ pair | U-Net | Invertible only |
 
-**When to choose flows:** exact likelihoods for anomaly detection, density estimation, or Bayesian inference over latents. For image generation, diffusion is currently superior. Flows as **priors in VAEs** (replace $\mathcal{N}(0,I)$ with a flow-based prior) improve VAE sample quality with exact likelihood and tractable inference.
+**When to choose flows:** exact likelihoods for anomaly detection, density estimation, or Bayesian inference over latents. For image generation, [[diffusion-models|diffusion]] is currently superior. Flows as **priors in VAEs** (replace $\mathcal{N}(0,I)$ with a flow-based prior) improve VAE sample quality with exact likelihood and tractable inference.
 
 ### The Expressiveness-Tractability Tradeoff
 
@@ -118,4 +123,4 @@ Flow Matching + CNF is currently the most active research direction, achieving s
 
 ---
 
-*See also: [[variational-autoencoders]] · [[diffusion-models]] · [[generative-adversarial-networks]] · [[loss-kl-divergence]] · [[math-svd]]*
+*See also: [[variational-autoencoders]] · [[diffusion-models]] · [[generative-adversarial-networks]] · [[loss-kl-divergence]] · [[math-svd]] · [[distributions-gaussian]] · [[normalization-layers]] · [[anomaly-detection]]*

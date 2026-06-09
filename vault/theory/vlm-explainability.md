@@ -99,9 +99,9 @@ More principled than Grad-CAM but requires many forward passes (approximated wit
 
 ### 3.1 Raw Attention Weights
 
-Vision Transformers (ViT) compute attention weights: for each query token, how much does it attend to each key token?
+[[vision-transformer|Vision Transformers (ViT)]] compute attention weights: for each query token, how much does it attend to each key token?
 
-It's tempting to visualize the attention from the [CLS] token to the patch tokens as a saliency map. **This is unreliable** because:
+It's tempting to visualize the [[attention-mechanism|attention]] from the [CLS] token to the patch tokens as a saliency map. **This is unreliable** because:
 - Attention is not attribution: a token attending to another doesn't mean it uses that information for the final prediction
 - Attention in early layers is often diffuse ("attending everywhere")
 - Multi-head attention has many heads with different roles; averaging is misleading
@@ -123,7 +123,7 @@ Better than raw attention, but still not a causal attribution (not the same as g
 
 ### 3.3 DINO Self-Attention
 
-DINO (self-supervised ViT training) produces attention heads that naturally segment objects without any supervision. The last-layer attention maps from the [CLS] token to patch tokens form remarkably clean object boundaries.
+[[contrastive-learning|DINO]] (self-supervised ViT training) produces attention heads that naturally segment objects without any supervision. The last-layer attention maps from the [CLS] token to patch tokens form remarkably clean object boundaries.
 
 **Why**: DINO's self-distillation objective encourages the model to produce sharp, consistent representations. The attention focuses on object structure rather than low-level texture.
 
@@ -169,7 +169,7 @@ For images: features are superpixels or individual pixels. Very expensive to com
 
 ### 5.1 Cross-Attention Visualization in VLMs
 
-In VLMs like Flamingo (which uses cross-attention between text and image), cross-attention weights directly show which image regions the model attends to when generating each output token.
+In [[vlm-architectures|VLMs]] like Flamingo (which uses cross-attention between text and image), cross-attention weights directly show which image regions the model attends to when generating each output token.
 
 For a generated token "leaf":
 - Extract the cross-attention weight matrix from the cross-attention layer when "leaf" was generated
@@ -229,7 +229,7 @@ Class prediction: "Robin"
 
 **Paper**: "Post-hoc Concept Bottleneck Models" (Yuksekgonul et al., 2022)
 
-Trains a concept predictor on top of a frozen pretrained model. No need to retrain from scratch. Concepts are defined as text descriptions, and concept predictions use CLIP similarity:
+Trains a concept predictor on top of a frozen pretrained model. No need to retrain from scratch. Concepts are defined as text descriptions, and concept predictions use [[clip|CLIP]] similarity:
 
 $$P(\text{concept}_k \mid \text{image}) = \text{CLIP-similarity}(\text{image}, \text{concept}_k\_\text{text})$$
 
@@ -283,4 +283,4 @@ For a CNN predicting habitat suitability from Sentinel-2:
 
 ## See Also
 
-[[vlm-architectures]], [[biodiversity-ml]], [[vision-transformer]], [[clip]], [[attention-mechanism]]
+[[vlm-architectures]], [[biodiversity-ml]], [[vision-transformer]], [[clip]], [[attention-mechanism]], [[contrastive-learning]], [[self-supervised-overview]]

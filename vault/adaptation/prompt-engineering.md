@@ -29,7 +29,7 @@ Review: "The battery life is amazing!" → Sentiment:
 ```
 3–8 examples typically capture most of the benefit. Order matters — later examples have more influence (recency bias). Few-shot examples also implicitly define the expected output format.
 
-**Why ICL works:** large models learn to perform gradient-descent-like updates implicitly through attention layers. ICL is an emergent capability — it appears at ~10B+ parameter scale.
+**Why ICL works:** large models learn to perform gradient-descent-like updates implicitly through [[attention-mechanism|attention layers]]. ICL is an emergent capability — it appears at ~10B+ parameter scale.
 
 ---
 
@@ -63,7 +63,7 @@ LLMs are highly sensitive to prompt wording:
 
 **User prompt:** actual user input per turn.
 
-At inference, system prompts are cached separately (KV cache friendly). System prompts are typically confidential; users shouldn't be able to extract them via injection attacks.
+At inference, system prompts are cached separately ([[arch-kv-cache|KV cache]] friendly). System prompts are typically confidential; users shouldn't be able to extract them via injection attacks.
 
 ---
 
@@ -105,8 +105,8 @@ Prepend a sequence of **learnable soft token embeddings** to the input. Only the
 
 $$\text{input} = [\underbrace{p_1, \ldots, p_k}_{\text{learned}},\ x_1, \ldots, x_T]$$
 
-At scale (T5-11B), prompt tuning matches full fine-tuning performance while updating only ~0.01% of parameters. Much cheaper storage than LoRA — one vector per task.
+At scale (T5-11B), prompt tuning matches full fine-tuning performance while updating only ~0.01% of parameters. Much cheaper storage than [[lora-quantization|LoRA]] — one vector per task.
 
 ---
 
-*See also: [[autoregressive-models]] · [[instruction-tuning]] · [[attention-mechanism]] · [[clip]]*
+*See also: [[autoregressive-models]] · [[instruction-tuning]] · [[attention-mechanism]] · [[clip]] · [[arch-kv-cache]] · [[lora-quantization]]*

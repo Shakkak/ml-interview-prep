@@ -49,9 +49,9 @@ Modern GPUs have tensor cores that run FP16/BF16 matrix multiplications **2–8�
 
 | Operation | Why FP32 needed |
 |-----------|----------------|
-| Softmax | Exponentials can overflow in FP16 |
+| [[activation-softmax\|Softmax]] | Exponentials can overflow in FP16 |
 | Log-sum-exp | Same overflow risk |
-| Batch norm statistics (mean/var) | Accumulation of many small values loses precision |
+| [[normalization-layers\|Batch norm]] statistics (mean/var) | Accumulation of many small values loses precision |
 | Loss computation | Final reduction of many terms |
 | Optimizer step | Operates on FP32 master weights |
 
@@ -88,7 +88,7 @@ Always unscale gradients before clipping — clipping scaled gradients clips aga
 |-----------|------|-----------|-----------|
 | Weights (active) | 4 GB | 2 GB | 2 GB |
 | Weights (master) | — | 4 GB | 4 GB |
-| Adam $m_1$ (FP32) | 4 GB | 4 GB | 4 GB |
+| [[optimizer-adam\|Adam]] $m_1$ (FP32) | 4 GB | 4 GB | 4 GB |
 | Adam $m_2$ (FP32) | 4 GB | 4 GB | 4 GB |
 | Activations | 4 GB | 2 GB | 2 GB |
 | **Total** | **16 GB** | **12 GB** | **12 GB** |
@@ -97,7 +97,7 @@ Optimizer states dominate and stay in FP32 regardless — the 25% savings comes 
 
 **FP8 training** (emerging): NVIDIA H100 supports FP8 (E4M3 and E5M2 formats) via the Transformer Engine. E4M3 (4-bit exponent, 3-bit mantissa) is used for activations and weights; E5M2 is used for gradients. Requires per-tensor or per-block scaling (similar to loss scaling but applied per tensor). Scaling factors must be tracked and updated per step. Narayanan et al. (2021) demonstrated FP8 training matching FP16 for GPT-3-class models. Key challenge: attention layers are numerically sensitive and may require FP16 fallback for softmax.
 
-**Gradient underflow vs vanishing gradients:** these are related but distinct phenomena. Vanishing gradients arise from the mathematical structure of the network (activation saturation, deep chains of Jacobians). Gradient underflow arises purely from the numerical format — a gradient of $10^{-7}$ is mathematically valid but rounds to 0 in FP16. Loss scaling addresses underflow without affecting the vanishing gradient problem, which requires architectural solutions (residual connections, normalization, activation choice).
+**Gradient underflow vs [[backpropagation-advanced|vanishing gradients]]:** these are related but distinct phenomena. Vanishing gradients arise from the mathematical structure of the network (activation saturation, deep chains of Jacobians). Gradient underflow arises purely from the numerical format — a gradient of $10^{-7}$ is mathematically valid but rounds to 0 in FP16. Loss scaling addresses underflow without affecting the vanishing gradient problem, which requires architectural solutions (residual connections, normalization, activation choice).
 
 **ZeRO and mixed precision for trillion-parameter models:** the ZeRO (Zero Redundancy Optimizer) family of memory optimizations (Rajbhandari et al., 2020) partitions optimizer states (ZeRO-1), gradients (ZeRO-2), and parameters (ZeRO-3) across data-parallel GPUs. Combined with BF16 mixed precision, ZeRO-3 achieves near-linear scaling for models with 100B+ parameters across thousands of GPUs. The memory cost per GPU for ZeRO-3 is $O(1/N_{GPUs})$ for optimizer states, making trillion-parameter training feasible without model parallelism. DeepSpeed implements ZeRO in practice.
 

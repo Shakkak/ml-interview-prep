@@ -41,7 +41,7 @@ The test asks: assuming $H_0$ is true, how likely is it to observe data at least
 **Decision rule:** reject $H_0$ if $p < \alpha$.
 
 **Common misinterpretations:**
-- ✗ "p = 0.03 means there is a 3% chance $H_0$ is true." (Requires a prior — it's Bayesian.)
+- ✗ "p = 0.03 means there is a 3% chance $H_0$ is true." (Requires a prior — it's [[bayesian-inference|Bayesian]].)
 - ✗ "p = 0.03 means a 3% chance the result is due to chance." (p is computed *assuming* chance.)
 - ✗ "p < 0.05 means the effect is large." (Statistical significance ≠ practical significance.)
 - ✓ "p = 0.03 means: if $H_0$ were true, data this extreme would occur only 3% of the time."
@@ -108,7 +108,7 @@ Not significant — the 0.8% difference is within noise for $n = 1000$. You'd ne
 
 ### Non-Parametric Tests
 
-When the Gaussian assumption fails:
+When the [[distributions-gaussian|Gaussian]] assumption fails:
 
 - **Mann-Whitney U / Wilcoxon rank-sum:** tests whether two distributions have the same median without assuming normality. Based on ranks. Less powerful than t-test when normality holds, but robust.
 - **McNemar's test:** paired test for classification accuracy — tests whether models make different errors on the same examples, not just whether overall accuracy differs. Exact for small samples.

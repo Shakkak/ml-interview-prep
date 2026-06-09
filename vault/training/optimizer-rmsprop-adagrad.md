@@ -27,7 +27,7 @@ $$\theta_t \leftarrow \theta_t - \frac{\eta}{\sqrt{G_t} + \epsilon}\, g_t$$
 $$v_t \leftarrow \beta v_{t-1} + (1 - \beta) g_t^2$$
 $$\theta_t \leftarrow \theta_t - \frac{\eta}{\sqrt{v_t} + \epsilon}\, g_t$$
 
-Typical $\beta = 0.9$. Now $v_t$ reflects *recent* gradient magnitudes; the effective learning rate no longer decays to zero. RMSProp = Adam without the first moment ($m_t$) and without bias correction.
+Typical $\beta = 0.9$. Now $v_t$ reflects *recent* gradient magnitudes; the effective learning rate no longer decays to zero. RMSProp = [[optimizer-adam|Adam]] without the first moment ($m_t$) and without bias correction.
 
 ---
 

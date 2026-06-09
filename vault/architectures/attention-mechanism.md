@@ -13,7 +13,7 @@ related: [arch-positional-encoding, flash-attention, arch-kv-cache, normalizatio
 
 ## Fundamental
 
-Recurrent networks process sequences step-by-step: $h_t = f(h_{t-1}, x_t)$. Every piece of information from token $x_1$ must survive $n-1$ sequential state updates to reach $h_n$. Two fatal consequences: (1) a fixed-size vector bottleneck that compresses arbitrarily long context, and (2) $O(n)$ sequential computation that prevents GPU parallelism.
+[[rnn-lstm|Recurrent networks]] process sequences step-by-step: $h_t = f(h_{t-1}, x_t)$. Every piece of information from token $x_1$ must survive $n-1$ sequential state updates to reach $h_n$. Two fatal consequences: (1) a fixed-size vector bottleneck that compresses arbitrarily long context, and (2) $O(n)$ sequential computation that prevents GPU parallelism.
 
 **Attention** abandons the bottleneck. Every output position directly reads from every input position in $O(1)$ hops. The sequence of updates is replaced by a single weighted retrieval over all positions simultaneously.
 
@@ -31,7 +31,7 @@ A high dot product $q_i \cdot k_j$ means "token $j$'s content is relevant to tok
 
 $$E = QK^T \in \mathbb{R}^{n \times n}, \quad \tilde{E} = E / \sqrt{d_k}$$
 
-**Why divide by $\sqrt{d_k}$?** If $q$ and $k$ have independent unit-variance entries, $\text{Var}(q \cdot k) = d_k$. Without scaling, large $d_k$ (e.g., 512) pushes dot products into the softmax saturation region where gradients vanish.
+**Why divide by $\sqrt{d_k}$?** If $q$ and $k$ have independent unit-variance entries, $\text{Var}(q \cdot k) = d_k$. Without scaling, large $d_k$ (e.g., 512) pushes dot products into the [[activation-softmax|softmax]] saturation region where gradients vanish.
 
 ### Scaled Dot-Product Attention
 
@@ -65,12 +65,12 @@ $e^{-\infty} = 0$ after softmax — future positions contribute nothing. This is
 
 ### The Full Transformer Block
 
-Each block applies two sub-layers with residual connections and layer normalization (pre-norm variant):
+Each block applies two sub-layers with residual connections and [[normalization-layers|layer normalization]] (pre-norm variant):
 
 $$x' = x + \text{MHA}(\text{LN}(x))$$
 $$\text{out} = x' + \text{FFN}(\text{LN}(x'))$$
 
-where $\text{FFN}(x) = W_2\,\text{GELU}(W_1 x)$ with $W_1 \in \mathbb{R}^{4d \times d}$ (4× expansion) and $W_2 \in \mathbb{R}^{d \times 4d}$.
+where $\text{FFN}(x) = W_2\,\text{GELU}(W_1 x)$ with $W_1 \in \mathbb{R}^{4d \times d}$ (4× expansion) and $W_2 \in \mathbb{R}^{d \times 4d}$ (see [[activation-gelu-swish]] for why GELU is preferred over ReLU here).
 
 **Division of labor:** attention = communication (each token reads from all others); FFN = computation (each token processed independently). This is why transformers store factual knowledge in FFN weights — attention routes information, FFN processes it.
 
@@ -92,7 +92,7 @@ The $QK^T$ product takes $O(n^2 d)$ FLOPs and produces an $n \times n$ matrix re
 
 Standard attention writes this matrix to HBM (the GPU's main memory, ~2 TB/s), reads it for softmax, writes back, then reads again for the $V$ multiplication — total $O(n^2)$ HBM reads/writes despite the computation being memory-bound, not FLOP-bound.
 
-**Flash Attention** avoids materializing the $n \times n$ matrix entirely by tiling the computation into SRAM (on-chip, ~10× faster). It computes exact attention with $O(n)$ HBM memory footprint. The key technical primitive is **online softmax**: maintaining running maximum $m$ and normalizer $\ell$ so softmax can be updated block-by-block without seeing the full row.
+**[[flash-attention|Flash Attention]]** avoids materializing the $n \times n$ matrix entirely by tiling the computation into SRAM (on-chip, ~10× faster). It computes exact attention with $O(n)$ HBM memory footprint. The key technical primitive is **online softmax**: maintaining running maximum $m$ and normalizer $\ell$ so softmax can be updated block-by-block without seeing the full row.
 
 ### Attention as Bilinear Similarity Search
 
@@ -133,4 +133,4 @@ Many attention heads are redundant: pruning 20% of heads in BERT produces <1% pe
 
 ---
 
-*See also: [[arch-positional-encoding]] · [[flash-attention]] · [[arch-kv-cache]] · [[vision-transformer]] · [[normalization-layers]]*
+*See also: [[arch-positional-encoding]] · [[flash-attention]] · [[arch-kv-cache]] · [[vision-transformer]] · [[normalization-layers]] · [[activation-softmax]] · [[activation-gelu-swish]] · [[lora-quantization]] · [[rnn-lstm]]*

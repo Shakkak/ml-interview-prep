@@ -24,10 +24,12 @@ If the optimal function is near identity, $F(x) \to 0$ is trivially easy (zero o
 **Basic block (ResNet-18/34):**
 
 ```
-x ─────────────────────────────────────► + ──► y
-│                                         ↑
-└──► Conv3×3 → BN → ReLU → Conv3×3 → BN ─┘
+x ─────────────────────────────────────────────────────► + ──► y
+│                                                         ↑
+└──► Conv3×3 → BN → ReLU → Conv3×3 → BN ─────────────────┘
 ```
+
+([[normalization-layers|BN]] = Batch Normalization)
 
 **Projection shortcut** (when dimensions change — stride 2 or channel change): $y = F(x) + W_s x$ where $W_s$ is a 1×1 conv matching dimensions. Used only at transition layers.
 
@@ -37,7 +39,7 @@ x ──────────────────────────
 
 ### Why Residuals Enable Deep Networks: Gradient Analysis
 
-Backpropagating through a residual block:
+[[backpropagation|Backpropagating]] through a residual block:
 
 $$\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y}\left(1 + \frac{\partial F}{\partial x}\right)$$
 
@@ -78,7 +80,7 @@ Near initialization with small weights, $F(x) \approx 0$, so $y \approx x$ — t
 
 ### Pre-activation ResNet (He et al., ResNet-v2)
 
-Original order: Conv → BN → ReLU → (add shortcut).
+Original order: Conv → BN → [[activation-relu-variants|ReLU]] → (add shortcut).
 Pre-activation: BN → ReLU → Conv.
 
 The shortcut path in pre-activation ResNet is completely clean — no BN or ReLU between blocks. This means the identity signal flows through without any modification, which improves gradient flow through very deep networks (1000+ layers).
@@ -101,4 +103,4 @@ Empirically, increasing cardinality at fixed parameter count outperforms increas
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[arch-bottleneck-1x1]] · [[normalization-layers]] · [[backpropagation-advanced]]*
+*See also: [[cnn-architectures-guide]] · [[arch-bottleneck-1x1]] · [[normalization-layers]] · [[backpropagation-advanced]] · [[backpropagation]] · [[activation-relu-variants]]*

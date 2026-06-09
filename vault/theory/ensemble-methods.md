@@ -28,11 +28,11 @@ $$\text{Var}(\bar{y}) = \frac{\sigma^2}{N} + \frac{N-1}{N}\rho\sigma^2 \approx \
 
 **Consequence:** the benefit of ensembling vanishes when models are highly correlated. Diversity is essential.
 
-**Bagging (Bootstrap Aggregating):** train $N$ models on different bootstrap samples (sample $n$ examples with replacement). Average predictions (regression) or vote (classification).
+**Bagging (Bootstrap Aggregating):** train $N$ models on different [[bootstrap|bootstrap samples]] (sample $n$ examples with replacement). Average predictions (regression) or vote (classification).
 
 Why it reduces variance: each model sees a different training set → different errors → errors partially cancel.
 
-**Random Forest = Bagging + feature randomness:**
+**Random Forest = Bagging + feature randomness**, applied to [[decision-trees|decision trees]]:
 1. Bootstrap sample for each tree
 2. At each split, consider only $\sqrt{d}$ random features (classification) or $d/3$ (regression)
 3. Grow each tree fully (no pruning) — high-variance/low-bias individual trees
@@ -108,7 +108,7 @@ Advantage: can combine models of different types (CNN + GBM + SVM) and learn the
 
 ## Advanced
 
-**Connection to Dropout:** Dropout at inference time (MC Dropout) runs the same model $N$ times with dropout active. Averaging approximates a Bayesian model average over the posterior of weights — a cheap ensemble from a single model. The equivalence is approximate: dropout posterior is not the exact Bayesian posterior, but provides calibrated uncertainty estimates for free.
+**Connection to [[regularization-dropout|Dropout]]:** Dropout at inference time (MC Dropout) runs the same model $N$ times with dropout active. Averaging approximates a Bayesian model average over the posterior of weights — a cheap ensemble from a single model. The equivalence is approximate: dropout posterior is not the exact Bayesian posterior, but provides calibrated uncertainty estimates for free.
 
 **Deep ensemble calibration (Lakshminarayanan et al., 2017):** train $M$ networks with random initialization, adversarial training on each. Ensemble predictions average the predictive distributions (not just logits). Empirically, ensembles of 5–10 models achieve far better calibration than temperature scaling alone, particularly for out-of-distribution inputs where the models disagree. The disagreement across ensemble members is a reliable uncertainty signal — high variance across ensemble members signals OOD.
 
@@ -120,4 +120,4 @@ Advantage: can combine models of different types (CNN + GBM + SVM) and learn the
 
 ---
 
-*See also: [[bias-variance-double-descent]] · [[regularization-dropout]] · [[statistical-inference-mle]]*
+*See also: [[bias-variance-double-descent]] · [[regularization-dropout]] · [[statistical-inference-mle]] · [[bayesian-inference]] · [[decision-trees]] · [[bootstrap]]*

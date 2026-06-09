@@ -29,11 +29,17 @@ Standard attention writes the $N \times N$ matrix to HBM, reads it for softmax, 
 
 ### The Key Insight: Online Softmax
 
-Standard softmax requires seeing all $N$ scores before normalizing — this seems to require the full $N$-length vector in memory. But softmax can be computed **incrementally**.
+Standard [[activation-softmax|softmax]] requires seeing all $N$ scores before normalizing — this seems to require the full $N$-length vector in memory. But softmax can be computed **incrementally**.
 
 Maintain two running statistics: $m$ (running maximum) and $\ell$ (running normalizer $\sum e^{x_i - m}$). When a new block arrives with local max $m_{\text{new}}$:
 
 $$m' = \max(m,\, m_{\text{new}}), \qquad \ell' = e^{m - m'} \cdot \ell + e^{m_{\text{new}} - m'} \cdot \ell_{\text{new}}$$
+
+> [!tip] Why the $e^{m - m'}$ rescaling keeps the normalizer exact ([[activation-softmax]])
+> $\ell$ tracks $\sum_{i \in \text{old}} e^{x_i - m}$, so $\sum_{i \in \text{old}} e^{x_i} = \ell \cdot e^m$.
+> After updating the max to $m'$, all exponentials must be re-expressed relative to the new baseline:
+> $\sum_{i \in \text{old}} e^{x_i - m'} = \ell \cdot e^m \cdot e^{-m'} = \ell \cdot e^{m - m'}$.
+> Adding the new block's contribution $\ell_{\text{new}} \cdot e^{m_{\text{new}} - m'}$ gives $\ell'$ — the exact same sum as if all scores had been processed together from the start.
 
 This is mathematically equivalent to standard softmax applied to the full sequence — no approximation.
 
@@ -69,7 +75,7 @@ The speedup comes entirely from reducing HBM traffic. Zero approximation.
 
 Standard attention stores the $N \times N$ attention matrix for the backward pass (needed to compute softmax gradients). Flash Attention does not.
 
-Instead, during the backward pass, it **recomputes** the attention weights by re-running the forward-pass tiling. This trades ~2× extra FLOPs for eliminating $O(N^2)$ activation storage — equivalent to gradient checkpointing applied to the attention operation itself.
+Instead, during the backward pass, it **recomputes** the attention weights by re-running the forward-pass tiling. This trades ~2× extra FLOPs for eliminating $O(N^2)$ activation storage — equivalent to [[backpropagation-advanced|gradient checkpointing]] applied to the attention operation itself.
 
 For training, this is almost always a win: GPU memory is the bottleneck, not FLOPs. Freeing the $O(N^2)$ attention matrix allows significantly larger batch sizes or longer sequences.
 
@@ -101,4 +107,4 @@ Flash Attention is unique: **exact** computation with $O(N)$ memory footprint.
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[vision-transformer]]*
+*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[vision-transformer]] · [[backpropagation-advanced]] · [[activation-softmax]]*

@@ -13,7 +13,7 @@ related: [loss-cross-entropy, regularization-dropout, activation-softmax, model-
 
 ## Fundamental
 
-**The problem.** Cross-entropy with one-hot targets pushes the model to output $z_y \to +\infty$ for the correct class. This causes large weight norms, overconfident predictions, and poor calibration.
+**The problem.** [[loss-cross-entropy|Cross-entropy]] with one-hot targets pushes the model to output $z_y \to +\infty$ for the correct class. This causes large weight norms, overconfident predictions, and poor calibration.
 
 **Definition.** Replace the hard one-hot target with a smoothed distribution:
 
@@ -82,13 +82,13 @@ This connects to maximum entropy principles (see [[maximum-entropy-principle]]):
 
 ### Hurts Distillation Teachers
 
-Hinton et al. showed that teacher models trained with label smoothing are **less useful** for knowledge distillation. Why: the soft logits of a label-smoothed teacher carry less information about inter-class similarities (the "dark knowledge"). The smoothing has already compressed the logit distribution toward uniform — there is less signal in the off-diagonal entries for the student to learn from.
+Hinton et al. showed that teacher models trained with label smoothing are **less useful** for knowledge distillation. Why: the soft logits of a label-smoothed teacher carry less information about inter-class similarities (the "[[knowledge-distillation|dark knowledge]]"). The smoothing has already compressed the logit distribution toward uniform — there is less signal in the off-diagonal entries for the student to learn from.
 
 **Rule:** train distillation teachers without label smoothing. Apply smoothing to students instead, or use the teacher's soft outputs (which naturally provide smoothing).
 
 ### Calibration Connection
 
-Label smoothing directly addresses calibration (see [[model-calibration]]): by capping logit growth, the softmax output is prevented from saturating to 1.0. The model's confidence is better aligned with its empirical accuracy. Temperature scaling post-hoc achieves a similar effect but at inference time; label smoothing bakes it into training.
+Label smoothing directly addresses calibration (see [[model-calibration]]): by capping logit growth, the [[activation-softmax|softmax]] output is prevented from saturating to 1.0. The model's confidence is better aligned with its empirical accuracy. Temperature scaling post-hoc achieves a similar effect but at inference time; label smoothing bakes it into training.
 
 Empirically: Guo et al. (2017) found that modern deep networks trained with hard labels are severely overconfident (reliability diagram curves far below the diagonal). Label smoothing with $\varepsilon = 0.1$ reduces this gap substantially, often making post-hoc temperature scaling unnecessary.
 
@@ -98,4 +98,4 @@ Mixup training $(\tilde{x}, \tilde{y}) = (\lambda x_i + (1-\lambda)x_j,\; \lambd
 
 ---
 
-*See also: [[loss-cross-entropy]] · [[activation-softmax]] · [[model-calibration]] · [[knowledge-distillation]] · [[regularization-dropout]]*
+*See also: [[loss-cross-entropy]] · [[activation-softmax]] · [[model-calibration]] · [[knowledge-distillation]] · [[regularization-dropout]] · [[entropy-mutual-info]] · [[maximum-entropy-principle]]*

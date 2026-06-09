@@ -14,7 +14,7 @@ related: [diffusion-models, variational-autoencoders, normalization-layers, loss
 ## Fundamental
 
 Two networks in adversarial competition:
-- **Generator** $G(z; \theta_G)$: maps random noise $z \sim p_z = \mathcal{N}(0,I)$ to data space. Wants to produce samples the discriminator cannot tell from real data.
+- **Generator** $G(z; \theta_G)$: maps random noise $z \sim p_z = \mathcal{N}(0,I)$ ([[distributions-gaussian]]) to data space. Wants to produce samples the discriminator cannot tell from real data.
 - **Discriminator** $D(x; \theta_D)$: classifies inputs as real or fake. Wants to correctly identify real vs. generated.
 
 **Minimax objective:**
@@ -46,9 +46,9 @@ When $D(G(z))=0.01$: saturating gradient $\approx -0.01$ vs non-saturating gradi
 
 Four architectural rules that made GANs reliably train on images:
 1. Replace pooling with **strided convolutions** (D) and **transposed convolutions** (G).
-2. **Batch normalization** everywhere (except $G$'s output layer and $D$'s input layer).
+2. **[[normalization-layers|Batch normalization]]** everywhere (except $G$'s output layer and $D$'s input layer).
 3. No fully connected hidden layers.
-4. **ReLU** in $G$ (Tanh at output), **LeakyReLU** in $D$.
+4. **ReLU** in $G$ (Tanh at output), **[[activation-relu-variants|LeakyReLU]]** in $D$.
 
 ### Evaluation: FID and Inception Score
 
@@ -57,7 +57,7 @@ $$\text{FID} = \|\mu_r-\mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2\sqrt{\Sigma
 
 Lower is better. Captures both **fidelity** (individual samples look real) and **diversity** (all modes of the distribution are covered). Requires ~50k samples for stable estimates.
 
-**Inception Score (IS):** $\text{IS} = \exp(\mathbb{E}_x[D_{KL}(p(y|x)\|p(y))])$. Rewards sharp, diverse class predictions. Does not compare to real data — can be gamed. FID is the standard today.
+**Inception Score (IS):** $\text{IS} = \exp(\mathbb{E}_x[D_{KL}(p(y|x)\|p(y))])$ ([[loss-kl-divergence|KL divergence]]). Rewards sharp, diverse class predictions. Does not compare to real data — can be gamed. FID is the standard today.
 
 ---
 
@@ -96,4 +96,4 @@ where $y = \text{linear}(w)$. Coarse styles (pose, face shape) controlled at low
 
 ---
 
-*See also: [[diffusion-models]] · [[variational-autoencoders]] · [[normalization-layers]]*
+*See also: [[diffusion-models]] · [[variational-autoencoders]] · [[normalization-layers]] · [[distributions-gaussian]] · [[activation-relu-variants]] · [[loss-kl-divergence]] · [[evaluation-metrics-guide]]*

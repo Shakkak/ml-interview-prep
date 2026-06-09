@@ -23,7 +23,14 @@ The marginal $p_\theta(x) = \int p_\theta(x \mid z) p(z)\,dz$ can be complex eve
 
 ### The ELBO
 
-We want to maximize $\log p_\theta(x)$, but the integral over $z$ is intractable. Introduce an approximate posterior $q_\phi(z \mid x) = \mathcal{N}(\mu_\phi(x), \sigma^2_\phi(x) I)$. By Jensen's inequality ($\log$ is concave):
+We want to maximize $\log p_\theta(x)$, but the integral over $z$ is intractable. Introduce an approximate [[bayesian-inference|posterior]] $q_\phi(z \mid x) = \mathcal{N}(\mu_\phi(x), \sigma^2_\phi(x) I)$. By [[math-convexity-jensen|Jensen's inequality]] ($\log$ is concave):
+
+> [!tip] Which direction Jensen's inequality points here ([[math-convexity-jensen]])
+> For any concave function $f$ (like $\log$) and random variable $X$: $f(\mathbb{E}[X]) \geq \mathbb{E}[f(X)]$.
+> Rearranging with $f = \log$ and $X = p(x,z)/q_\phi(z|x)$:
+> $\log \mathbb{E}_q[X] \geq \mathbb{E}_q[\log X]$
+> So moving $\log$ inside the expectation gives a **lower bound** — that lower bound is the ELBO.
+> The gap equals $D_{KL}(q_\phi(z|x) \,\|\, p_\theta(z|x)) \geq 0$, so the ELBO is tight exactly when $q$ perfectly approximates the true posterior.
 
 $$\log p_\theta(x) = \log \mathbb{E}_{q_\phi(z \mid x)}\!\left[\frac{p_\theta(x \mid z)\,p(z)}{q_\phi(z \mid x)}\right] \geq \mathbb{E}_{q_\phi}\!\left[\log \frac{p_\theta(x \mid z)\,p(z)}{q_\phi(z \mid x)}\right]$$
 
@@ -39,9 +46,9 @@ This is the **ELBO** (Evidence Lower BOund). The gap to the true log-likelihood 
 
 ### The Two ELBO Terms
 
-**Reconstruction term:** $\mathbb{E}_{q_\phi}[\log p_\theta(x \mid z)]$ — maximize log-likelihood of the input under the decoded distribution. For Gaussian decoder: equivalent to MSE loss. For Bernoulli decoder (binary pixels): binary cross-entropy.
+**Reconstruction term:** $\mathbb{E}_{q_\phi}[\log p_\theta(x \mid z)]$ — maximize log-likelihood of the input under the decoded distribution. For [[distributions-gaussian|Gaussian]] decoder: equivalent to [[loss-mse|MSE loss]]. For Bernoulli decoder (binary pixels): [[loss-cross-entropy|binary cross-entropy]].
 
-**KL divergence term:** $D_{KL}(q_\phi(z \mid x) \| p(z))$ — push the encoder's posterior toward the standard Gaussian prior. For diagonal Gaussian:
+**[[loss-kl-divergence|KL divergence]] term:** $D_{KL}(q_\phi(z \mid x) \| p(z))$ — push the encoder's posterior toward the standard Gaussian prior. For diagonal Gaussian:
 
 $$D_{KL}(\mathcal{N}(\mu, \sigma^2 I) \| \mathcal{N}(0,I)) = \frac{1}{2}\sum_{j=1}^d (\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1)$$
 
@@ -54,7 +61,7 @@ This has a **closed-form expression** — no sampling needed for the KL term, on
 
 ### The Reparameterization Trick
 
-To backpropagate through the sampling step $z \sim q_\phi(z \mid x) = \mathcal{N}(\mu_\phi, \sigma_\phi^2)$, rewrite as:
+To [[backpropagation|backpropagate]] through the sampling step $z \sim q_\phi(z \mid x) = \mathcal{N}(\mu_\phi, \sigma_\phi^2)$, rewrite as:
 
 $$z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon, \quad \epsilon \sim \mathcal{N}(0,I)$$
 
@@ -88,13 +95,13 @@ Higher $\beta$ **forces stronger disentanglement**: each dimension of $z$ is pus
 
 The ELBO is tight when $q_\phi(z \mid x) = p_\theta(z \mid x)$. In practice, the encoder is too simple to perfectly approximate the true posterior. The residual gap manifests as a lower bound that can be far from the true likelihood.
 
-**Posterior collapse:** a pathological training outcome where the encoder ignores the input and outputs $q_\phi(z \mid x) \approx p(z) = \mathcal{N}(0,I)$ for all $x$. Causes: the KL term dominates; the decoder is expressive enough to model $p(x)$ without the latent code. Common in VAEs for text generation (decoder is an RNN that learns its own context).
+**Posterior collapse:** a pathological training outcome where the encoder ignores the input and outputs $q_\phi(z \mid x) \approx p(z) = \mathcal{N}(0,I)$ for all $x$. Causes: the KL term dominates; the decoder is expressive enough to model $p(x)$ without the latent code. Common in VAEs for text generation (decoder is an [[rnn-lstm|RNN]] that learns its own context).
 
-**Fixes:** KL annealing (start with $\beta=0$, gradually increase to 1 during training); Free bits ($\beta$-VAE variant with a minimum target KL per dimension to prevent full collapse); using a flow-based posterior to match the true posterior more closely.
+**Fixes:** KL annealing (start with $\beta=0$, gradually increase to 1 during training); Free bits ($\beta$-VAE variant with a minimum target KL per dimension to prevent full collapse); using a [[normalizing-flows|flow-based]] posterior to match the true posterior more closely.
 
 ### VAE as Hierarchical VAE / Connection to Diffusion
 
-The DDPM forward process can be viewed as a **hierarchical VAE** with a fixed encoder:
+The [[diffusion-models|DDPM]] forward process can be viewed as a **hierarchical VAE** with a fixed encoder:
 - $q(x_t \mid x_{t-1}) = \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t I)$ — fixed (not learned)
 - $p_\theta(x_{t-1} \mid x_t)$ — learned decoder (the denoising network)
 
@@ -102,4 +109,4 @@ The DDPM ELBO is the sum of $T$ KL terms $D_{KL}(q(x_{t-1} \mid x_t, x_0) \| p_\
 
 ---
 
-*See also: [[bayesian-inference]] · [[normalizing-flows]] · [[diffusion-models]] · [[backpropagation]]*
+*See also: [[bayesian-inference]] · [[normalizing-flows]] · [[diffusion-models]] · [[backpropagation]] · [[loss-kl-divergence]] · [[loss-cross-entropy]] · [[math-convexity-jensen]] · [[rnn-lstm]]*

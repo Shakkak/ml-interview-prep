@@ -84,19 +84,27 @@ Kernel methods scale poorly with $n$ — impractical for $n > 10^5$.
 
 $$\phi_\omega(x) = \sqrt{\frac{2}{D}}\cos(\omega_i^\top x + b_i)_{i=1}^D, \quad \omega_i \sim \mathcal{N}(0, I/\sigma^2)$$
 
+> [!tip] Why sampling $\omega$ from the kernel's spectral density works ([[fourier-transform]])
+> **Bochner's theorem:** every continuous shift-invariant kernel $k(x,z) = k(x-z)$ is the Fourier transform
+> of a non-negative measure $p(\omega)$ — its **spectral density**:
+> $k(x-z) = \int p(\omega)\, e^{i\omega^\top(x-z)}\, d\omega = \mathbb{E}_\omega[e^{i\omega^\top x}\overline{e^{i\omega^\top z}}]$
+> For the RBF kernel $k(x-z) = e^{-\|x-z\|^2/2\sigma^2}$, the spectral density is $\mathcal{N}(0, I/\sigma^2)$.
+> Taking the real part: $k(x,z) = \mathbb{E}_\omega[2\cos(\omega^\top x + b)\cos(\omega^\top z + b)]$ for $b \sim \text{Uniform}[0,2\pi]$.
+> Drawing $D$ random $\omega_i$ from $p(\omega)$ gives an unbiased Monte Carlo estimate of the kernel — that's the RFF feature map.
+
 Reduces kernel SVM to linear SVM in a $D$-dimensional feature space. Training is $O(nD)$ rather than $O(n^2)$ — scalable with a quality-speed tradeoff.
 
 ---
 
 ## Advanced
 
-**The NTK as a kernel:** in the infinite-width limit, neural networks trained with gradient flow correspond to kernel regression with the Neural Tangent Kernel (NTK):
+**The NTK as a kernel:** in the infinite-width limit, neural networks trained with gradient flow correspond to kernel regression with the [[neural-tangent-kernel|Neural Tangent Kernel (NTK)]]:
 
 $$K_{\text{NTK}}(x, x') = \mathbb{E}\!\left[\langle \nabla_\theta f(x; \theta), \nabla_\theta f(x'; \theta) \rangle\right]$$
 
 The training dynamics are linear: $\dot{f}(x;t) = -K_{\text{NTK}}(x, X)(f(X;t) - y)$. This connects deep learning theory to kernel methods, providing a principled way to analyze infinite-width networks. Key finding: shallow networks with popular activations converge to known kernels (arc-cosine kernel for ReLU), while deep networks compute compositions of simpler kernels.
 
-**Spectral bias through the NTK lens:** the NTK eigenspectrum determines convergence rates. Eigenfunctions with large eigenvalues are learned quickly; those with small eigenvalues are learned slowly. For smooth kernels (like RBF), high-frequency eigenfunctions have small eigenvalues → spectral bias (see [[spectral-bias]]). This connects learning theory (Rademacher complexity in RKHS norm) to optimization dynamics.
+**Spectral bias through the NTK lens:** the NTK eigenspectrum determines convergence rates. Eigenfunctions with large [[eigenvalues-pca|eigenvalues]] are learned quickly; those with small eigenvalues are learned slowly. For smooth kernels (like RBF), high-frequency eigenfunctions have small eigenvalues → spectral bias (see [[spectral-bias]]). This connects learning theory (Rademacher complexity in RKHS norm) to optimization dynamics.
 
 **Support Vector Machine with soft margin (C-SVM):** allows some violations of the margin:
 
@@ -113,4 +121,4 @@ The box constraint $\alpha_i \leq C$ limits how much any single training point c
 
 ---
 
-*See also: [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[curse-of-dimensionality]] · [[generative-vs-discriminative]] · [[spectral-bias]]*
+*See also: [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[curse-of-dimensionality]] · [[generative-vs-discriminative]] · [[spectral-bias]] · [[neural-tangent-kernel]] · [[lagrangian-optimization]]*

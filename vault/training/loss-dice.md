@@ -16,9 +16,9 @@ related: [loss-focal, loss-cross-entropy, evaluation-metrics-guide]
 The Dice coefficient (Sørensen–Dice) measures overlap between two sets $A$ and $B$:
 $$\text{Dice}(A, B) = \frac{2|A \cap B|}{|A| + |B|}$$
 
-Range: 0 (no overlap) to 1 (perfect overlap). Equivalent to the F1 score for binary classification.
+Range: 0 (no overlap) to 1 (perfect overlap). Equivalent to the [[evaluation-metrics-guide|F1]] score for binary classification.
 
-**Why not cross-entropy for segmentation?** Pixel-wise cross-entropy treats each pixel independently and equally. For a segmentation map where 99% of pixels are background, cross-entropy is dominated by background pixels. A model that labels everything as background gets 99% pixel accuracy and near-zero cross-entropy loss — completely useless.
+**Why not [[loss-cross-entropy|cross-entropy]] for segmentation?** Pixel-wise cross-entropy treats each pixel independently and equally. For a segmentation map where 99% of pixels are background, cross-entropy is dominated by background pixels. A model that labels everything as background gets 99% pixel accuracy and near-zero cross-entropy loss — completely useless.
 
 Dice evaluates the overlap of the entire mask directly:
 
@@ -60,7 +60,7 @@ Cross-entropy provides stable pixel-level gradient signal everywhere; Dice enfor
 
 ## Advanced
 
-**Focal Dice loss** (Wang et al., 2020): combines focal modulation with Dice structure by applying a $(1 - \text{Dice})^\gamma$ modulating factor to down-weight easy (well-segmented) samples and focus training on hard cases. Extends focal loss ideas from detection to segmentation by operating at the image level rather than the pixel level.
+**Focal Dice loss** (Wang et al., 2020): combines focal modulation with Dice structure by applying a $(1 - \text{Dice})^\gamma$ modulating factor to down-weight easy (well-segmented) samples and focus training on hard cases. Extends [[loss-focal|focal loss]] ideas from detection to segmentation by operating at the image level rather than the pixel level.
 
 **Boundary-aware Dice loss:** standard Dice treats all foreground pixels equally. For tasks where boundary precision matters (surgical instrument segmentation, cell boundary detection), boundary-weighted variants apply higher loss near the predicted or ground-truth boundary: $\mathcal{L}_{BD} = \mathcal{L}_{Dice} + \lambda \mathcal{L}_{Dice,boundary}$ where the boundary loss is computed only on a dilated boundary mask. Reduces Hausdorff distance without sacrificing volumetric Dice.
 

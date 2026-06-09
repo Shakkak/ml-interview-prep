@@ -27,7 +27,7 @@ Given a dataset of **normal** examples, detect when a new example is abnormal. K
 
 Anomaly score: $s(x) = \|x - \hat{x}\|_2^2$ (reconstruction error). Flag $x$ as anomalous if $s(x) > \tau$.
 
-Variants: VAE uses ELBO as anomaly score ($-\log p(x)$ under the model). PatchWise computes reconstruction error per spatial patch, producing a localization map.
+Variants: [[variational-autoencoders|VAE]] uses ELBO as anomaly score ($-\log p(x)$ under the model). PatchWise computes reconstruction error per spatial patch, producing a localization map.
 
 Weakness: very expressive decoders can sometimes reconstruct anomalies well — the network generalizes too broadly.
 
@@ -43,7 +43,7 @@ Hypersphere collapse: if $f$ learns $f(x) = c$ for all inputs (trivial), the los
 
 Best practice: use the few available anomaly examples as a validation set to tune $\tau$ — do **not** use them for training.
 
-**Metric:** AUROC (Area Under ROC Curve) is standard — threshold-free, measures discrimination between normal and anomalous scores. Standard benchmark: MVTec AD (Bergmann et al., 2019) for industrial defect inspection.
+**Metric:** [[evaluation-metrics-guide|AUROC]] (Area Under ROC Curve) is standard — threshold-free, measures discrimination between normal and anomalous scores. Standard benchmark: MVTec AD (Bergmann et al., 2019) for industrial defect inspection.
 
 ---
 
@@ -64,17 +64,17 @@ Why it works: pretrained CNN features already encode rich visual information. No
 
 **Method 4 — Density estimation:**
 
-Normalizing flows learn an invertible mapping $f: x \mapsto z$ such that $z \sim \mathcal{N}(0,I)$:
+[[normalizing-flows|Normalizing flows]] learn an invertible mapping $f: x \mapsto z$ such that $z \sim \mathcal{N}(0,I)$:
 
 $$\log p(x) = \log p_z(f(x)) + \log|\det J_f(x)|$$
 
 Both terms are tractable. Anomaly score: $-\log p(x)$. Advantage over reconstruction: gives exact likelihoods rather than proxy distances.
 
-Gaussian Mixture Model: fit $K$ Gaussians to normal data features; score = $-\log \sum_k \pi_k \mathcal{N}(x; \mu_k, \Sigma_k)$.
+[[distributions-gaussian|Gaussian]] Mixture Model: fit $K$ Gaussians to normal data features; score = $-\log \sum_k \pi_k \mathcal{N}(x; \mu_k, \Sigma_k)$.
 
 **Method 5 — Self-supervised anomaly detection:**
 
-Train on normal data with a self-supervised pretext task. The model learns a representation of normal data; anomalies score poorly on the pretext task.
+Train on normal data with a [[self-supervised-overview|self-supervised]] pretext task. The model learns a representation of normal data; anomalies score poorly on the pretext task.
 
 **CutPaste (Li et al., 2021):** augment normal images with a "cut and paste" operation that simulates surface defects. Train a classifier to distinguish original vs. cut-pasted. The classifier's score serves as the anomaly signal. This creates synthetic anomalies from normal data, enabling supervised training without real anomaly examples.
 
@@ -102,8 +102,8 @@ Train on normal data with a self-supervised pretext task. The model learns a rep
 
 **OOD detection vs semantic anomaly detection:** a key distinction often ignored. OOD detection asks "is this input from the training distribution?" (distribution-level). Semantic anomaly detection asks "does this contain a defect?" (semantic-level). A misaligned bolt with correct image statistics is OOD-normal (same photographic distribution) but semantically anomalous. Methods that measure feature distance capture semantic anomalies; methods that measure input likelihood detect distributional shifts. Most industrial inspection tasks require semantic anomaly detection.
 
-**Anomaly detection in foundation model era:** CLIP and DINOv2 features dramatically outperform supervised ImageNet features for anomaly detection because they capture richer semantic information. WinCLIP (Jeong et al., 2023) uses CLIP's text encoder to define "normal" through text descriptions rather than images, enabling zero-shot anomaly detection without any reference normal images — a fundamentally new capability that doesn't fit the classical framework.
+**Anomaly detection in foundation model era:** [[clip|CLIP]] and DINOv2 features dramatically outperform supervised ImageNet features for anomaly detection because they capture richer semantic information. WinCLIP (Jeong et al., 2023) uses CLIP's text encoder to define "normal" through text descriptions rather than images, enabling zero-shot anomaly detection without any reference normal images — a fundamentally new capability that doesn't fit the classical framework.
 
 ---
 
-*See also: [[self-supervised-overview]] · [[contrastive-learning]] · [[distributions-gaussian]] · [[evaluation-metrics-guide]]*
+*See also: [[self-supervised-overview]] · [[contrastive-learning]] · [[distributions-gaussian]] · [[evaluation-metrics-guide]] · [[variational-autoencoders]] · [[normalizing-flows]] · [[clip]]*

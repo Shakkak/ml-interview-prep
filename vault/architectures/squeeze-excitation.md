@@ -32,6 +32,9 @@ $z_c$ summarizes "how active is channel $c$ on average for this image?"
 **Excitation (two FC layers + sigmoid):**
 $$s = \sigma\!\left(W_2 \cdot \text{ReLU}(W_1 z)\right), \quad W_1 \in \mathbb{R}^{C/r \times C},\ W_2 \in \mathbb{R}^{C \times C/r}$$
 
+> [!tip] Why sigmoid, not softmax?
+> Softmax weights sum to 1 — boosting one channel forces down-weighting others (zero-sum). Sigmoid lets each channel weight be set independently in (0,1): you can suppress several channels simultaneously without redistributing their "budget" to others.
+
 Reduction ratio $r=16$ by default. Parameters: $2C^2/r$.
 
 **Scale:**
@@ -43,7 +46,7 @@ $$\tilde{X}_{ijc} = s_c \cdot X_{ijc}$$
 
 ### Integration with ResNet
 
-In SE-ResNet, the SE block is inserted after the last conv of each residual block, before the residual addition:
+In SE-ResNet, the SE block is inserted after the last conv of each [[arch-residual-block|residual block]], before the residual addition:
 
 ```
 x ──── Conv block ──── SE block ──── + ──── y
@@ -66,7 +69,7 @@ For $C=256$, $r=16$: SE parameters = $2 \times 256^2/16 = 8{,}192$. This is tiny
 
 ### SE in EfficientNet
 
-EfficientNet's MBConv block uses SE with reduction ratio $r=4$ (applied to the *expanded* channel dimension):
+EfficientNet's [[arch-depthwise-separable|MBConv block]] uses SE with reduction ratio $r=4$ (applied to the *expanded* channel dimension):
 
 ```
 Input → 1×1 Expand → 3×3 Depthwise → SE block → 1×1 Project → Output
@@ -104,8 +107,8 @@ CBAM slightly outperforms SE at comparable parameter count. It addresses a limit
 
 ### SE as Learned Feature Selection
 
-From a representation learning perspective, SE blocks implement **dynamic, input-dependent feature selection**. BatchNorm learns a fixed affine rescaling $(\gamma, \beta)$ per channel — the same scale regardless of input. SE learns to compute $s_c$ as a function of the input, enabling the network to select which feature detectors are relevant for each specific input. This is a form of sample-wise attention that is computationally cheap.
+From a representation learning perspective, SE blocks implement **dynamic, input-dependent feature selection**. [[normalization-layers|BatchNorm]] learns a fixed affine rescaling $(\gamma, \beta)$ per channel — the same scale regardless of input. SE learns to compute $s_c$ as a function of the input, enabling the network to select which feature detectors are relevant for each specific input. This is a form of sample-wise attention that is computationally cheap.
 
 ---
 
-*See also: [[arch-residual-block]] · [[cnn-architectures-guide]] · [[attention-mechanism]]*
+*See also: [[arch-residual-block]] · [[cnn-architectures-guide]] · [[attention-mechanism]] · [[normalization-layers]] · [[arch-depthwise-separable]]*

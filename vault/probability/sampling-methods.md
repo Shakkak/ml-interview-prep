@@ -20,7 +20,7 @@ Many intractable integrals in ML can be estimated by sampling:
 $$\mathbb{E}_{p(x)}[f(x)] = \int f(x)\, p(x)\, dx \approx \frac{1}{N} \sum_{i=1}^N f(x^{(i)}), \quad x^{(i)} \sim p(x)$$
 
 Key examples:
-- **Posterior inference:** $p(\theta \mid D) \propto p(D \mid \theta) p(\theta)$ — normalizing constant $p(D)$ is intractable
+- **[[bayesian-inference|Posterior]] inference:** $p(\theta \mid D) \propto p(D \mid \theta) p(\theta)$ — normalizing constant $p(D)$ is intractable
 - **Marginal likelihood:** $p(x) = \int p(x \mid z) p(z)\, dz$ — requires integrating over latent states
 - **Expected loss:** $\mathbb{E}_{x \sim p_{\text{data}}}[\mathcal{L}(\theta; x)]$ — training data is a finite sample
 
@@ -66,7 +66,7 @@ $$\hat{\mu}_{SNIS} = \frac{\sum_i f(x^{(i)}) \tilde{w}(x^{(i)})}{\sum_i \tilde{w
 
 ### Markov Chain Monte Carlo (MCMC)
 
-Construct a Markov chain with stationary distribution $p(x)$. After burn-in, samples approximate i.i.d. from $p$.
+Construct a [[markov-chains|Markov chain]] with stationary distribution $p(x)$. After burn-in, samples approximate i.i.d. from $p$.
 
 **Metropolis-Hastings:**
 1. At state $x$, propose $x' \sim q(x' \mid x)$
@@ -78,7 +78,7 @@ Detailed balance is satisfied, so the stationary distribution is $p$. The normal
 **Tuning Metropolis-Hastings:** proposal variance $\sigma^2$ controls the tradeoff:
 - Too small: high acceptance, slow exploration (random walk with tiny steps)
 - Too large: low acceptance, chain gets stuck
-- Optimal: ~23% acceptance rate for Gaussian proposals in high dimensions (Roberts-Gelman-Gilks, 1997)
+- Optimal: ~23% acceptance rate for [[distributions-gaussian|Gaussian]] proposals in high dimensions (Roberts-Gelman-Gilks, 1997)
 
 **Gibbs sampling:** for multivariate $p(x_1,\ldots,x_d)$, iteratively sample each variable from its full conditional $p(x_i|x_{-i})$. Always accepts. Slow when variables are highly correlated.
 
@@ -94,11 +94,11 @@ MCMC samples are correlated and may not have reached stationarity.
 
 ### Ancestral Sampling in Generative Models
 
-**VAE:** (1) sample $z \sim \mathcal{N}(0, I)$; (2) sample $x \sim p_\theta(x \mid z)$.
+**[[variational-autoencoders|VAE]]:** (1) sample $z \sim \mathcal{N}(0, I)$; (2) sample $x \sim p_\theta(x \mid z)$.
 
-**Autoregressive models (GPT):** sample $x_1 \sim p(x_1)$, then $x_t \sim p(x_t \mid x_{<t})$ autoregressively. Exact ancestral sampling — no MCMC needed.
+**[[autoregressive-models|Autoregressive models]] (GPT):** sample $x_1 \sim p(x_1)$, then $x_t \sim p(x_t \mid x_{<t})$ autoregressively. Exact ancestral sampling — no MCMC needed.
 
-**Diffusion models:** the DDPM sampling procedure is a Markov chain: $x_T \sim \mathcal{N}(0, I)$, then $x_{t-1} \sim p_\theta(x_{t-1} \mid x_t)$ for $t = T, \ldots, 1$.
+**[[diffusion-models|Diffusion models]]:** the DDPM sampling procedure is a Markov chain: $x_T \sim \mathcal{N}(0, I)$, then $x_{t-1} \sim p_\theta(x_{t-1} \mid x_t)$ for $t = T, \ldots, 1$.
 
 ---
 
@@ -146,4 +146,4 @@ The optimal perturbation $\phi^*$ in the RKHS minimizes the KL divergence betwee
 
 ---
 
-*See also: [[bayesian-inference]] · [[markov-chains]] · [[diffusion-models]] · [[variational-autoencoders]] · [[distributions-gaussian]]*
+*See also: [[bayesian-inference]] · [[markov-chains]] · [[diffusion-models]] · [[variational-autoencoders]] · [[distributions-gaussian]] · [[autoregressive-models]]*

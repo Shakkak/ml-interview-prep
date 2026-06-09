@@ -46,17 +46,17 @@ Effectively zero. This is why sigmoid was abandoned for hidden layers.
 
 ### Zero-Centering: Why Tanh Is Better Than Sigmoid for Hidden Layers
 
-When activations $a_j > 0$ always (sigmoid, ReLU), the gradient of the loss w.r.t. weight $w_j$ is:
+When activations $a_j > 0$ always (sigmoid, [[activation-relu-variants|ReLU]]), the gradient of the loss w.r.t. weight $w_j$ is:
 
 $$\frac{\partial L}{\partial w_j} = \delta \cdot a_j$$
 
-where $\delta = \frac{\partial L}{\partial z}$ can be positive or negative, but $a_j > 0$ always. This means all gradients $\frac{\partial L}{\partial w_j}$ in a layer have the same sign as $\delta$. All weights in that layer update in the same direction — gradients zig-zag rather than moving diagonally toward the optimum in weight space. Zero-centered outputs (tanh) eliminate this sign-consistency constraint.
+where $\delta = \frac{\partial L}{\partial z}$ can be positive or negative, but $a_j > 0$ always. This means all gradients $\frac{\partial L}{\partial w_j}$ in a layer have the same sign as $\delta$. All weights in that layer update in the same direction — gradients zig-zag rather than moving diagonally toward the optimum in weight space. Zero-centered outputs (tanh) eliminate this sign-consistency constraint (see [[backpropagation]] for the full gradient chain).
 
 ### When to Use Each
 
-- **Sigmoid:** binary classification output (probability), LSTM gates (forget, input, output). **Not** hidden layers.
+- **Sigmoid:** binary classification output (probability), [[rnn-lstm|LSTM]] gates (forget, input, output). **Not** hidden layers.
 - **Tanh:** LSTM cell state updates, hidden layers in shallow RNNs where zero-centering matters.
-- **Sigmoid vs softmax:** sigmoid per-class allows multi-label (cat AND dog simultaneously); softmax enforces mutual exclusivity (exactly one class).
+- **Sigmoid vs [[activation-softmax|softmax]]:** sigmoid per-class allows multi-label (cat AND dog simultaneously); softmax enforces mutual exclusivity (exactly one class).
 
 ---
 
@@ -88,4 +88,4 @@ This is a smooth approximation of ReLU. Its derivative is $\sigma(x)$. Rarely us
 
 ---
 
-*See also: [[activation-relu-variants]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[backpropagation-advanced]]*
+*See also: [[activation-relu-variants]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[backpropagation-advanced]] · [[backpropagation]] · [[rnn-lstm]]*

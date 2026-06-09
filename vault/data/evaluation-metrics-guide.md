@@ -22,7 +22,15 @@ For binary classification with threshold $t$ (predict positive if score ≥ $t$)
 
 $$\text{Precision} = \frac{TP}{TP+FP} \quad \text{Recall} = \frac{TP}{TP+FN} \quad \text{F1} = \frac{2 \cdot P \cdot R}{P + R}$$
 
-**F1 uses harmonic mean** — not arithmetic. Arithmetic mean of P=1.0, R=0.01 is 0.505 (looks fine). Harmonic mean is 0.020 (correctly penalizes the near-zero component). The harmonic mean is dominated by the smaller value: $\text{HM}(a, b) \leq \min(a, b)$.
+**F1 uses [[math-means|harmonic mean]]** — not arithmetic. Arithmetic mean of P=1.0, R=0.01 is 0.505 (looks fine). Harmonic mean is 0.020 (correctly penalizes the near-zero component). The harmonic mean is dominated by the smaller value: $\text{HM}(a, b) \leq \min(a, b)$.
+
+> [!tip] Why harmonic mean — not arithmetic — for F1
+> For P = 1.0, R = 0.01:
+> - Arithmetic mean = (1.0 + 0.01)/2 = **0.505** — hides the near-zero recall
+> - Harmonic mean = 2/(1/1.0 + 1/0.01) = 2/101 ≈ **0.020** — correctly low
+>
+> Key property: $\text{HM}(a,b) \leq \min(a,b)$ — a near-zero component drags it all the way down.
+> F1 only stays high when *both* P and R are high, not just one. See math-means for the full picture.
 
 **$F_\beta$ score:** $F_\beta = (1+\beta^2)\frac{P \cdot R}{\beta^2 P + R}$. $\beta > 1$ weights recall more (FN is costly: cancer screening). $\beta < 1$ weights precision more (FP is costly: spam filter).
 
@@ -91,7 +99,7 @@ $$\text{AUC} = P(\text{score}(x^+) > \text{score}(x^-))$$
 
 A model outputting $p(y=1 \mid x) = 0.9$ should be correct 90% of the time among all such predictions. Modern deep networks are typically **overconfident**: they output 0.9 when actual accuracy is 0.7.
 
-**Reliability diagram:** bin predictions by confidence; plot (mean confidence, fraction correct) per bin. A perfectly calibrated model produces points on the diagonal.
+**Reliability diagram:** bin predictions by confidence; plot (mean confidence, fraction correct) per bin. A perfectly [[model-calibration|calibrated]] model produces points on the diagonal.
 
 **Expected Calibration Error:**
 $$ECE = \sum_{b=1}^B \frac{|B_b|}{n}\left|\text{acc}(B_b) - \text{conf}(B_b)\right|$$
@@ -102,13 +110,18 @@ $$ECE = \sum_{b=1}^B \frac{|B_b|}{n}\left|\text{acc}(B_b) - \text{conf}(B_b)\rig
 
 | Task | Metric | What it measures |
 |---|---|---|
-| Image generation | FID (Fréchet Inception Distance) | KL divergence between real/fake feature distributions |
+| Image generation | FID (Fréchet Inception Distance) | [[loss-kl-divergence\|KL divergence]] between real/fake feature distributions |
 | Image quality | SSIM | Structural similarity (luminance × contrast × structure) |
 | Text generation | BLEU | $n$-gram overlap between hypothesis and references |
-| Text generation | BERTScore | Soft token matching using contextual embeddings |
+| Text generation | [[bert-mlm\|BERTScore]] | Soft token matching using contextual embeddings |
 | Retrieval | nDCG | Normalized discounted cumulative gain (position-weighted recall) |
 
-**FID:** compute Inception-v3 features for real and generated images; fit Gaussians $(\mu_r, \Sigma_r)$ and $(\mu_g, \Sigma_g)$; FID = $\|\mu_r - \mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})$. Lower is better. Requires ~50k samples for stable estimates. FID is known to correlate with human judgments of image quality better than Inception Score.
+**FID:** compute Inception-v3 features for real and generated images; fit [[distributions-gaussian|Gaussians]] $(\mu_r, \Sigma_r)$ and $(\mu_g, \Sigma_g)$; FID = $\|\mu_r - \mu_g\|^2 + \text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})$. Lower is better. Requires ~50k samples for stable estimates. FID is known to correlate with human judgments of image quality better than Inception Score.
+
+> [!tip] What the FID formula is computing
+> FID is the squared **Fréchet distance** (Wasserstein-2 distance) between two multivariate Gaussians.
+> $\|\mu_r - \mu_g\|^2$ measures mean shift; $\text{Tr}(\Sigma_r + \Sigma_g - 2(\Sigma_r \Sigma_g)^{1/2})$ measures covariance mismatch.
+> It equals zero iff the two Gaussians are identical — i.e., the generated images' feature distribution perfectly matches real images.
 
 ### Choosing the Right Metric
 
@@ -124,4 +137,4 @@ Report a **learning curve** (performance vs. labeled set size) for active learni
 
 ---
 
-*See also: [[feature-pyramid-networks]] · [[bayesian-inference]] · [[model-calibration]] · [[bias-variance-double-descent]]*
+*See also: [[feature-pyramid-networks]] · [[bayesian-inference]] · [[model-calibration]] · [[bias-variance-double-descent]] · [[math-means]] · [[distributions-gaussian]] · [[loss-kl-divergence]]*

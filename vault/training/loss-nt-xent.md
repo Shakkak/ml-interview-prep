@@ -13,7 +13,7 @@ related: [loss-cross-entropy, loss-kl-divergence, contrastive-learning, entropy-
 
 ## Fundamental
 
-NT-Xent is the training loss for SimCLR contrastive self-supervised learning. It trains an encoder to produce similar representations for two views of the same image and dissimilar representations for different images.
+NT-Xent is the training loss for [[contrastive-learning|SimCLR]] contrastive self-supervised learning. It trains an encoder to produce similar representations for two views of the same image and dissimilar representations for different images.
 
 **Setup:** given a batch of $N$ images, augment each twice to get $2N$ views. Encode and project each: $z_i = g(f(x_i))$, normalized to unit sphere.
 
@@ -61,7 +61,7 @@ NT-Xent optimizes both simultaneously: the numerator drives alignment, the denom
 
 ## Advanced
 
-**NT-Xent as a lower bound on mutual information:** the InfoNCE bound (Oord et al., 2018) establishes:
+**NT-Xent as a lower bound on [[entropy-mutual-info|mutual information]]:** the InfoNCE bound (Oord et al., 2018) establishes:
 $$I(z_i; z_j) \geq \log(N) - \mathcal{L}_{NT-Xent}$$
 
 where $N$ is the number of negatives. Maximizing NT-Xent loss (making it less negative) lower-bounds the mutual information between the two views. This bound is tight when the optimal critic is used. However, the bound is inherently limited: with $N$ negatives, the maximum achievable bound is $\log N$ nats — larger batches allow tighter MI estimation. This theoretical insight motivates the empirical finding that larger batches systematically improve contrastive learning.
@@ -73,7 +73,7 @@ where $N$ is the number of negatives. Maximizing NT-Xent loss (making it less ne
 **Supervised contrastive loss** (Khosla et al., 2020): extends NT-Xent to supervised learning by treating all samples of the same class as positives:
 $$L_{sup} = \sum_{i \in I} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(\text{sim}(z_i, z_p)/\tau)}{\sum_{k \neq i} \exp(\text{sim}(z_i, z_k)/\tau)}$$
 
-where $P(i)$ is the set of all positives for anchor $i$. This consistently outperforms cross-entropy training (0.5–1% top-1 on ImageNet with the same architecture) by learning representations with better inter-class margins and intra-class compactness.
+where $P(i)$ is the set of all positives for anchor $i$. This consistently outperforms [[loss-cross-entropy|cross-entropy training]] (0.5–1% top-1 on ImageNet with the same architecture) by learning representations with better inter-class margins and intra-class compactness.
 
 ---
 

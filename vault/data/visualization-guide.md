@@ -63,7 +63,7 @@ Use log scale when:
 
 ### Q-Q Plot Interpretation
 
-A Q-Q plot plots sample quantiles vs theoretical (Gaussian) quantiles. Diagonal = perfect Gaussian.
+A Q-Q plot plots sample quantiles vs theoretical ([[distributions-gaussian|Gaussian]]) quantiles. Diagonal = perfect Gaussian.
 
 | Pattern | Meaning |
 |---|---|
@@ -85,7 +85,7 @@ For 5 CV fold scores $[0.82, 0.85, 0.83, 0.87, 0.84]$: $\bar{x}=0.842$, $s=0.018
 | SEM | $s/\sqrt{n}$ | ±0.0081 | Uncertainty about the mean (narrower) |
 | 95% CI | $t_{.025,4} \cdot s/\sqrt{n} = 2.78 \times 0.0081$ | ±0.022 | Comparing models; statistical significance |
 
-For model comparison, always report 95% CI — it directly communicates whether the improvement is statistically meaningful. SD is the right choice when you want to show how much individual fold scores vary.
+For model comparison, always report [[statistical-inference-mle|95% CI]] — it directly communicates whether the improvement is statistically meaningful. SD is the right choice when you want to show how much individual fold scores vary.
 
 ### Heatmap Best Practices
 
@@ -94,7 +94,7 @@ For model comparison, always report 95% CI — it directly communicates whether 
 - Probabilities / counts (0 to max): sequential (Blues, viridis).
 - Signed values (can be negative): diverging.
 
-**Confusion matrix:** annotate raw counts in cells; use row-normalized values (recall per class) as the color scale. Raw counts alone hide class imbalance; row-normalization alone hides absolute scale.
+**[[evaluation-metrics-guide|Confusion matrix]]:** annotate raw counts in cells; use row-normalized values (recall per class) as the color scale. Raw counts alone hide class imbalance; row-normalization alone hides absolute scale.
 
 ### t-SNE and UMAP: What They Preserve
 
@@ -113,7 +113,7 @@ For model comparison, always report 95% CI — it directly communicates whether 
 
 ### Monitoring Distribution Drift
 
-**Feature drift detection:** for each feature, overlay train vs production distributions. Quantify with the **Kolmogorov-Smirnov (KS) statistic** — the maximum difference between the two empirical CDFs. Plot KS statistics sorted descending; investigate the top-10 most drifted features.
+**Feature drift detection:** for each feature, overlay train vs production distributions. Quantify with the **[[hypothesis-testing|Kolmogorov-Smirnov (KS) statistic]]** — the maximum difference between the two empirical CDFs. Plot KS statistics sorted descending; investigate the top-10 most drifted features.
 
 ```python
 from scipy.stats import ks_2samp
@@ -128,7 +128,7 @@ where $A_b$ = actual (production) fraction in bin $b$, $E_b$ = expected (trainin
 
 ### Calibration Visualization
 
-Reliability diagram: bin predictions by confidence $[0,0.1), [0.1,0.2), \ldots, [0.9,1.0]$; for each bin plot (mean confidence, fraction correct).
+[[model-calibration|Reliability diagram]]: bin predictions by confidence $[0,0.1), [0.1,0.2), \ldots, [0.9,1.0]$; for each bin plot (mean confidence, fraction correct).
 
 ```
 Perfect:     Overconfident:    Underconfident:
@@ -145,8 +145,8 @@ Perfect:     Overconfident:    Underconfident:
 
 A scatter matrix plots all pairwise relationships between $d$ features, with histograms (or KDEs) on the diagonal. At $d=10$, you get 45 scatter plots — still readable. At $d=100$, use correlation heatmap instead.
 
-Color by target class to see separability. Look for: (1) clear linear separation → linear model may suffice; (2) non-linear structure → tree or kernel methods; (3) correlated features → consider PCA or regularization; (4) outliers in scatterplots → may need robust preprocessing.
+Color by target class to see separability. Look for: (1) clear linear separation → linear model may suffice; (2) non-linear structure → tree or kernel methods; (3) correlated features → consider [[eigenvalues-pca|PCA]] or regularization; (4) outliers in scatterplots → may need robust preprocessing.
 
 ---
 
-*See also: [[evaluation-metrics-guide]] · [[statistical-inference-mle]] · [[distributions-overview]] · [[model-calibration]]*
+*See also: [[evaluation-metrics-guide]] · [[statistical-inference-mle]] · [[distributions-overview]] · [[model-calibration]] · [[distributions-gaussian]] · [[hypothesis-testing]] · [[eigenvalues-pca]]*

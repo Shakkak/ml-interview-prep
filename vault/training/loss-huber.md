@@ -13,7 +13,7 @@ related: [loss-mse, loss-cross-entropy]
 
 ## Fundamental
 
-**The problem with MSE:** MSE penalizes errors quadratically — a 10× larger error produces 100× the loss. A single outlier can dominate the entire gradient update.
+**The problem with [[loss-mse|MSE]]:** MSE penalizes errors quadratically — a 10× larger error produces 100× the loss. A single outlier can dominate the entire gradient update.
 
 **L1 (absolute error)** is robust to outliers (linear growth) but its gradient is constant ($\pm 1$) near zero, making convergence slow for small errors.
 
@@ -74,4 +74,4 @@ where $C$ is the smallest enclosing box. GIoU (Rezatofighi et al., 2019) handles
 
 ---
 
-*See also: [[loss-mse]] · [[feature-pyramid-networks]]*
+*See also: [[loss-mse]] · [[loss-cross-entropy]] · [[feature-pyramid-networks]]*

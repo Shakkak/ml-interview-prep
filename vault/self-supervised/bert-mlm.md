@@ -13,9 +13,9 @@ related: [attention-mechanism, self-supervised-overview, contrastive-learning, r
 
 ## Fundamental
 
-Before BERT (Devlin et al., 2019), language pretraining used **causal (left-to-right) language models** (GPT). These have a fundamental limitation for understanding tasks: when processing token $t$, only tokens $1, \ldots, t-1$ are visible. For understanding tasks — classification, NER, QA — full bidirectional context is more informative. "The bank was steep" means something different from "The bank approved the loan," and only seeing later context resolves the ambiguity.
+Before BERT (Devlin et al., 2019), language [[self-supervised-overview|pretraining]] used **causal (left-to-right) language models** (GPT). These have a fundamental limitation for understanding tasks: when processing token $t$, only tokens $1, \ldots, t-1$ are visible. For understanding tasks — classification, NER, QA — full bidirectional context is more informative. "The bank was steep" means something different from "The bank approved the loan," and only seeing later context resolves the ambiguity.
 
-**BERT's core insight:** use a masked prediction objective that allows bidirectional attention while still providing a non-trivial learning signal.
+**BERT's core insight:** use a masked prediction objective that allows bidirectional [[attention-mechanism|attention]] while still providing a non-trivial learning signal.
 
 **The MLM objective:** randomly mask some tokens in the input; train the model to predict the original tokens from the bidirectional context.
 
@@ -26,7 +26,7 @@ Before BERT (Devlin et al., 2019), language pretraining used **causal (left-to-r
 
 **Why not just `[MASK]` for all selected tokens?** If the model only ever sees `[MASK]` at prediction positions, it learns to attend differently to masked vs unmasked tokens. At fine-tuning time, there are no `[MASK]` tokens — a train/inference mismatch. The 10%/10% rule forces the model to maintain useful representations for every token even when it is not masked.
 
-**Loss:** cross-entropy over the 15% masked positions only:
+**Loss:** [[loss-cross-entropy|cross-entropy]] over the 15% masked positions only:
 $$\mathcal{L}_{\text{MLM}} = -\sum_{i \in \text{masked}} \log P(x_i \mid \tilde{x}; \theta)$$
 
 **Architecture:** BERT is a standard Transformer encoder (no decoder). Every token attends to every other token — no causal mask. Special tokens: `[CLS]` at position 0 (classification tasks), `[SEP]` to separate sentences.
@@ -72,7 +72,7 @@ The encoder-decoder architecture (T5, BART) combines both: bidirectional encoder
 
 **ALBERT (2019):** parameter-efficient BERT — factorizes the embedding matrix ($V \times H$ becomes $V \times E + E \times H$ with $E \ll H$) and shares parameters across layers. 18× fewer parameters than BERT-large with comparable performance.
 
-**DistilBERT:** knowledge distillation of BERT-base — 40% smaller, 60% faster, retains 97% of BERT's performance.
+**DistilBERT:** [[knowledge-distillation|knowledge distillation]] of BERT-base — 40% smaller, 60% faster, retains 97% of BERT's performance.
 
 **Practical fine-tuning details:** learning rate warmup avoids early catastrophic updates; layer-wise learning rate decay (lower LR for early layers) often helps because early representations change less during fine-tuning. For short-text tasks, pooling strategies other than `[CLS]` (mean pooling over all tokens) can yield better sentence embeddings.
 
@@ -80,7 +80,7 @@ The encoder-decoder architecture (T5, BART) combines both: bidirectional encoder
 
 ## Advanced
 
-**DeBERTa (He et al., 2020):** disentangled attention separates content and position embeddings entirely. Each token is represented by two vectors: one for content, one for relative position. The attention score between tokens $i$ and $j$ is computed as:
+**DeBERTa (He et al., 2020):** disentangled attention separates content and [[arch-positional-encoding|position embeddings]] entirely. Each token is represented by two vectors: one for content, one for relative position. The attention score between tokens $i$ and $j$ is computed as:
 
 $$A_{i,j} = \langle \tilde{H}_i, \tilde{H}_j \rangle + \langle \tilde{H}_i, \tilde{P}_{i|j} \rangle + \langle \tilde{P}_{j|i}, \tilde{H}_j \rangle$$
 
@@ -90,7 +90,7 @@ where $\tilde{P}_{i|j}$ encodes the relative position of $j$ from $i$. This sepa
 
 **Why MLM learns better representations than causal LM for understanding:** mutual information theory perspective — MLM maximizes $I(x_i ; \tilde{x})$ where $\tilde{x}$ is the masked context. Since both left and right context is available, the model captures richer conditional distributions. For a word like "bank" in "The bank was steep," bidirectional context resolves the ambiguity that causal LM cannot, since the causal model sees only "The bank" before the target.
 
-**SimCSE (Gao et al., 2021):** uses BERT as backbone for sentence-level contrastive learning. The positive pair is obtained by feeding the same sentence twice through BERT with different dropout masks — the two forward passes produce different representations due to dropout noise. This simple approach achieves state-of-the-art on semantic textual similarity tasks, demonstrating that BERT's representations benefit substantially from contrastive fine-tuning without any new data.
+**SimCSE (Gao et al., 2021):** uses BERT as backbone for sentence-level [[contrastive-learning]]. The positive pair is obtained by feeding the same sentence twice through BERT with different dropout masks — the two forward passes produce different representations due to dropout noise. This simple approach achieves state-of-the-art on semantic textual similarity tasks, demonstrating that BERT's representations benefit substantially from contrastive fine-tuning without any new data.
 
 **SpanBERT (Joshi et al., 2020):** replaces token-level masking with span masking (mask contiguous spans of 1–10 tokens). Additionally adds a span boundary objective: predict each masked token from the boundary token representations alone, not internal span context. This forces the model to encode span-level information, substantially improving on extractive QA and coreference resolution tasks.
 
@@ -98,4 +98,4 @@ where $\tilde{P}_{i|j}$ encodes the relative position of $j$ from $i$. This sepa
 
 ---
 
-*See also: [[attention-mechanism]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[rlhf]] · [[lora-quantization]] · [[arch-positional-encoding]]*
+*See also: [[attention-mechanism]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[rlhf]] · [[lora-quantization]] · [[arch-positional-encoding]] · [[loss-cross-entropy]] · [[knowledge-distillation]]*

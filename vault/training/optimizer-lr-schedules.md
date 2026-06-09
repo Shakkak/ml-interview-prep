@@ -28,7 +28,7 @@ Smooth decay; gentle near the minimum (the cosine is nearly flat at its trough).
 **Warmup + cosine decay (standard transformer schedule):**
 $$\eta_t = \begin{cases} \eta_{\max} \cdot t / T_w & t \leq T_w \\ \eta_{\min} + \frac{1}{2}(\eta_{\max}-\eta_{\min})\left(1+\cos\frac{\pi(t-T_w)}{T-T_w}\right) & t > T_w \end{cases}$$
 
-Used in BERT, GPT, ViT, and most modern transformers. Typical warmup: 4% of total training steps (Devlin et al., 2019).
+Used in [[bert-mlm|BERT]], GPT, [[vision-transformer|ViT]], and most modern transformers. Typical warmup: 4% of total training steps (Devlin et al., 2019).
 
 **Step decay:** multiply LR by $\gamma$ every $k$ epochs:
 $$\eta_t = \eta_0 \cdot \gamma^{\lfloor t/k \rfloor}$$
@@ -75,7 +75,7 @@ High LR phases help escape saddle points and sharp minima; low LR phases allow f
 
 ## Advanced
 
-**Why LR schedules matter more for Adam than SGD:** SGD's update $\theta \leftarrow \theta - \eta g$ scales directly with $\eta$ — the schedule directly controls step size. Adam's update $\theta \leftarrow \theta - \eta \hat{m}/(\sqrt{\hat{v}} + \epsilon)$ is already normalized by the second moment. At initialization, $\hat{m}/\sqrt{\hat{v}} \approx \text{sign}(g)$ (Adam acts like sign gradient descent early). As training progresses, $\hat{v}$ stabilizes and captures gradient scale. The schedule controls *when* Adam commits to a solution (stops exploring). Without decay, Adam keeps taking steps of similar effective size indefinitely — it doesn't naturally converge. Without warmup, early steps are unpredictable because $\hat{v}$ is estimated from only a few gradients.
+**Why LR schedules matter more for Adam than [[optimizer-sgd-momentum|SGD]]:** SGD's update $\theta \leftarrow \theta - \eta g$ scales directly with $\eta$ — the schedule directly controls step size. Adam's update $\theta \leftarrow \theta - \eta \hat{m}/(\sqrt{\hat{v}} + \epsilon)$ is already normalized by the second moment. At initialization, $\hat{m}/\sqrt{\hat{v}} \approx \text{sign}(g)$ (Adam acts like sign gradient descent early). As training progresses, $\hat{v}$ stabilizes and captures gradient scale. The schedule controls *when* Adam commits to a solution (stops exploring). Without decay, Adam keeps taking steps of similar effective size indefinitely — it doesn't naturally converge. Without warmup, early steps are unpredictable because $\hat{v}$ is estimated from only a few gradients.
 
 **Cosine with warm restarts (SGDR, Loshchilov & Hutter, 2017):** periodically reset LR to $\eta_{\max}$ with period doubling (1 → 2 → 4 → 8 epochs). Each restart helps escape the current local minimum. The model snapshots at each restart's minimum can be ensembled for better predictions than any single model — "snapshot ensembles." SGDR with $T_0=10, T_{mult}=2$ produces approximate ensemble benefits at the cost of a single training run.
 
@@ -88,4 +88,4 @@ This combines warmup (linear phase) with an infinite decay ($t^{-0.5}$). Unlike 
 
 ---
 
-*See also: [[optimizer-adam]] · [[optimizer-sgd-momentum]] · [[regularization-early-stopping]] · [[large-batch-training]]*
+*See also: [[optimizer-adam]] · [[optimizer-sgd-momentum]] · [[regularization-early-stopping]] · [[large-batch-training]] · [[bert-mlm]] · [[vision-transformer]]*

@@ -73,7 +73,7 @@ $$\pi_i P_{ij} = \pi_j P_{ji} \quad \text{for all } i, j$$
 
 ### MCMC: Sampling via Markov Chains
 
-**Goal:** sample from a target distribution $\pi(x)$ (e.g., Bayesian posterior) that's hard to sample from directly.
+**Goal:** sample from a target distribution $\pi(x)$ (e.g., [[bayesian-inference|Bayesian posterior]]) that's hard to sample from directly.
 
 **Idea:** construct a Markov chain with stationary distribution $\pi$. Run until it mixes (converges), then collect samples.
 
@@ -131,16 +131,16 @@ $$H(x, p) = -\log \pi(x) + \frac{1}{2}p^\top M^{-1}p$$
 
 Leapfrog integration approximates Hamiltonian dynamics, producing proposals that can travel far while maintaining high acceptance rates. HMC scales to hundreds of parameters; the No-U-Turn Sampler (NUTS, Hoffman & Gelman 2014) automatically tunes the trajectory length.
 
-**Practical insight:** HMC requires gradients of the log-target density — available in modern probabilistic programming frameworks (Stan, PyMC, Pyro). For neural posteriors, this requires backpropagation through the network.
+**Practical insight:** HMC requires gradients of the log-target density — available in modern probabilistic programming frameworks (Stan, PyMC, Pyro). For neural posteriors, this requires [[backpropagation]] through the network.
 
 ### Stochastic Gradient MCMC
 
 **SGLD (Stochastic Gradient Langevin Dynamics, Welling & Teh 2011):** inject noise into SGD updates:
 
-$$\theta_{t+1} = \theta_t + \frac{\epsilon_t}{2}\nabla\log p(\theta_t|D) + \eta_t, \quad \eta_t \sim \mathcal{N}(0, \epsilon_t I)$$
+$$\theta_{t+1} = \theta_t + \frac{\epsilon_t}{2}\nabla\log p(\theta_t|D) + \eta_t, \quad \eta_t \sim \mathcal{N}(0, \epsilon_t I) \text{ ([[distributions-gaussian|Gaussian]] noise)}$$
 
 As the learning rate $\epsilon_t \to 0$ following a specific schedule, the iterates converge to samples from the posterior. This bridges optimization and sampling — the same algorithm transitions from optimization (high learning rate) to posterior sampling (low learning rate). Used in Bayesian deep learning to sample neural network posteriors at scale.
 
 ---
 
-*See also: [[bayesian-inference]] · [[distributions-overview]] · [[entropy-mutual-info]] · [[sampling-methods]]*
+*See also: [[bayesian-inference]] · [[distributions-overview]] · [[entropy-mutual-info]] · [[sampling-methods]] · [[backpropagation]] · [[distributions-gaussian]]*

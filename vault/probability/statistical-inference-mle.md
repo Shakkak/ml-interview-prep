@@ -21,13 +21,13 @@ $$\hat{\theta}_{MLE} = \arg\max_\theta \prod_{i=1}^n p(x_i|\theta) = \arg\max_\t
 
 Log is used because products become sums, and the log is monotone so it preserves the argmax.
 
-**Gaussian MLE:** $\hat{\mu} = \bar{x}$, $\hat{\sigma}^2 = \frac{1}{n}\sum(x_i-\bar{x})^2$ (biased by factor $(n-1)/n$). Unbiased: divide by $n-1$ (Bessel's correction).
+**[[distributions-gaussian|Gaussian]] MLE:** $\hat{\mu} = \bar{x}$, $\hat{\sigma}^2 = \frac{1}{n}\sum(x_i-\bar{x})^2$ (biased by factor $(n-1)/n$). Unbiased: divide by $n-1$ (Bessel's correction).
 
 **Bernoulli MLE:** $\hat{p} = k/n$ (fraction of successes). Derivation: $d/dp[k\log p + (n-k)\log(1-p)] = k/p - (n-k)/(1-p) = 0$.
 
 **Poisson MLE:** $\hat{\lambda} = \bar{x}$.
 
-**Pattern for exponential family:** MLE = moment matching — set the expected sufficient statistic equal to the observed sufficient statistic. For Gaussian: match $\bar{x}$ and $\overline{x^2}$.
+**Pattern for [[distributions-overview|exponential family]]:** MLE = moment matching — set the expected sufficient statistic equal to the observed sufficient statistic. For Gaussian: match $\bar{x}$ and $\overline{x^2}$.
 
 ### Confidence Intervals
 
@@ -59,19 +59,20 @@ MAP adds a log-prior term to MLE, equivalent to regularized MLE:
 
 | Prior | Regularization |
 |-------|---------------|
-| Gaussian $\mathcal{N}(0, 1/(2\lambda))$ | L2 ($\lambda\|\theta\|^2$) |
+| Gaussian $\mathcal{N}(0, 1/(2\lambda))$ | [[regularization-weight-decay\|L2]] ($\lambda\|\theta\|^2$) |
 | Laplace $\propto e^{-\lambda|\theta|}$ | L1 ($\lambda\|\theta\|_1$) |
 | Uniform | None (MAP = MLE) |
 
 **Example:** $n=5$, observe $k=4$ successes. MLE: $\hat{p} = 0.8$.
 
-- Beta(2,2) prior: MAP $= 5/7 = 0.714$ — shrunk toward 0.5
+- Beta(2,2) [[bayesian-inference|prior]]: MAP $= 5/7 = 0.714$ — shrunk toward 0.5
 - Beta(10,10) prior: MAP $= 13/23 = 0.565$ — strongly shrunk
 - $n=100$, $k=80$ with Beta(2,2): MAP $= 81/103 = 0.786 \approx$ MLE — data overwhelms prior
 
 ### Bootstrap CI
 
-When no closed-form formula exists (e.g., AUC):
+The [[bootstrap]] applied to confidence-interval estimation, when no closed-form formula
+exists (e.g., AUC):
 
 1. Draw $B = 10{,}000$ bootstrap samples (resample with replacement)
 2. Compute statistic on each
@@ -100,7 +101,7 @@ $$n = \frac{(z_\alpha + z_\beta)^2}{d^2/2} = \frac{(1.96 + 0.84)^2}{0.125} = 63 
 
 ### Fisher Information and Asymptotic Efficiency
 
-The MLE is asymptotically efficient — it achieves the Cramér-Rao lower bound:
+The MLE is asymptotically efficient — it achieves the [[fisher-information|Cramér-Rao lower bound]]:
 
 $$\sqrt{n}(\hat{\theta}_{MLE} - \theta^*) \xrightarrow{d} \mathcal{N}(0, I(\theta^*)^{-1})$$
 
@@ -127,7 +128,7 @@ The Wald test, score (Lagrange multiplier) test, and likelihood ratio test are t
 MLE is a special case of M-estimators: $\hat{\theta} = \arg\min_\theta \sum_i \rho(x_i, \theta)$ where $\rho = -\log p$ for MLE.
 
 **Robust alternatives:**
-- **Huber loss:** $\rho(r) = r^2/2$ for $|r| \leq k$, $k|r| - k^2/2$ for $|r| > k$. Less sensitive to outliers than squared loss.
+- **[[loss-huber|Huber loss]]:** $\rho(r) = r^2/2$ for $|r| \leq k$, $k|r| - k^2/2$ for $|r| > k$. Less sensitive to outliers than squared loss.
 - **Tukey's bisquare:** complete downweighting of outliers beyond a threshold.
 
 The influence function $\text{IF}(x; T, F) = \lim_{\epsilon \to 0} [T(F_\epsilon) - T(F)]/\epsilon$ measures the sensitivity of estimator $T$ to a single contaminating observation. MLE has unbounded influence function for heavy-tailed models; robust M-estimators bound it.
@@ -140,7 +141,7 @@ $$\text{AIC} = 2k - 2\ln\hat{L}, \quad \text{BIC} = k\ln n - 2\ln\hat{L}$$
 
 where $k$ = number of parameters, $\hat{L}$ = maximum likelihood, $n$ = sample size.
 
-**Derivation of AIC:** Akaike (1974) derived AIC as an approximately unbiased estimator of the expected KL divergence from the fitted model to the true distribution. The $2k$ penalty corrects for the optimistic bias of in-sample log-likelihood.
+**Derivation of AIC:** Akaike (1974) derived AIC as an approximately unbiased estimator of the expected [[loss-kl-divergence|KL divergence]] from the fitted model to the true distribution. The $2k$ penalty corrects for the optimistic bias of in-sample log-likelihood.
 
 **Consistency of BIC:** BIC is consistent — as $n \to \infty$, it selects the true model if it is in the candidate set. AIC is not consistent but minimizes asymptotic prediction error. Use AIC for prediction, BIC for structure discovery.
 
@@ -158,4 +159,4 @@ EM monotonically increases $\log p(X|\theta)$ and converges to a local maximum. 
 
 ---
 
-*See also: [[distributions-gaussian]] · [[distributions-overview]] · [[bayesian-inference]] · [[regularization-weight-decay]] · [[loss-cross-entropy]] · [[fisher-information]]*
+*See also: [[distributions-gaussian]] · [[distributions-overview]] · [[bayesian-inference]] · [[regularization-weight-decay]] · [[loss-cross-entropy]] · [[fisher-information]] · [[loss-kl-divergence]] · [[loss-huber]] · [[bootstrap]]*

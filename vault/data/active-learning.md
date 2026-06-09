@@ -52,7 +52,7 @@ $$x^* = \arg\max_{x \in U} -\sum_c \frac{V(c,x)}{K}\log\frac{V(c,x)}{K}$$
 
 where $V(c,x)$ = number of committee members predicting class $c$ for $x$.
 
-**Why diversity matters:** if all members agree, the example is already well-understood regardless of confidence. Diversity is achieved via different random seeds, bagging (train each model on a bootstrap sample), or MC Dropout (each stochastic forward pass = one committee member).
+**Why diversity matters:** if all members agree, the example is already well-understood regardless of confidence. Diversity is achieved via different random seeds, bagging (train each model on a [[bootstrap|bootstrap sample]]), or MC Dropout (each stochastic forward pass = one committee member).
 
 **Advantage over single-model uncertainty:** a committee is less sensitive to mislabeled examples — a single model can be confused by a noisy label and focus on it repeatedly; a committee is likely to disagree on genuinely ambiguous examples, not on noise.
 
@@ -78,11 +78,11 @@ Core-set is computed in **embedding space** from a pretrained encoder, not in ra
 
 ### BALD: Bayesian Active Learning by Disagreement
 
-Uncertainty sampling (entropy) selects examples that are uncertain for the model's current parameters. But some uncertain examples are uncertain because of noise — labeling them will not help. **BALD** (Houlsby et al., 2011) selects examples that maximize the **mutual information** between the prediction and the model's parameters:
+Uncertainty sampling (entropy) selects examples that are uncertain for the model's current parameters. But some uncertain examples are uncertain because of noise — labeling them will not help. **BALD** (Houlsby et al., 2011) selects examples that maximize the [[entropy-mutual-info|mutual information]] between the prediction and the model's parameters:
 
 $$x^* = \arg\max_{x \in U} I(y; \theta \mid x, \mathcal{D}) = H[y \mid x, \mathcal{D}] - \mathbb{E}_{p(\theta \mid \mathcal{D})}\left[H[y \mid x, \theta]\right]$$
 
-The first term is the predictive entropy (total uncertainty). The second is the expected entropy under the posterior (aleatoric/irreducible uncertainty). Their difference is **epistemic uncertainty** — uncertainty that can be reduced by observing labels.
+The first term is the predictive entropy (total uncertainty). The second is the expected entropy under the [[bayesian-inference|posterior]] (aleatoric/irreducible uncertainty). Their difference is **epistemic uncertainty** — uncertainty that can be reduced by observing labels.
 
 BALD implemented with MC Dropout: run $K$ stochastic forward passes, compute sample mean entropy (first term) minus mean of per-sample entropies (second term). Selects examples where the model is globally uncertain but individual samples disagree — the hallmark of epistemic uncertainty.
 
@@ -92,7 +92,7 @@ Querying the top-$b$ uncertain examples independently is suboptimal: they cluste
 
 1. **K-means on uncertain examples:** take the top-$kb$ uncertain examples, run k-means clustering in embedding space, return the $b$ cluster centers.
 2. **Core-set restricted to uncertain examples:** run the k-center greedy algorithm on the top uncertain subset — diverse + uncertain.
-3. **BADGE (Ash et al., 2020):** embed each example by its gradient with respect to the last-layer parameters:
+3. **BADGE (Ash et al., 2020):** embed each example by its [[backpropagation|gradient]] with respect to the last-layer parameters:
    $$g_x = \nabla_\theta \mathcal{L}(\hat{y}_x, f_\theta(x))$$
    Run $k$-means++ on $\{g_x\}_{x \in U}$. The magnitude of $g_x$ encodes uncertainty; the direction encodes which part of the model would change. Diverse gradient directions → diverse model updates.
 
@@ -104,4 +104,4 @@ In **domain adaptation**, the target domain has cheap unlabeled data but expensi
 
 ---
 
-*See also: [[model-calibration]] · [[regularization-dropout]] · [[bayesian-inference]] · [[evaluation-metrics-guide]]*
+*See also: [[model-calibration]] · [[regularization-dropout]] · [[bayesian-inference]] · [[evaluation-metrics-guide]] · [[entropy-mutual-info]] · [[backpropagation]] · [[bootstrap]]*

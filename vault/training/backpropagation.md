@@ -4,7 +4,7 @@ tags: [training, gradients, calculus, fundamentals]
 aliases: [backprop, reverse-mode autodiff]
 difficulty: 1
 status: complete
-related: [backpropagation-advanced, normalization-layers, training-fundamentals]
+related: [backpropagation-advanced, normalization-layers]
 ---
 
 # Backpropagation
@@ -21,7 +21,7 @@ $$a^{(l)} = \sigma(z^{(l)}) \quad \text{(post-activation)}$$
 
 Training finds $\theta$ minimizing a loss $L(\hat{y}, y)$. This requires $\frac{\partial L}{\partial \theta}$ for every parameter — the role of backpropagation.
 
-**The chain rule** is the entire mathematical engine:
+**The chain rule** ([[matrix-calculus]]) is the entire mathematical engine:
 
 $$\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial x}$$
 
@@ -40,7 +40,7 @@ $$\frac{\partial L}{\partial W^{(l)}} = \delta^{(l)} \left(a^{(l-1)}\right)^T, \
 
 **Worked example — 1-neuron network (ReLU + MSE):**
 
-Network: $z_1 = w_1 x$, $a_1 = \text{ReLU}(z_1)$, $\hat{y} = w_2 a_1$, $L = (\hat{y}-y)^2$.
+Network: $z_1 = w_1 x$, $a_1 = \text{ReLU}(z_1)$ ([[activation-relu-variants]]), $\hat{y} = w_2 a_1$, $L = (\hat{y}-y)^2$.
 Given: $x=2, y=1, w_1=0.5, w_2=3$.
 
 Forward: $z_1=1$, $a_1=1$, $\hat{y}=3$, $L=4$.
@@ -64,8 +64,8 @@ Network: $x \in \mathbb{R}^2$, hidden layer (ReLU), output layer (sigmoid), bina
 
 Forward:
 $$z^{(1)} = W^{(1)}x + b^{(1)},\; a^{(1)} = \text{ReLU}(z^{(1)})$$
-$$z^{(2)} = W^{(2)}a^{(1)} + b^{(2)},\; \hat{y} = \sigma(z^{(2)})$$
-$$L = -y\log\hat{y} - (1-y)\log(1-\hat{y})$$
+$$z^{(2)} = W^{(2)}a^{(1)} + b^{(2)},\; \hat{y} = \sigma(z^{(2)})$$ ([[activation-sigmoid-tanh]])
+$$L = -y\log\hat{y} - (1-y)\log(1-\hat{y})$$ ([[loss-cross-entropy|binary cross-entropy]])
 
 Backward (the key simplification for sigmoid + cross-entropy):
 $$\frac{\partial L}{\partial z^{(2)}} = \hat{y} - y$$
@@ -85,7 +85,7 @@ $$\frac{\partial L}{\partial W^{(1)}} = \delta^{(1)} \cdot x^T$$
 | Tanh | $[0, 1]$ | Vanishes, but slower |
 | ReLU | $\{0, 1\}$ | Passes through or dies permanently |
 | LeakyReLU | $\{0.01, 1\}$ | Almost never dies |
-| GELU | $\approx [0, 1]$ | Smooth, good empirical behavior |
+| [[activation-gelu-swish\|GELU]] | $\approx [0, 1]$ | Smooth, good empirical behavior |
 
 **Dead ReLU problem:** if a neuron's pre-activation is always negative, $\sigma'(z) = 0$ forever, the neuron never receives updates and is permanently dead. Causes: large negative bias initialization or a very high learning rate early in training. Fixes: LeakyReLU or careful initialization.
 
@@ -95,7 +95,7 @@ $$\frac{\partial L}{\partial W^{(1)}} = \delta^{(1)} \cdot x^T$$
 
 ## Advanced
 
-**Reverse-mode vs forward-mode autodiff:** backprop is reverse-mode automatic differentiation — it propagates a single scalar (the loss) backward through the computation graph. It requires one forward pass and one backward pass regardless of the number of parameters. Forward-mode AD propagates an input perturbation forward and costs one pass *per input dimension*, making it efficient for wide-input/narrow-output functions (e.g., Jacobian vector products) but impractical for training. Modern frameworks (PyTorch, JAX) implement both; reverse-mode is used for training, forward-mode for Jacobian–vector products during second-order methods.
+**Reverse-mode vs forward-mode autodiff:** backprop is reverse-mode automatic differentiation — it propagates a single scalar (the loss) backward through the computation graph. It requires one forward pass and one backward pass regardless of the number of parameters. Forward-mode AD propagates an input perturbation forward and costs one pass *per input dimension*, making it efficient for wide-input/narrow-output functions (e.g., [[matrix-calculus|Jacobian]] vector products) but impractical for training. Modern frameworks (PyTorch, JAX) implement both; reverse-mode is used for training, forward-mode for Jacobian–vector products during second-order methods.
 
 **Gradient checkpointing tradeoffs:** storing all $L$ layers of activations requires $O(L \cdot B \cdot d)$ memory. Gradient checkpointing stores only $O(\sqrt{L})$ evenly spaced checkpoints and recomputes the others during the backward pass, reducing activation memory to $O(\sqrt{L} \cdot B \cdot d)$ at the cost of one extra forward pass. This is the standard technique for training very deep or long-context models (Chen et al., 2016).
 
@@ -107,4 +107,4 @@ $$\frac{\partial L}{\partial W^{(1)}} = \delta^{(1)} \cdot x^T$$
 
 ---
 
-*See also: [[backpropagation-advanced]] · [[normalization-layers]] · [[optimizer-adam]] · [[optimizer-sgd-momentum]]*
+*See also: [[backpropagation-advanced]] · [[normalization-layers]] · [[optimizer-adam]] · [[optimizer-sgd-momentum]] · [[matrix-calculus]] · [[activation-relu-variants]] · [[activation-sigmoid-tanh]] · [[loss-cross-entropy]]*

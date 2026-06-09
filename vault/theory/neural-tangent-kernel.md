@@ -39,7 +39,7 @@ This measures how correlated the gradient directions are for two inputs $x$ and 
 
 ### Infinite-Width Limit and Kernel Regression
 
-In the infinite-width limit, training a neural network with squared loss and gradient descent is equivalent to **kernel regression** with the NTK:
+In the infinite-width limit, training a neural network with squared loss and gradient descent is equivalent to **[[kernel-methods|kernel regression]]** with the NTK:
 
 $$\hat{f}(x) = K_{NTK}(x, X_{train}) \bigl[K_{NTK}(X_{train}, X_{train})\bigr]^{-1} y_{train}$$
 
@@ -58,7 +58,7 @@ The NTK $K_{NTK}$ is a positive semi-definite matrix over training inputs. Its e
 
 For standard architectures with smooth activations, the NTK eigenvalues decay with frequency: low-frequency eigenfunctions have large eigenvalues, high-frequency ones have small eigenvalues.
 
-**Consequence (spectral bias / frequency principle):** gradient descent learns low-frequency components of the target function first, regardless of the network size. This is the formal NTK explanation for the **spectral bias** (Rahaman et al., 2019) observed empirically.
+**Consequence (spectral bias / frequency principle):** gradient descent learns low-frequency components of the target function first, regardless of the network size. This is the formal NTK explanation for the **[[spectral-bias|spectral bias]]** (Rahaman et al., 2019) observed empirically.
 
 ---
 
@@ -95,4 +95,4 @@ where $\|y\|_{K^{-1}}^2 = y^\top K^{-1} y$ is the norm of the target in the repr
 
 ---
 
-*See also: [[spectral-bias]] · [[generalization-bounds]] · [[bias-variance-double-descent]] · [[optimizer-adam]]*
+*See also: [[spectral-bias]] · [[generalization-bounds]] · [[bias-variance-double-descent]] · [[optimizer-adam]] · [[kernel-methods]]*

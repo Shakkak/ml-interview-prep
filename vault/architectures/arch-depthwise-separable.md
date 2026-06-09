@@ -66,7 +66,7 @@ MobileNetV2 **inverts**: narrow → wide → narrow.
 32 ch → 1×1 expand (→192, factor 6) → 3×3 depthwise → 1×1 project (→32) + skip
 ```
 
-Why inverted: depthwise conv has limited expressive power per channel. Expanding first gives more features for spatial filtering. ReLU6 (capped at 6) used after expansion for numerical stability at low precision. **No activation after the projection** — the bottleneck embedding stays in a low-dimensional manifold without information loss from non-linearity.
+Why inverted: depthwise conv has limited expressive power per channel. Expanding first gives more features for spatial filtering. [[activation-relu-variants|ReLU6]] (capped at 6) used after expansion for numerical stability at low precision. **No activation after the projection** — the bottleneck embedding stays in a low-dimensional manifold without information loss from non-linearity.
 
 ---
 
@@ -74,7 +74,7 @@ Why inverted: depthwise conv has limited expressive power per channel. Expanding
 
 ### Xception: Extreme Inception
 
-Inception modules use 1×1 convs to mix channels before different-sized spatial filters. Xception (Chollet, 2017) takes this to the extreme: replace every standard conv with depthwise separable conv, add residual connections between blocks.
+Inception modules use 1×1 convs to mix channels before different-sized spatial filters. Xception (Chollet, 2017) takes this to the extreme: replace every standard conv with depthwise separable conv, add [[arch-residual-block|residual connections]] between blocks.
 
 **The key theoretical claim:** "the mapping of cross-channel correlations and spatial correlations in the feature maps of convolutional neural networks can be entirely decoupled." This is the hypothesis that depthwise separable conv tests. Xception outperforms Inception-V3 on ImageNet and JFT-300M with the same number of parameters, empirically supporting the hypothesis.
 
@@ -83,10 +83,10 @@ Inception modules use 1×1 convs to mix channels before different-sized spatial 
 EfficientNet (Tan & Le, 2019) makes three observations:
 1. Depth scaling (more layers), width scaling (more channels), and resolution scaling each improve accuracy but hit diminishing returns alone.
 2. **Compound scaling** all three together under a fixed FLOP budget outperforms scaling any one dimension.
-3. The optimal MBConv block (= MobileNetV2 inverted residual with Squeeze-and-Excitation) is found via neural architecture search.
+3. The optimal MBConv block (= MobileNetV2 inverted residual with [[squeeze-excitation|Squeeze-and-Excitation]]) is found via neural architecture search.
 
 Scaling rule: $d = \alpha^\phi$, $w = \beta^\phi$, $r = \gamma^\phi$ where $\phi$ is the compound coefficient and $\alpha \approx 1.2$, $\beta \approx 1.1$, $\gamma \approx 1.15$ (found by grid search under $\alpha \cdot \beta^2 \cdot \gamma^2 \approx 2$ constraint). EfficientNet-B7 achieves 84.4% ImageNet top-1 at 37B FLOPs — higher accuracy than GPipe (557B FLOPs) at 15× lower cost.
 
 ---
 
-*See also: [[arch-bottleneck-1x1]] · [[cnn-architectures-guide]] · [[squeeze-excitation]]*
+*See also: [[arch-bottleneck-1x1]] · [[cnn-architectures-guide]] · [[squeeze-excitation]] · [[arch-residual-block]] · [[activation-relu-variants]]*

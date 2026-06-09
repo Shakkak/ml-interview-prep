@@ -73,7 +73,7 @@ Apply Jensen ($\log$ is concave, so $\log\mathbb{E}[Y] \geq \mathbb{E}[\log Y]$)
 
 $$\log p_\theta(x) \geq \mathbb{E}_{q_\phi}\!\left[\log\frac{p_\theta(x,z)}{q_\phi(z|x)}\right] = \underbrace{\mathbb{E}_{q_\phi}[\log p_\theta(x|z)]}_{\text{reconstruction}} - \underbrace{D_{KL}(q_\phi(z|x) \| p(z))}_{\text{regularization}} = \text{ELBO}$$
 
-Jensen converts an intractable log-integral into a tractable lower bound. The gap equals $D_{KL}(q_\phi(z|x) \| p_\theta(z|x)) \geq 0$. Maximizing the ELBO simultaneously tightens the lower bound (pushes $q_\phi$ toward the true posterior) and maximizes the likelihood lower bound.
+Jensen converts an intractable log-integral into a tractable lower bound. The gap equals $D_{KL}(q_\phi(z|x) \| p_\theta(z|x)) \geq 0$. Maximizing the [[variational-autoencoders|ELBO]] simultaneously tightens the lower bound (pushes $q_\phi$ toward the true [[bayesian-inference|posterior]]) and maximizes the likelihood lower bound.
 
 ### Strong Convexity and Convergence Rates
 
@@ -85,14 +85,14 @@ Equivalently, $\nabla^2 f \succeq \mu I$ everywhere. Strong convexity implies a 
 **Gradient descent convergence** for $\mu$-strongly convex, $L$-smooth $f$ (Lipschitz gradient: $\nabla^2 f \preceq LI$) with step size $\eta = 1/L$:
 $$f(x_t) - f^* \leq \left(1 - \frac{\mu}{L}\right)^t (f(x_0) - f^*)$$
 
-The convergence factor $(1 - \mu/L) = (1 - 1/\kappa) < 1$ where $\kappa = L/\mu$ is the condition number. High $\kappa$ → slow convergence. This is why preconditioning (Adam, quasi-Newton) and normalizing inputs (batchnorm, layer norm) dramatically speed up training — they reduce the effective $\kappa$.
+The convergence factor $(1 - \mu/L) = (1 - 1/\kappa) < 1$ where $\kappa = L/\mu$ is the condition number. High $\kappa$ → slow convergence. This is why preconditioning ([[optimizer-adam|Adam]], quasi-Newton) and normalizing inputs ([[normalization-layers|batchnorm, layer norm]]) dramatically speed up training — they reduce the effective $\kappa$.
 
 **Comparison of convergence rates:**
 
 | Method | Rate | Oracle calls to $\epsilon$-accuracy |
 |---|---|---|
 | Gradient descent | Linear: $(1-1/\kappa)^t$ | $O(\kappa \log 1/\epsilon)$ |
-| Nesterov momentum | Linear: $(1-1/\sqrt{\kappa})^t$ | $O(\sqrt{\kappa}\log 1/\epsilon)$ |
+| [[optimizer-sgd-momentum\|Nesterov momentum]] | Linear: $(1-1/\sqrt{\kappa})^t$ | $O(\sqrt{\kappa}\log 1/\epsilon)$ |
 | Newton's method | Quadratic near optimum | $O(\log\log 1/\epsilon)$ |
 
 ---
@@ -104,11 +104,11 @@ The convergence factor $(1 - \mu/L) = (1 - 1/\kappa) < 1$ where $\kappa = L/\mu$
 **Log-sum inequality:** for $a_i, b_i > 0$:
 $$\sum_i a_i \log\frac{a_i}{b_i} \geq \left(\sum_i a_i\right)\log\frac{\sum_i a_i}{\sum_i b_i}$$
 
-This generalizes Jensen (the KL case is $b_i = \sum_j a_j$) and is used to prove subadditivity of entropy:
+This generalizes Jensen (the KL case is $b_i = \sum_j a_j$) and is used to prove subadditivity of [[entropy-mutual-info|entropy]]:
 
 $$H(X, Y) \leq H(X) + H(Y)$$
 
-with equality iff $X \perp Y$. This follows from $D_{KL}(p_{XY} \| p_X p_Y) \geq 0$ — the KL divergence between the joint and the product of marginals is the mutual information $I(X;Y) \geq 0$.
+with equality iff $X \perp Y$. This follows from $D_{KL}(p_{XY} \| p_X p_Y) \geq 0$ — the [[loss-kl-divergence|KL divergence]] between the joint and the product of marginals is the mutual information $I(X;Y) \geq 0$.
 
 ### AM-GM from Jensen
 
@@ -135,4 +135,4 @@ The composition of convex functions need not be convex. $\text{ReLU}(x) = \max(0
 
 ---
 
-*See also: [[loss-kl-divergence]] · [[variational-autoencoders]] · [[entropy-mutual-info]] · [[lagrangian-optimization]]*
+*See also: [[loss-kl-divergence]] · [[variational-autoencoders]] · [[entropy-mutual-info]] · [[lagrangian-optimization]] · [[optimizer-adam]] · [[normalization-layers]] · [[optimizer-sgd-momentum]]*

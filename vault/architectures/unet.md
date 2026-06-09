@@ -33,7 +33,7 @@ Input 572×572
 ```
 
 **Three components:**
-1. **Encoder** — repeated [Conv 3×3 → ReLU → Conv 3×3 → ReLU → MaxPool 2×2], doubling channels and halving spatial resolution at each level.
+1. **Encoder** — repeated [Conv 3×3 → [[activation-relu-variants|ReLU]] → Conv 3×3 → ReLU → MaxPool 2×2], doubling channels and halving spatial resolution at each level.
 2. **Bottleneck** — deepest level, highest channel count, lowest resolution.
 3. **Decoder** — repeated upsampling with skip connection concatenation, halving channels and doubling spatial resolution.
 
@@ -48,7 +48,7 @@ At each resolution level, the encoder's feature map is **concatenated** to the d
 $$\text{decoder input at level } l = \text{CONCAT}\!\left[\text{upsample}(\text{decoder}_{l+1}),\ \text{encoder}_l\right]$$
 
 **Why concatenation, not addition?**
-- Addition (as in ResNets and FPN) requires matching channel counts — constraining the architecture.
+- Addition (as in [[arch-residual-block|ResNets]] and [[feature-pyramid-networks|FPN]]) requires matching channel counts — constraining the architecture.
 - Concatenation preserves both representations independently. The subsequent 3×3 convolutions learn to combine semantic context (from the deep decoder) with fine spatial detail (from the shallow encoder).
 
 **Information asymmetry:** encoder features at early levels carry high spatial frequency (edges, corners, texture boundaries) that vanish in the bottleneck. Decoder features carry low spatial frequency semantic context. The skip connection is the only pathway for high-frequency information to survive — without it, the decoder reconstructs boundaries by pattern completion, not by reading them.
@@ -67,7 +67,7 @@ $$\text{decoder input at level } l = \text{CONCAT}\!\left[\text{upsample}(\text{
 | Modern U-Net | Same padding, BatchNorm → input/output same size | General segmentation |
 | U-Net++ | Dense nested skip connections at every decoder level | Maximum accuracy, higher params |
 | ResU-Net | ResBlocks replace plain conv stacks | Gradient flow, very deep versions |
-| SegFormer | ViT encoder + lightweight MLP decoder | State-of-the-art semantic seg |
+| SegFormer | [[vision-transformer\|ViT encoder]] + lightweight MLP decoder | State-of-the-art semantic seg |
 
 ---
 
@@ -79,12 +79,15 @@ Denoising diffusion probabilistic models (DDPM, Ho et al., 2020) use a U-Net as 
 
 1. **Multi-scale processing:** diffusion must denoise at all spatial frequencies simultaneously — coarse structures (low frequency) and fine textures (high frequency) need different treatment at different resolutions. U-Net's skip connections naturally implement this.
 
-2. **Time conditioning:** the scalar timestep $t$ is embedded via sinusoidal encoding followed by a 2-layer MLP. The embedding is injected into every residual block via AdaIN-style affine transform — scale $\gamma(t)$ and shift $\beta(t)$ are applied after GroupNorm:
+2. **Time conditioning:** the scalar timestep $t$ is embedded via [[arch-positional-encoding|sinusoidal encoding]] followed by a 2-layer MLP. The embedding is injected into every residual block via AdaIN-style affine transform — scale $\gamma(t)$ and shift $\beta(t)$ are applied after [[normalization-layers|GroupNorm]]:
    $$\text{output} = \gamma(t) \cdot \text{GroupNorm}(h) + \beta(t)$$
 
-3. **Cross-attention for text conditioning:** in text-to-image models (Stable Diffusion), text embeddings from a frozen CLIP/T5 encoder are injected via cross-attention in the bottleneck and decoder blocks. The U-Net's spatial features serve as queries; the text tokens provide keys and values.
+> [!tip] AdaIN-style affine transform
+> Adaptive Instance Normalization (AdaIN) applies a learned scale and shift after normalizing — the same mechanism used in StyleGAN for style conditioning. Here the conditioning signal is the timestep embedding instead of a style vector, letting the denoiser adapt its behavior at each noise level.
 
-Stable Diffusion's U-Net operates in the 64×64 latent space of a VAE (not pixel space), has 860M parameters, and uses ResBlocks + self-attention at the 16×16 and 8×8 levels + cross-attention for text.
+3. **Cross-attention for text conditioning:** in text-to-image models (Stable Diffusion), text embeddings from a frozen [[clip|CLIP]]/T5 encoder are injected via [[attention-mechanism|cross-attention]] in the bottleneck and decoder blocks. The U-Net's spatial features serve as queries; the text tokens provide keys and values.
+
+Stable Diffusion's U-Net operates in the 64×64 latent space of a [[variational-autoencoders|VAE]] (not pixel space), has 860M parameters, and uses ResBlocks + self-attention at the 16×16 and 8×8 levels + cross-attention for text.
 
 ### Why Skip Connections Prevent Hallucination
 
@@ -109,4 +112,4 @@ FPN's addition-based merging is more parameter-efficient; U-Net's concatenation-
 
 ---
 
-*See also: [[feature-pyramid-networks]] · [[arch-residual-block]] · [[diffusion-models]] · [[vision-transformer]]*
+*See also: [[feature-pyramid-networks]] · [[arch-residual-block]] · [[diffusion-models]] · [[vision-transformer]] · [[arch-positional-encoding]] · [[clip]] · [[variational-autoencoders]] · [[attention-mechanism]] · [[normalization-layers]] · [[activation-relu-variants]]*

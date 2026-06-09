@@ -86,15 +86,15 @@ What VC bounds miss:
 
 $$R[h] \leq \hat{R}[h] + O\!\left(\frac{B \cdot \prod_l \|W_l\|_\sigma}{\sqrt{m}}\right)$$
 
-where $\|W_l\|_\sigma$ is the spectral norm of the $l$-th weight matrix and $B$ is the input norm. These bounds explain why weight decay and spectral normalization improve generalization — they explicitly constrain the product of spectral norms, tightening the bound.
+where $\|W_l\|_\sigma$ is the spectral norm of the $l$-th weight matrix and $B$ is the input norm. These bounds explain why [[regularization-weight-decay|weight decay]] and spectral normalization improve generalization — they explicitly constrain the product of spectral norms, tightening the bound.
 
 **Margin bounds:** for classifiers achieving margin $\gamma$ on training data (all training points correctly classified with confidence $\gamma$):
 
 $$R[h] \leq \frac{\hat{R}_\gamma[h]}{1} + O\!\left(\frac{\|W\|_F}{\gamma\sqrt{m}}\right)$$
 
-where $\hat{R}_\gamma$ is the fraction of training points with margin less than $\gamma$. The bound improves with larger margin and smaller Frobenius norm. This provides theoretical justification for large-margin training (SVM objective) and weight decay.
+where $\hat{R}_\gamma$ is the fraction of training points with margin less than $\gamma$. The bound improves with larger margin and smaller Frobenius norm. This provides theoretical justification for large-margin training ([[kernel-methods|SVM]] objective) and weight decay.
 
-**Double descent from learning theory perspective (Belkin et al., 2019):** in overparameterized regimes ($d \gg m$), the VC bound is vacuously large. But the actual solution found by SGD has norm-based complexity far smaller than the VC bound suggests. The minimum-norm interpolant has Rademacher complexity $O(\|w^*\|_2/\sqrt{m})$ where $\|w^*\|_2$ decreases as $d$ increases (the minimum-norm solution spreads weight across more parameters). This explains why adding parameters can reduce generalization error.
+**[[bias-variance-double-descent|Double descent]] from learning theory perspective (Belkin et al., 2019):** in overparameterized regimes ($d \gg m$), the VC bound is vacuously large. But the actual solution found by SGD has norm-based complexity far smaller than the VC bound suggests. The minimum-norm interpolant has Rademacher complexity $O(\|w^*\|_2/\sqrt{m})$ where $\|w^*\|_2$ decreases as $d$ increases (the minimum-norm solution spreads weight across more parameters). This explains why adding parameters can reduce generalization error.
 
 **PAC-Bayes bounds:** instead of worst-case bounds over $\mathcal{H}$, PAC-Bayes considers a prior distribution $P$ over hypotheses and a posterior $Q$ after seeing data. The McAllester bound:
 

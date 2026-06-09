@@ -19,7 +19,7 @@ $$p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\r
 
 - Mean: $\mu$, Variance: $\sigma^2$, Standard deviation: $\sigma$
 - Entropy: $\frac{1}{2}\ln(2\pi e\sigma^2)$ nats
-- The maximum-entropy distribution given fixed mean and variance (see [[maximum-entropy-principle]])
+- The [[maximum-entropy-principle|maximum-entropy]] distribution given fixed mean and variance
 
 ### 68-95-99.7 Rule
 
@@ -33,7 +33,7 @@ Numerically: $P(|Z| \leq 1) = 2\Phi(1) - 1 = 2(0.8413) - 1 = 0.6827$ where $\Phi
 
 ### Why the Gaussian Is Everywhere
 
-1. **Central Limit Theorem:** sums of $n$ i.i.d. random variables with finite variance converge to Gaussian as $n \to \infty$, regardless of the underlying distribution — additive noise processes converge to Gaussian.
+1. **Central Limit Theorem:** sums of $n$ i.i.d. random variables with finite variance converge to Gaussian as $n \to \infty$, regardless of the underlying distribution — additive noise processes converge to Gaussian (see [[sampling-methods]] for how this motivates Gaussian proposals in MCMC).
 2. **Maximum entropy:** under only a mean and variance constraint, the Gaussian is the least-informative distribution — the principled default.
 3. **Closure:** sums, linear transforms, and conditioning all stay Gaussian — algebraically convenient.
 
@@ -62,7 +62,7 @@ $X \sim \mathcal{N}(\mu_1, \sigma_1^2)$, $Y \sim \mathcal{N}(\mu_2, \sigma_2^2)$
 
 **Linear transform:** $Y = aX + b \Rightarrow Y \sim \mathcal{N}(a\mu + b, a^2\sigma^2)$.
 
-**Product of Gaussian PDFs** (key for Bayesian updates):
+**Product of Gaussian PDFs** (key for [[bayesian-inference|Bayesian]] updates):
 $p_1(x) \propto \mathcal{N}(x|\mu_1, \sigma_1^2)$, $p_2(x) \propto \mathcal{N}(x|\mu_2, \sigma_2^2)$:
 
 $$p_1(x)p_2(x) \propto \mathcal{N}(x | \mu^*, \sigma^{*2})$$
@@ -74,8 +74,16 @@ where $\frac{1}{\sigma^{*2}} = \frac{1}{\sigma_1^2} + \frac{1}{\sigma_2^2}$ and 
 $$p(x) = \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left(-\frac{1}{2}(x-\mu)^\top\Sigma^{-1}(x-\mu)\right)$$
 
 - $\mu \in \mathbb{R}^d$: mean vector
-- $\Sigma \in \mathbb{R}^{d \times d}$: positive semi-definite covariance matrix
+- $\Sigma \in \mathbb{R}^{d \times d}$: positive semi-definite covariance matrix (see [[linear-algebra-fundamentals]] for Cholesky sampling: $x = \mu + Lz$, $z \sim \mathcal{N}(0,I)$, $\Sigma = LL^\top$)
 - Entropy: $\frac{1}{2}\ln\left((2\pi e)^d |\Sigma|\right)$
+
+> [!tip] Why $x = \mu + Lz$ samples from $\mathcal{N}(\mu, \Sigma)$ ([[linear-algebra-fundamentals]])
+> Every positive semi-definite $\Sigma$ has a Cholesky factorisation $\Sigma = LL^\top$ with $L$ lower-triangular.
+> For $z \sim \mathcal{N}(0, I)$:
+> $\mathbb{E}[Lz] = L\,\mathbb{E}[z] = 0$, so the mean of $\mu + Lz$ is $\mu$.
+> $\text{Var}(Lz) = L\,\text{Var}(z)\,L^\top = L I L^\top = LL^\top = \Sigma$.
+> Since any affine transform of a Gaussian is Gaussian, $\mu + Lz \sim \mathcal{N}(\mu, \Sigma)$ exactly.
+> In practice: `L = torch.linalg.cholesky(Sigma); x = mu + L @ torch.randn(d)`.
 
 | $\Sigma$ shape | Meaning | Density contours |
 |---------------|---------|-----------------|
@@ -115,7 +123,7 @@ A GP is an infinite-dimensional Gaussian — a distribution over functions. Any 
 
 $$f_* | X_*, X, \mathbf{y} \sim \mathcal{N}(K_{*,X}(K_{X,X} + \sigma_n^2 I)^{-1}\mathbf{y},\; K_{*,*} - K_{*,X}(K_{X,X}+\sigma_n^2 I)^{-1}K_{X,*})$$
 
-Exact inference requires $O(n^3)$ for the Cholesky of $K_{X,X}$. Sparse GP approximations (inducing points, Titsias 2009) reduce this to $O(nm^2)$ with $m$ inducing points.
+Exact inference requires $O(n^3)$ for the [[linear-algebra-fundamentals|Cholesky]] of $K_{X,X}$. Sparse GP approximations (inducing points, Titsias 2009) reduce this to $O(nm^2)$ with $m$ inducing points.
 
 ### Information Geometry of the Gaussian Family
 
@@ -129,7 +137,7 @@ $$D_{KL}(\mathcal{N}_1 \| \mathcal{N}_2) = \frac{1}{2}\left[\frac{\sigma_1^2}{\s
 
 The multivariate version: $D_{KL}(\mathcal{N}(\mu_1,\Sigma_1) \| \mathcal{N}(\mu_2,\Sigma_2)) = \frac{1}{2}\left[\text{tr}(\Sigma_2^{-1}\Sigma_1) + (\mu_2-\mu_1)^\top\Sigma_2^{-1}(\mu_2-\mu_1) - d + \ln\frac{|\Sigma_2|}{|\Sigma_1|}\right]$.
 
-This is the formula used in VAE KL penalty terms.
+This is the formula used in [[variational-autoencoders|VAE]] KL penalty terms.
 
 ### Stein's Paradox and Shrinkage
 
@@ -143,4 +151,4 @@ For $d \geq 3$, the MLE $\hat{\mu} = \bar{x}$ is inadmissible — the James-Stei
 
 ---
 
-*See also: [[distributions-overview]] · [[maximum-entropy-principle]] · [[bayesian-inference]] · [[math-svd]]*
+*See also: [[distributions-overview]] · [[maximum-entropy-principle]] · [[bayesian-inference]] · [[math-svd]] · [[linear-algebra-fundamentals]] · [[variational-autoencoders]] · [[lora-quantization]]*

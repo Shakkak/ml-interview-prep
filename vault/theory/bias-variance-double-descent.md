@@ -58,7 +58,7 @@ The cross term $2(f-\bar{f})\mathbb{E}[\bar{f} - \hat{f}] = 0$ by definition of 
 
 **Bias-variance for specific models:**
 
-KNN: as $k$ increases, variance decreases (average more neighbors → stable prediction) and bias increases (farther neighbors may be wrong class). Optimal $k$ via cross-validation.
+KNN: as $k$ increases, variance decreases (average more neighbors → stable prediction) and bias increases (farther neighbors may be wrong class). Optimal $k$ via [[cross-validation]].
 
 Ridge regression: $\hat{\beta} = (X^TX + \lambda I)^{-1}X^Ty$. As $\lambda$ increases, variance decreases ($\hat{\beta}$ shrinks toward 0, less sensitivity to training set) but bias increases (solutions pulled away from truth). The $\lambda$ that minimizes test MSE is the bias-variance sweet spot.
 
@@ -70,7 +70,7 @@ Ridge regression: $\hat{\beta} = (X^TX + \lambda I)^{-1}X^Ty$. As $\lambda$ incr
 | Low train error + high test error | High variance (overfit) | Regularization, more data, simpler model |
 | Both errors high | Possibly both | Try both |
 
-Regularization (L2, dropout, early stopping) reduces variance at the cost of slight bias increase — net benefit when variance dominates.
+Regularization (L2, [[regularization-dropout|dropout]], early stopping) reduces variance at the cost of slight bias increase — net benefit when variance dominates.
 
 **Key insight often missed:** more data reduces variance but not bias. If the model class cannot represent the true function, more data does not help — the systematic error persists.
 
@@ -109,7 +109,7 @@ This is well-regularized even though it fits all training points exactly. The mi
 
 **Epoch-wise double descent (Nakkiran et al., 2020):** double descent also occurs along the training axis. Test error can first decrease, then increase (classical overfitting), then decrease again as training continues. This happens because early in training the model is in the underparameterized regime for any given number of gradient steps; eventually it enters the overparameterized regime.
 
-**Neural Tangent Kernel connection:** in the infinite-width limit, neural networks trained with gradient flow are governed by the NTK. The NTK dynamics are linear, and the minimum-norm solution corresponds to minimum RKHS norm in the NTK's reproducing kernel Hilbert space. This provides a theoretical foundation for why overparameterized networks find smooth, generalizing solutions.
+**[[neural-tangent-kernel|Neural Tangent Kernel]] connection:** in the infinite-width limit, neural networks trained with gradient flow are governed by the NTK. The NTK dynamics are linear, and the minimum-norm solution corresponds to minimum RKHS norm in the NTK's reproducing kernel Hilbert space. This provides a theoretical foundation for why overparameterized networks find smooth, generalizing solutions.
 
 **Practical implications for practitioners:**
 
@@ -123,4 +123,4 @@ Rule of thumb: if you have enough compute, larger models almost always generaliz
 
 ---
 
-*See also: [[bayesian-inference]] · [[backpropagation]] · [[normalization-layers]] · [[generalization-bounds]] · [[spectral-bias]]*
+*See also: [[bayesian-inference]] · [[backpropagation]] · [[normalization-layers]] · [[generalization-bounds]] · [[spectral-bias]] · [[regularization-dropout]] · [[neural-tangent-kernel]] · [[cross-validation]]*

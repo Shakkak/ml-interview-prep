@@ -15,9 +15,9 @@ related: [regularization-dropout, data-augmentation, model-calibration, ensemble
 
 A single deterministic forward pass produces one prediction. Accuracy and uncertainty estimates both improve by aggregating multiple predictions from related model evaluations. Three mechanisms achieve this:
 
-1. **Test-Time Augmentation (TTA):** run the same model on multiple augmented views of the input.
+1. **[[data-augmentation|Test-Time Augmentation]] (TTA):** run the same model on multiple augmented views of the input.
 2. **MC Dropout:** run multiple stochastic forward passes through the same model.
-3. **Deep Ensembles:** average predictions from multiple independently trained models.
+3. **[[ensemble-methods|Deep Ensembles]]:** average predictions from multiple independently trained models.
 
 All three reduce **prediction variance** at the cost of additional inference compute.
 
@@ -32,7 +32,7 @@ $$\hat{p}(y \mid x) = \frac{1}{K}\sum_{k=1}^K p(y \mid \text{aug}_k(x))$$
 - Multi-crop ($K=5$): 4 corners + center crop at standard size.
 - Multi-scale ($K=3$): resize to {480, 512, 544} and predict on each.
 
-**Aggregation:** soft voting (mean of softmax probabilities) outperforms hard voting (majority of argmax). Soft voting preserves calibration information in the tail of the distribution.
+**Aggregation:** soft voting (mean of softmax probabilities) outperforms hard voting (majority of argmax). Soft voting preserves [[model-calibration|calibration]] information in the tail of the distribution.
 
 **Cost vs benefit:** TTA($K$) requires $K$ forward passes per example. For $K \leq 5$ and moderate model size, the compute cost is acceptable. For real-time inference or very large models, TTA is often impractical.
 
@@ -42,7 +42,7 @@ $$\hat{p}(y \mid x) = \frac{1}{K}\sum_{k=1}^K p(y \mid \text{aug}_k(x))$$
 
 ### MC Dropout for Uncertainty Estimation
 
-Standard dropout is disabled at test time (activations scaled by keep probability $1-p$). **MC Dropout** (Gal & Ghahramani, 2016) keeps dropout active and runs $K$ stochastic forward passes:
+Standard [[regularization-dropout|dropout]] is disabled at test time (activations scaled by keep probability $1-p$). **MC Dropout** (Gal & Ghahramani, 2016) keeps dropout active and runs $K$ stochastic forward passes:
 
 $$\hat{p}(y \mid x) = \frac{1}{K}\sum_{k=1}^K p_{\theta^{(k)}}(y \mid x)$$
 
@@ -51,7 +51,7 @@ where $\theta^{(k)}$ is the model with independently sampled dropout masks for p
 **Epistemic uncertainty** (model uncertainty, reducible with more data):
 $$\text{Var}[p(y \mid x)] = \frac{1}{K-1}\sum_k\left(p_{\theta^{(k)}} - \hat{p}\right)^2$$
 
-High variance across passes signals an out-of-distribution input — the model's functional uncertainty is high. Gal & Ghahramani showed this approximates the posterior predictive distribution in a Bayesian neural network via the correspondence between dropout and variational inference with a Bernoulli approximate posterior.
+High variance across passes signals an out-of-distribution input — the model's functional uncertainty is high. Gal & Ghahramani showed this approximates the [[bayesian-inference|posterior]] predictive distribution in a Bayesian neural network via the correspondence between dropout and variational inference with a Bernoulli approximate posterior.
 
 **Requirement:** the model must have been trained with dropout layers. ResNets without dropout cannot use MC Dropout directly without retraining.
 
@@ -87,13 +87,13 @@ $$\underbrace{H[y \mid x, \mathcal{D}]}_{\text{total}} = \underbrace{I(y; \theta
 
 **Epistemic** (model) uncertainty: reducible by observing more labeled data. High for out-of-distribution inputs. Captured by disagreement between ensemble members or MC Dropout passes.
 
-**Aleatoric** (data) uncertainty: irreducible — caused by genuine label noise or inherent ambiguity in the input. Does not decrease with more data. Captured by the average entropy of individual models, not their disagreement.
+**Aleatoric** (data) uncertainty: irreducible — caused by genuine label noise or inherent ambiguity in the input. Does not decrease with more data. Captured by the average [[entropy-mutual-info|entropy]] of individual models, not their disagreement.
 
 Deep ensembles estimate total uncertainty; the epistemic component is the variance across members. This decomposition matters practically: if an input has high epistemic uncertainty, collect more training data near it. If it has high aleatoric uncertainty, collecting more data won't help — the input is genuinely ambiguous.
 
 ### Snapshot Ensembles: Free Diversity from One Training Run
 
-Train with a **cyclical learning rate** schedule (warm restarts). Each restart converges to a different local minimum. Save a snapshot at each cycle end. Ensemble the snapshots.
+Train with a [[optimizer-lr-schedules|cyclical learning rate]] schedule (warm restarts). Each restart converges to a different local minimum. Save a snapshot at each cycle end. Ensemble the snapshots.
 
 Total training cost ≈ one normal training run. Diversity is lower than independently initialized models (the snapshots start from related initializations) but substantially better than a single model. Standard in Kaggle competitions where training large models is expensive.
 
@@ -111,4 +111,4 @@ Total training cost ≈ one normal training run. Diversity is lower than indepen
 
 ---
 
-*See also: [[regularization-dropout]] · [[data-augmentation]] · [[model-calibration]] · [[ensemble-methods]] · [[bayesian-inference]]*
+*See also: [[regularization-dropout]] · [[data-augmentation]] · [[model-calibration]] · [[ensemble-methods]] · [[bayesian-inference]] · [[entropy-mutual-info]] · [[optimizer-lr-schedules]]*

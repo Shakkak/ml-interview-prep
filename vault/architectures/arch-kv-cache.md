@@ -13,7 +13,7 @@ related: [attention-mechanism, arch-positional-encoding]
 
 ## Fundamental
 
-In autoregressive transformers, generating token $t+1$ requires attending to all previous tokens $1, \ldots, t$. Without caching, to generate token $t+1$ the full sequence $[x_1, \ldots, x_t]$ is re-processed through all transformer layers — recomputing K and V for every position at every step. Generating a 1000-token sequence requires:
+In [[autoregressive-models|autoregressive transformers]], generating token $t+1$ requires attending to all previous tokens $1, \ldots, t$. Without caching, to generate token $t+1$ the full sequence $[x_1, \ldots, x_t]$ is re-processed through all transformer layers — recomputing K and V for every position at every step. Generating a 1000-token sequence requires:
 $$1 + 2 + \cdots + 999 = 499{,}500 \text{ forward-pass token computations}$$
 Quadratic in sequence length.
 
@@ -92,7 +92,7 @@ Speedup: $1.5$–$3\times$ for tasks with predictable continuations (code, struc
 
 ### KV Cache Compression
 
-**Quantization:** INT4 KV cache halves memory at small quality cost.
+**[[lora-quantization|Quantization]]:** INT4 KV cache halves memory at small quality cost.
 
 **Token eviction:** drop K, V entries for past tokens based on importance heuristics (attention scores, recency). StreamingLLM maintains a "sink" of early tokens (which receive high attention) plus a rolling window. Enables unbounded context with bounded memory.
 
@@ -100,4 +100,4 @@ Speedup: $1.5$–$3\times$ for tasks with predictable continuations (code, struc
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[flash-attention]]*
+*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[flash-attention]] · [[autoregressive-models]] · [[lora-quantization]]*

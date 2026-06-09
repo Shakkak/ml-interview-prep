@@ -36,7 +36,7 @@ Each backbone layer is good at one but not both.
 
 ### FPN Architecture
 
-**Bottom-up pathway:** standard ResNet forward pass:
+**Bottom-up pathway:** standard [[arch-residual-block|ResNet]] forward pass:
 
 ```
 C2: 200×200, 256ch (stride 4)   ← fine spatial, low semantic
@@ -77,9 +77,9 @@ $$l = \left\lfloor l_0 + \log_2\!\left(\frac{\sqrt{wh}}{224}\right) \right\rfloo
 
 ### FPN in Different Architectures
 
-**Faster R-CNN + FPN:** RPN runs on each FPN level with level-specific anchors. ROI Align extracts features from the appropriate level per proposal (scale-aware). The detection head is shared across all levels.
+**Faster R-CNN + FPN:** RPN runs on each FPN level with level-specific anchors. [[arch-roi-align|ROI Align]] extracts features from the appropriate level per proposal (scale-aware). The detection head is shared across all levels.
 
-**RetinaNet:** single-stage detector with FPN. Classification and regression heads (shared weights) run on all FPN levels. Focal Loss handles anchor class imbalance.
+**RetinaNet:** single-stage detector with FPN. Classification and regression heads (shared weights) run on all FPN levels. [[loss-focal|Focal Loss]] handles anchor class imbalance.
 
 **Mask R-CNN + FPN:** adds instance segmentation mask head. FPN is critical for small-object masks — high-resolution P2/P3 features are essential for accurate pixel-level segmentation of small instances.
 
@@ -97,7 +97,7 @@ Weights $w_i \geq 0$ are learned; the normalization keeps them as a convex combi
 
 All three solve multi-scale representation but differ in mechanism:
 
-| | FPN | U-Net | ASPP |
+| | FPN | [[unet\|U-Net]] | [[dilated-convolution\|ASPP]] |
 |--|:---:|:---:|:---:|
 | Multi-scale mechanism | Top-down feature merging | Encoder-decoder skip | Parallel dilated convs |
 | Resolution | Multiple pyramid levels | Encoder resolution levels | Single resolution |
@@ -106,4 +106,4 @@ All three solve multi-scale representation but differ in mechanism:
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[dilated-convolution]] · [[unet]] · [[arch-roi-align]]*
+*See also: [[cnn-architectures-guide]] · [[dilated-convolution]] · [[unet]] · [[arch-roi-align]] · [[arch-residual-block]] · [[loss-focal]]*

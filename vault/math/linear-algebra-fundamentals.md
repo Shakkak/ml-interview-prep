@@ -72,11 +72,11 @@ Example: $v = [3, 4]$: $\|v\|_1 = 7$, $\|v\|_2 = 5$, $\|v\|_\infty = 4$.
 
 Inequalities: $\|A\|_2 \leq \|A\|_F \leq \sqrt{\min(m,n)}\|A\|_2$.
 
-**Spectral norm as the Lipschitz constant:** $\|Ax\|_2 \leq \|A\|_2 \|x\|_2$ — the spectral norm is the maximum amplification factor. Spectral normalization in GAN discriminators divides each weight matrix by its spectral norm, enforcing a 1-Lipschitz constraint on the discriminator (used in WGAN-GP).
+**Spectral norm as the Lipschitz constant:** $\|Ax\|_2 \leq \|A\|_2 \|x\|_2$ — the spectral norm is the maximum amplification factor. Spectral normalization in [[generative-adversarial-networks|GAN]] discriminators divides each weight matrix by its spectral norm, enforcing a 1-Lipschitz constraint on the discriminator (used in WGAN-GP).
 
 ### Trace
 
-$\text{tr}(A) = \sum_i A_{ii} = \sum_i \lambda_i$ (sum of eigenvalues).
+$\text{tr}(A) = \sum_i A_{ii} = \sum_i \lambda_i$ (sum of [[eigenvalues-pca|eigenvalues]]).
 
 **Key properties:**
 - **Cyclic:** $\text{tr}(ABC) = \text{tr}(CAB) = \text{tr}(BCA)$
@@ -84,7 +84,7 @@ $\text{tr}(A) = \sum_i A_{ii} = \sum_i \lambda_i$ (sum of eigenvalues).
 - **Trace trick:** $x^\top Ax = \text{tr}(x^\top Ax) = \text{tr}(Axx^\top)$ — converts a scalar to a trace for matrix differentiation
 - $\nabla_A \text{tr}(AB) = B^\top$ (used constantly in backpropagation)
 
-ML appearances: Gaussian entropy $\propto \text{tr}(\ln\Sigma)$; KL divergence between Gaussians contains $\text{tr}(\Sigma_1^{-1}\Sigma_0)$; normalizing flows use $\text{tr}(J)$ for the instantaneous log-density change.
+ML appearances: [[distributions-gaussian|Gaussian]] entropy $\propto \text{tr}(\ln\Sigma)$; KL divergence between Gaussians contains $\text{tr}(\Sigma_1^{-1}\Sigma_0)$; [[normalizing-flows|normalizing flows]] use $\text{tr}(J)$ for the instantaneous log-density change.
 
 ### Determinant
 
@@ -156,10 +156,10 @@ $\text{rank}(AB) \leq \min(\text{rank}(A), \text{rank}(B))$: multiplying by a lo
 
 $\text{rank}(A) = \text{rank}(A^\top) = \text{rank}(A^\top A) = \text{rank}(AA^\top)$: rank is preserved under these operations.
 
-$\text{rank}(A+B) \leq \text{rank}(A) + \text{rank}(B)$: adding low-rank matrices gives a low-rank result (if both are rank $r$, sum is at most rank $2r$ — the basis for LoRA's initialization strategy).
+$\text{rank}(A+B) \leq \text{rank}(A) + \text{rank}(B)$: adding low-rank matrices gives a low-rank result (if both are rank $r$, sum is at most rank $2r$ — the basis for [[lora-quantization|LoRA]]'s initialization strategy).
 
 **Effective rank in pretrained models:** weight matrices $W$ in transformers have nominal rank $\min(m,n)$ but stable rank $\|W\|_F^2/\|W\|_2^2 = \sum\sigma_i^2/\sigma_1^2 \ll \min(m,n)$. Fine-tuning moves mostly within this low stable-rank subspace — the justification for LoRA (see [[math-svd]]).
 
 ---
 
-*See also: [[eigenvalues-pca]] · [[math-svd]] · [[matrix-calculus]] · [[regularization-weight-decay]]*
+*See also: [[eigenvalues-pca]] · [[math-svd]] · [[matrix-calculus]] · [[regularization-weight-decay]] · [[distributions-gaussian]] · [[normalizing-flows]] · [[generative-adversarial-networks]] · [[lora-quantization]]*

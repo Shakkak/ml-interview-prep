@@ -21,7 +21,14 @@ Full fine-tuning a GPT-3 scale model (~175B parameters) requires storing weights
 - INT8: 1 byte/param → 7B model = 7 GB
 - NF4: 0.5 bytes/param → 7B model = 3.5 GB
 
-**Matrix rank:** the rank of $A \in \mathbb{R}^{m \times n}$ is the number of linearly independent rows/columns. If rank $r < \min(m,n)$: $A = UV^T$ where $U \in \mathbb{R}^{m \times r}$, $V \in \mathbb{R}^{n \times r}$. Storage drops from $mn$ to $(m+n)r$ numbers — much less if $r \ll \min(m,n)$.
+**Matrix rank** ([[linear-algebra-fundamentals]]): the rank of $A \in \mathbb{R}^{m \times n}$ is the number of linearly independent rows/columns. If rank $r < \min(m,n)$: $A = UV^T$ where $U \in \mathbb{R}^{m \times r}$, $V \in \mathbb{R}^{n \times r}$. Storage drops from $mn$ to $(m+n)r$ numbers — much less if $r \ll \min(m,n)$.
+
+> [!tip] How low-rank factorisation works (SVD)
+> [[math-svd]] gives the exact mechanism: for any $A$, the singular value decomposition yields $A = U \Sigma V^\top$.
+> Keeping only the top $r$ singular vectors: $A \approx U_r \Sigma_r V_r^\top$.
+> We absorb $\Sigma_r$ into one factor, writing $A \approx \tilde{U}\tilde{V}^\top$ with $\tilde{U} \in \mathbb{R}^{m \times r}$, $\tilde{V} \in \mathbb{R}^{n \times r}$.
+> The Eckart–Young theorem guarantees this is the best rank-$r$ approximation in Frobenius norm.
+> Storage: $mn \to (m+n)r$ — the saving LoRA exploits.
 
 ---
 
@@ -29,7 +36,7 @@ Full fine-tuning a GPT-3 scale model (~175B parameters) requires storing weights
 
 ### Why Weight Updates Are Low-Rank
 
-Empirical finding (Aghajanyan et al., 2020): **weight changes during fine-tuning have low intrinsic dimensionality**. Pre-trained models already encode rich features; fine-tuning on a downstream task requires only a small "correction" in a low-dimensional subspace. Training GPT-3 with random projection matrices: 90% of fine-tuning performance is recoverable with rank ≤ 64.
+Empirical finding (Aghajanyan et al., 2020): **weight changes during fine-tuning have low intrinsic dimensionality** (see [[math-svd]] — stable rank of gradient matrices is small). Pre-trained models already encode rich features; fine-tuning on a downstream task requires only a small "correction" in a low-dimensional subspace. Training GPT-3 with random projection matrices: 90% of fine-tuning performance is recoverable with rank ≤ 64.
 
 ### LoRA: Low-Rank Adaptation
 
@@ -41,7 +48,7 @@ Modified forward pass: $h = W_0 x + \frac{\alpha}{r} B A x$
 
 - $W_0$ is **frozen** — never updated; only $A$ and $B$ are trained
 - Initialization: $A \sim \mathcal{N}(0, \sigma^2)$, $B = 0$ → $\Delta W = 0$ at start (preserves pretrained behavior)
-- Typical: $r = 4$–$16$; applied to $W_Q, W_K, W_V, W_O$ in attention layers
+- Typical: $r = 4$–$16$; applied to $W_Q, W_K, W_V, W_O$ in [[attention-mechanism|attention layers]]
 
 **Parameter savings:** 4096×4096 weight matrix with $r=8$:
 - Full fine-tuning: $4096^2 = 16.7M$ parameters
@@ -55,7 +62,7 @@ Map a range $[\min, \max]$ to integer values $[0, 2^b - 1]$:
 
 $$\hat{x} = \text{round}\left(\frac{x - \min}{\max - \min} \cdot (2^b - 1)\right)$$
 
-**Problem:** neural weights follow approximately Gaussian distributions. Uniform bins waste resolution on the tails and have too little resolution near zero where most weights cluster.
+**Problem:** neural weights follow approximately [[distributions-gaussian|Gaussian distributions]]. Uniform bins waste resolution on the tails and have too little resolution near zero where most weights cluster.
 
 ---
 
@@ -63,9 +70,14 @@ $$\hat{x} = \text{round}\left(\frac{x - \min}{\max - \min} \cdot (2^b - 1)\right
 
 ### NF4: NormalFloat 4-bit
 
-NF4 (used in QLoRA) uses equal-area bins under the standard Gaussian instead of equal-width bins:
+NF4 (used in QLoRA) uses equal-area bins under the standard [[distributions-gaussian|Gaussian]] instead of equal-width bins:
 
 $$q_i = \Phi^{-1}\left(\frac{i + 0.5}{2^4}\right)$$
+
+> [!tip] What $\Phi^{-1}$ is
+> $\Phi$ is the standard normal CDF: $\Phi(z) = P(Z \leq z)$ for $Z \sim \mathcal{N}(0,1)$.
+> $\Phi^{-1}(p)$ (the *quantile function*) returns the $z$ such that exactly fraction $p$ of the distribution lies below it.
+> Spacing 16 quantile levels uniformly in $[0,1]$ and mapping them through $\Phi^{-1}$ places bin edges so each bin covers equal probability mass under $\mathcal{N}(0,1)$ — dense near zero (where weights cluster), sparse in the tails.
 
 High resolution where most weights are (near zero), coarser in the tails. Empirically outperforms INT4 for neural network weights.
 
@@ -82,7 +94,7 @@ Add LoRA contribution (BF16)         ← trained
 Three components:
 1. **NF4 quantization:** base weights stored in 4-bit; dequantized to BF16 block-by-block during forward pass, then discarded.
 2. **Double quantization:** quantize the quantization constants (scale factors) themselves to FP8. Saves ~0.4 bits/param additional.
-3. **Paged optimizer states:** Adam moments paged to CPU RAM when GPU memory is tight — prevents OOM during gradient accumulation.
+3. **Paged optimizer states:** [[optimizer-adam|Adam]] moments paged to CPU RAM when GPU memory is tight — prevents OOM during gradient accumulation.
 
 Memory for a 65B model:
 
@@ -102,10 +114,10 @@ Fits on a single A100 80GB. Without QLoRA: 130+ GB in FP16.
 |--------|---------------|---------|
 | Full fine-tuning | All | Best performance |
 | LoRA | ~0.1% (attention matrices) | Near full perf, swappable, mergeable |
-| Prefix tuning | ~0.1% (KV prefix per layer) | More expressive than input prompt tuning |
+| Prefix tuning | ~0.1% ([[arch-kv-cache|KV prefix]] per layer) | More expressive than input prompt tuning |
 | Prompt tuning | <0.01% (input tokens only) | Very cheap; weaker on hard tasks |
 | Adapter layers | ~1% (after FFN sublayer) | Older approach; similar trade-off to LoRA |
 
 ---
 
-*See also: [[attention-mechanism]] · [[rlhf]] · [[backpropagation]]*
+*See also: [[attention-mechanism]] · [[rlhf]] · [[backpropagation]] · [[math-svd]] · [[linear-algebra-fundamentals]] · [[optimizer-adam]] · [[distributions-gaussian]]*

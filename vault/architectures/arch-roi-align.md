@@ -58,7 +58,7 @@ The mask AP improvement is dramatic because segmentation requires precise spatia
 
 ### FPN Level Assignment
 
-In Mask R-CNN, ROI Align is applied to FPN feature maps. Each proposal is assigned to a pyramid level based on its area:
+In Mask R-CNN, ROI Align is applied to [[feature-pyramid-networks|FPN]] feature maps. Each proposal is assigned to a pyramid level based on its area:
 
 $$\text{level} = \left\lfloor k_0 + \log_2\left(\frac{\sqrt{wh}}{224}\right) \right\rfloor$$
 

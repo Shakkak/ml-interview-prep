@@ -62,9 +62,9 @@ For $f: \mathbb{R}^n \to \mathbb{R}^m$: $J \in \mathbb{R}^{m \times n}$, $J_{ij}
 | $f(x)$ | $J = \partial f/\partial x$ |
 |---|---|
 | $Ax$ (linear) | $A$ |
-| $\sigma(x)$ (elementwise sigmoid) | $\text{diag}(\sigma(x)(1-\sigma(x)))$ |
-| $\text{ReLU}(x)$ | $\text{diag}(\mathbf{1}[x > 0])$ |
-| $\text{softmax}(x)$ | $\text{diag}(p) - pp^\top$ where $p = \text{softmax}(x)$ |
+| $\sigma(x)$ (elementwise [[activation-sigmoid-tanh\|sigmoid]]) | $\text{diag}(\sigma(x)(1-\sigma(x)))$ |
+| [[activation-relu-variants\|$\text{ReLU}(x)$]] | $\text{diag}(\mathbf{1}[x > 0])$ |
+| [[activation-softmax\|$\text{softmax}(x)$]] | $\text{diag}(p) - pp^\top$ where $p = \text{softmax}(x)$ |
 
 **Softmax Jacobian derivation:** $p_i = e^{x_i}/\sum_k e^{x_k}$.
 
@@ -130,7 +130,7 @@ For $f: \mathbb{R}^{m \times n} \to \mathbb{R}$: $(\nabla_A f)_{ij} = \partial f
 
 **Derivation of $\nabla_A\text{tr}(AB)$:** $\text{tr}(AB) = \sum_{ij} A_{ij} B_{ji}$. So $\partial/\partial A_{ij} = B_{ji} = (B^\top)_{ij}$. Hence $\nabla_A\text{tr}(AB) = B^\top$.
 
-**Derivation of $\nabla_A\ln\det(A)$:** using cofactor expansion and the matrix determinant lemma:
+**Derivation of $\nabla_A\ln\det(A)$:** using cofactor expansion and the matrix [[linear-algebra-fundamentals|determinant]] lemma:
 $$\frac{\partial\ln\det(A)}{\partial A_{ij}} = (A^{-\top})_{ij}$$
 
 For symmetric $A$: $\nabla_A\ln\det(A) = A^{-1}$.
@@ -159,11 +159,11 @@ $$H = J^\top J + \sum_i r_i H_i$$
 
 **Gauss-Newton approximation:** drop the second-order term (valid near the optimum where $r_i \approx 0$): $H_{GN} = J^\top J \succeq 0$ (always PSD). Update: $\Delta\theta = -(J^\top J)^{-1}J^\top r$.
 
-**Connection to Fisher Information:** for a probabilistic model $p_\theta(x)$, the **Fisher information matrix**:
+**Connection to [[fisher-information|Fisher Information]]:** for a probabilistic model $p_\theta(x)$, the **Fisher information matrix**:
 $$F = \mathbb{E}_x\!\left[\nabla_\theta \log p_\theta(x) \nabla_\theta \log p_\theta(x)^\top\right]$$
 
 For a model with Gaussian output, $F = J^\top J$ (the Gauss-Newton matrix). **Natural gradient descent** (Amari, 1998) uses $F^{-1}$ instead of $H^{-1}$: it steps in the direction of steepest descent in the space of probability distributions (invariant to parameter reparameterization) rather than in Euclidean parameter space. This gives faster convergence when the parameter space has non-uniform curvature — connections to Adam (which approximates the diagonal of $F$).
 
 ---
 
-*See also: [[backpropagation]] · [[backpropagation-advanced]] · [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[lagrangian-optimization]]*
+*See also: [[backpropagation]] · [[backpropagation-advanced]] · [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[lagrangian-optimization]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[fisher-information]]*
