@@ -15,7 +15,7 @@ An Anki deck and Obsidian vault for ML interview preparation — from core funda
 
 ## Anki Deck
 
-Download `interview-prep.apkg` and import into Anki via **File → Import**.
+Download the latest `interview-prep.apkg` from the [Releases page](https://github.com/Shakkak/ml-interview-prep/releases) and import into Anki via **File → Import**.
 
 ### Sub-decks
 
