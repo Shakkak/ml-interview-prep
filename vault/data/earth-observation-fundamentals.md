@@ -2,6 +2,7 @@
 title: "Earth Observation Fundamentals"
 tags: [earth-observation, remote-sensing, satellite-imagery, multispectral, sar, geotiff, ndvi, sentinel-2, landsat]
 aliases: [Remote Sensing Basics, Satellite Imagery Fundamentals, EO Fundamentals]
+status: complete
 ---
 
 Earth observation (EO) uses satellite and airborne sensors to acquire information about Earth's surface. This file covers everything from raw sensor physics to datasets — written so a complete beginner can follow, while still being precise enough for an ML practitioner.

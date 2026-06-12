@@ -2,6 +2,7 @@
 title: "VLM Explainability and Interpretability"
 tags: [explainability, grad-cam, attention-rollout, concept-bottleneck-model, tcav, vlm-attribution, interpretability, xai]
 aliases: [VLM Interpretability, Explainable VLMs, Grad-CAM, Attention Rollout, CBM]
+status: complete
 ---
 
 Explainability methods let us understand why a model makes a particular prediction. For scientific applications like ecology and biodiversity monitoring, explainability is not optional — it is a core requirement for trust, debugging, and regulatory compliance. This file covers methods from first principles.

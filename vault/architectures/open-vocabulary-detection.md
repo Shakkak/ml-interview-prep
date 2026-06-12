@@ -2,6 +2,7 @@
 title: "Open-Vocabulary Detection and Segmentation"
 tags: [open-vocabulary-detection, grounding-dino, owl-vit, sam, glip, ovdet, zero-shot-detection, language-grounding]
 aliases: [Open-Vocabulary Object Detection, OVD, Language-Grounded Detection, Grounding DINO, OWL-ViT, SAM]
+status: complete
 ---
 
 Open-vocabulary detection lets you detect, localize, and segment objects specified by arbitrary text prompts at test time — without retraining. This file covers the core models from first principles: what problem they solve, how they work, and their strengths and weaknesses for ecological applications.

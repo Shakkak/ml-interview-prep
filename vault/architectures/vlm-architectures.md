@@ -2,6 +2,7 @@
 title: "Vision-Language Model Architectures"
 tags: [vlm, llava, flamingo, instructblip, multimodal, vision-language, dense-prediction, visual-instruction-tuning]
 aliases: [VLM Architectures, Large Vision-Language Models, Multimodal LLMs]
+status: complete
 ---
 
 Vision-Language Models (VLMs) combine a visual encoder with a large language model (LLM) to answer questions about images, describe scenes, and reason across modalities. This file covers the architecture families from first principles, including how they work, what makes them different, and how they apply to domain-specific tasks like ecology.

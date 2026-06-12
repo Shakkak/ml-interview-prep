@@ -2,6 +2,7 @@
 title: "Biodiversity and Ecology Machine Learning"
 tags: [biodiversity-ml, species-distribution-modelling, maxent, plant-traits, phenology, long-tail, gbif, inaturalist, bioclip, fine-grained-recognition]
 aliases: [Ecology ML, SDM, Species Distribution Modelling, Biodiversity Informatics ML]
+status: complete
 ---
 
 This file covers machine learning methods for biodiversity and ecology — from species distribution modelling to plant trait prediction, phenology monitoring, and fine-grained species recognition. Written to be self-contained for someone coming from ML without ecology background.

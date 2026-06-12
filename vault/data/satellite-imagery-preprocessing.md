@@ -2,6 +2,7 @@
 title: "Satellite Imagery Preprocessing"
 tags: [satellite-preprocessing, radiometric-calibration, cloud-masking, normalization, temporal-compositing, geospatial-ml, vlm-preprocessing]
 aliases: [Remote Sensing Preprocessing, EO Data Preprocessing, Satellite Data Preparation]
+status: complete
 ---
 
 This file covers every preprocessing step needed to transform raw satellite data into model-ready tensors — from raw digital numbers to normalized patches ready for a [[vlm-architectures|vision-language model]]. Written for someone starting from zero with satellite data.

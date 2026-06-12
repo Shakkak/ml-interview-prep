@@ -2,6 +2,7 @@
 title: "Multi-Source Data Fusion for Earth Observation"
 tags: [multi-source-fusion, data-fusion, drone-satellite, early-fusion, late-fusion, mid-fusion, multimodal-eo, sensor-fusion]
 aliases: [Multi-Modal Fusion EO, Sensor Fusion Remote Sensing, Drone Satellite Fusion]
+status: complete
 ---
 
 Multi-source fusion combines data from different sensors, platforms, or time points to produce richer information than any single source. In Earth observation and ecology, the three main sources are: satellite imagery, drone (UAV) imagery, and in-situ ground measurements. This file covers the technical challenges and strategies for fusing them.

@@ -2,6 +2,7 @@
 title: "Remote Sensing Foundation Models"
 tags: [remote-sensing, foundation-models, remote-clip, prithvi, geochat, satmae, scale-mae, geospatial-fm, earth-observation-ml]
 aliases: [EO Foundation Models, Geospatial Foundation Models, RemoteCLIP, Prithvi, GeoChat]
+status: complete
 ---
 
 Foundation models are large neural networks pretrained on broad data that can be fine-tuned for many downstream tasks. In Earth observation (EO), standard ImageNet-pretrained models underperform because satellite imagery differs fundamentally from natural photos. This file covers why domain-specific pretraining matters and the key models built for geospatial data.
