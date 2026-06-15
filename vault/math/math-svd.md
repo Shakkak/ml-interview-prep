@@ -13,6 +13,8 @@ related: [lora-quantization, math-convexity-jensen, backpropagation-advanced, ei
 
 ## Fundamental
 
+**SVD (Singular Value Decomposition)** breaks any matrix — regardless of shape — into three interpretable components that reveal its underlying structure: the principal directions of input and output, and the "stretch factors" along each direction. It is the engine behind PCA, LoRA (low-rank fine-tuning of LLMs), semantic search, and data compression. Understanding SVD gives you a unified view of what matrices *do* geometrically.
+
 Every matrix $A \in \mathbb{R}^{m \times n}$ has a **singular value decomposition**:
 
 $$A = U \Sigma V^\top$$

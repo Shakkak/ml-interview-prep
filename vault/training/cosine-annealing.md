@@ -13,6 +13,8 @@ related: [optimizer-lr-schedules, optimizer-adam, optimizer-sgd-momentum, large-
 
 ## Fundamental
 
+A constant learning rate forces a compromise: high enough to make progress early, but low enough to converge precisely later — and no single value does both well. **Learning rate schedules** solve this by varying the rate during training. Cosine annealing is the most widely used schedule: it starts high for fast initial progress, decays smoothly following a cosine curve, and reaches near-zero at the end for fine-grained convergence. It consistently outperforms step-decay and is the default in modern LLM and ViT training.
+
 ### Cosine Decay
 
 **Cosine annealing** decays the learning rate from $\eta_\text{max}$ to $\eta_\text{min}$ following a cosine curve over $T$ steps:

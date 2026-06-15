@@ -13,6 +13,8 @@ related: [loss-cross-entropy, entropy-mutual-info, variational-autoencoders, bay
 
 ## Fundamental
 
+When training a model to approximate a distribution — a VAE encoder approximating a Gaussian prior, a language model approximating the human preference distribution — you need to measure how different two probability distributions are. **KL divergence** is the standard tool: it measures the extra bits needed to encode samples from $p$ if you built your code for $q$ instead. It is always non-negative (you can never save bits by using the wrong code) and asymmetric (measuring "$q$ approximating $p$" differs from "$p$ approximating $q$"). This asymmetry is critical for understanding variational inference and RLHF.
+
 The KL divergence from $q$ to $p$ measures how much information is lost when $q$ is used to approximate $p$:
 $$D_{KL}(p \,\|\, q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \mathbb{E}_p\left[\log\frac{p}{q}\right]$$
 

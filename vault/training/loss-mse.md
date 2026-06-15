@@ -13,6 +13,8 @@ related: [loss-huber, loss-cross-entropy, backpropagation, bayesian-inference]
 
 ## Fundamental
 
+**Mean Squared Error (MSE)** is the standard loss function for regression. It measures the average squared difference between predictions and true values — a prediction twice as far from the target costs four times as much. Because squaring amplifies large errors, MSE encourages the model to avoid big mistakes, at the cost of being sensitive to outliers.
+
 $$L_{MSE} = \frac{1}{N}\sum_{i=1}^N (y_i - \hat{y}_i)^2$$
 
 Also written as $L = \frac{1}{2}\|y - \hat{y}\|^2$ (the $\frac{1}{2}$ is a convenience that cancels in the gradient).

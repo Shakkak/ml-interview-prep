@@ -13,6 +13,8 @@ related: [loss-kl-divergence, variational-autoencoders, bayesian-inference, entr
 
 ## Fundamental
 
+A **convex function** curves upward like a bowl — the line segment between any two points on the graph lies above or on the curve. Convexity matters because gradient descent on a convex function is guaranteed to find the global minimum with no local minima to get stuck in. **Jensen's inequality** is the key tool that makes this precise, and it shows up everywhere: proving KL divergence is non-negative, deriving the ELBO in VAEs, and proving the AM-GM inequality.
+
 A function $f: \mathbb{R}^n \to \mathbb{R}$ is **convex** if for any $x, y$ and $\lambda \in [0,1]$:
 
 $$f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda)f(y)$$

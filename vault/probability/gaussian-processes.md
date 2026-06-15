@@ -13,6 +13,8 @@ related: [bayesian-inference, kernel-methods, distributions-gaussian, variationa
 
 ## Fundamental
 
+Standard ML models predict a single output value — a **Gaussian process (GP)** goes further by placing a probability distribution over the entire function you are trying to learn. At every input point, a GP gives you both a mean prediction and an uncertainty estimate. This makes GPs the classic tool for Bayesian optimization (finding the best setting of hyperparameters with few expensive evaluations) and any regression problem where calibrated uncertainty matters.
+
 ### Definition
 
 A **Gaussian process** is a probability distribution over functions: any finite collection of function values $\{f(x_1), \ldots, f(x_n)\}$ is jointly Gaussian. Formally:

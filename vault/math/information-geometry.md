@@ -13,6 +13,8 @@ related: [fisher-information, exponential-family, variational-inference, statist
 
 ## Fundamental
 
+Ordinary calculus measures distances in Euclidean space. When your objects are probability distributions rather than vectors, the natural notion of distance is not Euclidean — it depends on how different two distributions are statistically. **Information geometry** formalizes this by treating a family of distributions as a curved space (manifold) where distances are measured by Fisher information. The payoff: it explains why natural gradient descent converges faster, and gives a geometric interpretation of KL divergence and the ELBO.
+
 ### Statistical Manifolds
 
 **Information geometry** treats families of probability distributions as **Riemannian manifolds**, where each point is a distribution $p_\theta$ and distances are measured by the Fisher information metric.

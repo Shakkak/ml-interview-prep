@@ -13,6 +13,8 @@ related: [kernel-methods, linear-algebra-fundamentals, math-svd, eigenvalues-pca
 
 ## Fundamental
 
+The **Gram matrix** encodes all pairwise similarities between a set of vectors — each entry is the dot product between two vectors. It appears in kernel methods (the kernel matrix is a Gram matrix computed via the kernel trick), neural style transfer (matching texture by matching feature correlations), and the theory of neural network training dynamics (the NTK is a Gram matrix of gradients).
+
 ### Definition
 
 Given a matrix $X \in \mathbb{R}^{n \times d}$ (rows are vectors), the **Gram matrix** is:

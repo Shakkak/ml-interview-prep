@@ -13,6 +13,8 @@ related: [loss-mse, regularization-weight-decay, statistical-inference-mle, bias
 
 ## Fundamental
 
+**Linear regression** is the simplest prediction model: it estimates a continuous output as a weighted sum of input features. It matters far beyond its simplicity — it is the only model with a closed-form optimal solution, making it the ideal case study for understanding regularization (Ridge and LASSO), the bias-variance tradeoff, and what optimization is trying to do. Every more complex model is essentially doing what linear regression does, but in a feature space learned jointly with the prediction.
+
 ### Model and Objective
 
 Linear regression models the relationship between inputs $\mathbf{x} \in \mathbb{R}^p$ and scalar output $y$:

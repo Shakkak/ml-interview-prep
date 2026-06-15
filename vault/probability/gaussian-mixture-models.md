@@ -13,6 +13,8 @@ related: [distributions-gaussian, expectation-maximization, clustering, variatio
 
 ## Fundamental
 
+Real data rarely comes from a single Gaussian — it often forms multiple clusters. A **Gaussian Mixture Model (GMM)** models this by assuming data is drawn from one of $K$ Gaussian components, where the cluster membership is unobserved (latent). It is the probabilistic version of K-means, and fitting it with the EM algorithm lets you discover soft cluster assignments and estimate the shape of each cluster.
+
 ### Definition
 
 A Gaussian Mixture Model is a **weighted sum of Gaussian distributions**. The joint distribution is:

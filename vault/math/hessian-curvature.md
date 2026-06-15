@@ -13,6 +13,8 @@ related: [loss-landscape, matrix-calculus, lagrangian-optimization, numerical-me
 
 ## Fundamental
 
+While the gradient tells you which direction to go to reduce a function, the **Hessian** tells you how curved the function is — whether a step in some direction will decrease it a little or a lot. In ML it appears in second-order optimization (Newton's method, K-FAC), loss landscape analysis (flat vs. sharp minima and generalization), and explains why poorly-conditioned loss surfaces make gradient descent slow.
+
 ### The Hessian
 
 For a scalar function $f: \mathbb{R}^n \to \mathbb{R}$, the **Hessian** $H \in \mathbb{R}^{n \times n}$ is the matrix of second partial derivatives:

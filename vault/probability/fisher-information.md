@@ -13,6 +13,8 @@ related: [statistical-inference-mle, matrix-calculus, optimizer-adam, entropy-mu
 
 ## Fundamental
 
+**Fisher information** measures how much information a single data observation carries about a model parameter — specifically, how sharply the likelihood peaks near the true parameter value. A high Fisher information means small data changes shift the likelihood a lot, so the parameter is easy to estimate. It sets the fundamental lower bound on estimator variance (Cramér-Rao bound) and is the metric that natural gradient methods use instead of Euclidean distance in parameter space.
+
 ### Fisher Information (Scalar Case)
 
 For a model with parameter $\theta$ and log-likelihood $\ell(\theta; x) = \log p(x; \theta)$:

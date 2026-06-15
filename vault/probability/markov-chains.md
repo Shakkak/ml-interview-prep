@@ -13,6 +13,8 @@ related: [distributions-overview, bayesian-inference, entropy-mutual-info]
 
 ## Fundamental
 
+Many systems evolve over time where only the current state matters for predicting the future — not the full history. **Markov chains** formalize this "memoryless" property: the next state depends only on the current one. This simple assumption makes many problems analytically tractable and appears throughout ML: PageRank, reinforcement learning environments, MCMC sampling, and hidden Markov models are all built on Markov chains.
+
 ### The Markov Property
 
 A sequence $X_0, X_1, X_2,\ldots$ is a Markov chain if:

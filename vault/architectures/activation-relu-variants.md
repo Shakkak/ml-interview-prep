@@ -13,6 +13,8 @@ related: [activation-gelu-swish, activation-sigmoid-tanh, backpropagation-advanc
 
 ## Fundamental
 
+An **activation function** introduces non-linearity into a neural network — without it, stacking layers collapses to a single linear transformation. **ReLU (Rectified Linear Unit)** is the activation that made deep networks practical: it passes positive values unchanged and zeros out negatives, keeping gradients alive across many layers.
+
 $$\text{ReLU}(x) = \max(0, x)$$
 
 Gradient: $1$ if $x > 0$, else $0$. Computationally trivial.

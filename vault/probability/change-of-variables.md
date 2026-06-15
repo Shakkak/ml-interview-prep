@@ -13,6 +13,8 @@ related: [normalizing-flows, variational-autoencoders, distributions-gaussian, m
 
 ## Fundamental
 
+When you apply a function to a random variable, it changes the distribution — but probability must still add up to 1, so the density must stretch or compress to compensate. The **change of variables formula** tells you exactly how the density transforms: you multiply by the Jacobian, which measures how much the function stretches space. This is the foundation of normalizing flows (which turn simple distributions into complex ones by stacking transformations) and appears whenever you reparameterize a model.
+
 ### Scalar Change of Variables
 
 Given a random variable $X$ with density $p_X(x)$ and a **monotone differentiable** transformation $Y = g(X)$, the density of $Y$ is:

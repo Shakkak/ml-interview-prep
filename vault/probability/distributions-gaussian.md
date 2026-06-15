@@ -13,6 +13,8 @@ related: [distributions-overview, maximum-entropy-principle, bayesian-inference,
 
 ## Fundamental
 
+The **Gaussian (normal) distribution** is the most important distribution in statistics and ML. It describes the bell-shaped pattern that emerges whenever many independent random effects add together — from measurement noise to prediction errors. It is the default choice for continuous-valued uncertainty, and underpins linear regression, Bayesian inference, VAEs, and diffusion models. The Central Limit Theorem explains why it appears so universally: sums of any independent random variables converge to Gaussian.
+
 ### Univariate Gaussian
 
 $$p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$

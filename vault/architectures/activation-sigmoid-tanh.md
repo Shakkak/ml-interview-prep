@@ -13,6 +13,8 @@ related: [activation-relu-variants, activation-softmax, loss-cross-entropy, back
 
 ## Fundamental
 
+**Sigmoid** and **tanh** were the original activation functions for neural networks. Sigmoid squashes any real input into $(0, 1)$, making it a natural output for probabilities. Tanh squashes into $(-1, 1)$, giving zero-centered outputs. Both suffer from vanishing gradients in deep networks — the main reason ReLU replaced them in hidden layers — but they still play specific roles in gates and output layers.
+
 $$\sigma(x) = \frac{1}{1 + e^{-x}} \qquad \tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}} = 2\sigma(2x) - 1$$
 
 **Sigmoid:** range $(0, 1)$. Derivative: $\sigma'(x) = \sigma(x)(1 - \sigma(x))$. Maximum gradient at $x=0$: $\sigma'(0) = 0.25$.

@@ -13,6 +13,8 @@ related: [linear-algebra-fundamentals, math-svd, matrix-calculus, lagrangian-opt
 
 ## Fundamental
 
+**Eigenvectors** are the "natural axes" of a matrix — the directions a linear transformation stretches or compresses without rotating. **Eigenvalues** say how much stretching happens along each axis. They underlie PCA (finding directions of maximum variance), graph algorithms, spectral clustering, and stability analysis of optimization. If you've ever seen a covariance ellipse or a scree plot, you've seen eigenvalues in action.
+
 A vector $v \neq 0$ is an **eigenvector** of a square matrix $A \in \mathbb{R}^{n\times n}$ with **eigenvalue** $\lambda$ if:
 
 $$Av = \lambda v$$

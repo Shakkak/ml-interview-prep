@@ -13,6 +13,8 @@ related: [sampling-methods, importance-sampling, distributions-overview, bayesia
 
 ## Fundamental
 
+Most integrals in probability and machine learning — computing expectations, normalizing constants, or marginal likelihoods — cannot be solved analytically. **Monte Carlo methods** sidestep this by using random samples: draw many samples from a distribution, average the function over those samples, and use the average as the estimate. With enough samples, this converges to the true answer regardless of the dimensionality of the problem — making Monte Carlo the workhorse of Bayesian inference and RL.
+
 ### The Monte Carlo Estimator
 
 For any expectation $\mu = \mathbb{E}_{p}[f(X)] = \int f(x) p(x) dx$ that is intractable analytically, the **Monte Carlo estimator** approximates it with a sample average:

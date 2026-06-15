@@ -13,6 +13,8 @@ related: [statistical-inference-mle, exponential-family, bayesian-inference, fis
 
 ## Fundamental
 
+When estimating a parameter from data, you usually don't need all the raw data — some compressed summary captures everything. A **sufficient statistic** is exactly that: a function of the data that retains all the information about the parameter. For example, to estimate the mean of a Gaussian you only need the sample mean, not all $n$ individual values. Sufficiency explains why MLE estimators in the exponential family have elegant closed forms.
+
 ### Definition
 
 A statistic $T(X)$ is **sufficient** for parameter $\theta$ if the conditional distribution of $X$ given $T(X)$ does not depend on $\theta$:

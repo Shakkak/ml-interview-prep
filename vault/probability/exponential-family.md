@@ -13,6 +13,8 @@ related: [distributions-overview, distributions-gaussian, statistical-inference-
 
 ## Fundamental
 
+The **exponential family** is a large class of distributions — Gaussian, Bernoulli, Poisson, Gamma, Beta, and many more — that all share the same mathematical form. This shared structure means one unified theory covers all of them: MLE always reduces to matching sufficient statistics, conjugate priors always exist, and the natural gradient has a clean form. Understanding the exponential family is the key to understanding why so many ML algorithms have elegant closed-form solutions.
+
 ### Definition
 
 A distribution $p(x \mid \eta)$ belongs to the **exponential family** if it can be written:

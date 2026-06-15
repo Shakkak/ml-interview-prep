@@ -13,6 +13,8 @@ related: [activation-sigmoid-tanh, loss-cross-entropy, attention-mechanism, back
 
 ## Fundamental
 
+**Softmax** converts a vector of raw scores (logits) — one per class — into a probability distribution over all classes. Every output is positive and they all sum to 1, making softmax the standard final layer for multi-class classification. The exponential function ensures larger logits get disproportionately higher probability, creating sharp decisions when scores differ by even a few units.
+
 For a vector of logits $z \in \mathbb{R}^K$:
 
 $$\text{softmax}(z)_k = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}$$

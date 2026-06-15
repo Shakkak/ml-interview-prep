@@ -13,6 +13,8 @@ related: [arch-residual-block, arch-bottleneck-1x1, arch-depthwise-separable, fe
 
 ## Fundamental
 
+This is a reference guide to the key CNN building blocks — how to compute parameter counts, FLOPs, and receptive fields. These numbers come up constantly when reasoning about model size, efficiency tradeoffs, and why certain architectural choices (stride, kernel size, depth) were made.
+
 A 2D convolution of input $x \in \mathbb{R}^{C_{in} \times H \times W}$ with kernel $w \in \mathbb{R}^{C_{out} \times C_{in} \times K \times K}$ produces:
 - **Parameters:** $C_{out} \times C_{in} \times K^2 + C_{out}$
 - **FLOPs:** $C_{out} \times C_{in} \times K^2 \times H' \times W'$

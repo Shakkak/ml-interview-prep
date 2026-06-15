@@ -13,6 +13,8 @@ related: [optimizer-sgd-momentum, lagrangian-optimization, second-order-optimiza
 
 ## Fundamental
 
+Some optimization problems become easy when you fix all variables but one — the one-dimensional subproblem often has a closed-form solution. **Coordinate descent** exploits this by cycling through all variables, updating each one in turn while holding the rest fixed. It is the algorithm behind LASSO regression, SVM training, and some matrix factorization methods, and is particularly effective when the exact per-variable update is cheap to compute.
+
 ### Algorithm
 
 **Coordinate descent** minimizes $f(\theta_1, \ldots, \theta_n)$ by cycling through variables and minimizing over each one while holding the others fixed:

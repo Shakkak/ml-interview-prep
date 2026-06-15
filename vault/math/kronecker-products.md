@@ -13,6 +13,8 @@ related: [linear-algebra-fundamentals, matrix-calculus, math-svd, information-ge
 
 ## Fundamental
 
+The **Kronecker product** builds a large block matrix from two smaller ones — each entry of the first matrix multiplies the entire second matrix. In ML, it appears in K-FAC (an efficient approximation of the Fisher information matrix for second-order optimization), tensorized neural network layers, and the vec trick that converts matrix equations into vector equations. It is mainly a tool for structured matrix algebra that makes otherwise expensive operations tractable.
+
 ### Definition
 
 For matrices $A \in \mathbb{R}^{m \times n}$ and $B \in \mathbb{R}^{p \times q}$, the **Kronecker product** $A \otimes B \in \mathbb{R}^{mp \times nq}$ is the block matrix:

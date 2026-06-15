@@ -13,6 +13,8 @@ related: [feature-pyramid-networks, bayesian-inference, bias-variance-double-des
 
 ## Fundamental
 
+How do you know if a model is good? Accuracy alone is misleading — a model that predicts "no cancer" for every patient achieves 99% accuracy on a dataset that is 99% healthy. **Evaluation metrics** capture the right tradeoffs for each problem type: precision and recall for classification with class imbalance, mAP for object detection, mIoU for segmentation, and calibration for probabilistic models. Choosing the wrong metric is one of the most common sources of misleading evaluation results.
+
 For binary classification with threshold $t$ (predict positive if score ≥ $t$):
 
 |  | Predicted Positive | Predicted Negative |

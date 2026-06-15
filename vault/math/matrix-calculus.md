@@ -13,6 +13,8 @@ related: [linear-algebra-fundamentals, eigenvalues-pca, backpropagation, backpro
 
 ## Fundamental
 
+Training a neural network means computing how the loss changes with respect to every weight — derivatives of functions that take vectors as input and return vectors or scalars. **Matrix calculus** extends ordinary differentiation to these multi-dimensional functions. It is the language of backpropagation: every gradient update is a matrix calculus expression.
+
 We use **denominator layout** (Jacobian layout): the gradient $\nabla_x f$ has the same shape as $x$. For scalar $f$ and vector $x \in \mathbb{R}^n$: $\nabla_x f \in \mathbb{R}^n$.
 
 ### Scalar-by-Vector Derivatives

@@ -13,6 +13,8 @@ related: [distributions-overview, distributions-gaussian, central-limit-theorem,
 
 ## Fundamental
 
+**Moments** summarize a distribution by its expected powers: the first moment is the mean, the second gives variance, the third measures skewness. A **moment generating function (MGF)** encodes all moments in a single function — differentiating it at zero gives any moment directly. MGFs are why the Central Limit Theorem works: the MGF of a sum of independent variables is the product of their individual MGFs, which converges to the Gaussian MGF as terms accumulate.
+
 ### Moments of a Distribution
 
 The **$k$-th moment** of a random variable $X$ is $\mu_k = \mathbb{E}[X^k]$. Moments characterize the shape of a distribution:

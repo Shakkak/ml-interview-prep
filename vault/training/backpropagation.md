@@ -13,6 +13,8 @@ related: [backpropagation-advanced, normalization-layers]
 
 ## Fundamental
 
+**Backpropagation** is how neural networks learn — it computes the gradient of the loss with respect to every weight in the network. The core idea is the chain rule of calculus applied layer by layer from output back to input: each layer passes responsibility for the error backwards to the layers before it. Without backpropagation, training a deep network would be computationally intractable.
+
 A neural network is a composed function $f_\theta : \mathbb{R}^n \to \mathbb{R}^m$. For a fully connected network with $L$ layers:
 
 $$a^{(0)} = x \quad \text{(input)}$$
