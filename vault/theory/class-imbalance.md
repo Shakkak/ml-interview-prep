@@ -5,6 +5,7 @@ aliases: [class imbalance, imbalanced dataset, SMOTE, oversampling, undersamplin
 difficulty: 1
 status: complete
 related: [loss-focal, loss-cross-entropy, data-augmentation, evaluation-metrics-guide, logistic-regression]
+depends_on: [loss-cross-entropy, evaluation-metrics-guide, distributions-overview]
 ---
 
 # Class Imbalance
@@ -85,4 +86,10 @@ For deep networks, class imbalance interacts with:
 - **Early stopping:** monitor minority class recall, not overall accuracy
 - **Transfer learning:** pretrained features may already encode minority class structure — fine-tuning with class weights often sufficient
 
-*See also: [[loss-focal]] · [[loss-cross-entropy]] · [[evaluation-metrics-guide]] · [[data-augmentation]]*
+## Links
+
+- [[loss-cross-entropy]] — standard cross-entropy treats all classes equally; class-weighted cross-entropy scales the loss by $1/\text{class frequency}$ to up-weight minority classes
+- [[loss-focal]] — focal loss $(1-p_t)^\gamma$ down-weights easy (well-classified majority) examples and focuses training on hard minority examples; used in RetinaNet for object detection
+- [[evaluation-metrics-guide]] — accuracy is misleading for imbalanced data (99% accuracy on 99% majority); use precision, recall, F1, AUROC, or AP over the minority class
+- [[distributions-overview]] — class imbalance means the marginal distribution $p(y)$ is skewed; both loss reweighting and sampling methods correct for this prior shift
+- [[data-augmentation]] — SMOTE synthesizes minority class samples in feature space by interpolating between nearest neighbors; it is a data-level alternative to loss reweighting

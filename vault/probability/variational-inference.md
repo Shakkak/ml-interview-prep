@@ -5,6 +5,7 @@ aliases: [VI, variational Bayes, ELBO, mean-field approximation, amortized infer
 difficulty: 3
 status: complete
 related: [bayesian-inference, loss-kl-divergence, variational-autoencoders, normalizing-flows, sampling-methods, fisher-information, change-of-variables]
+depends_on: [bayesian-inference, loss-kl-divergence, math-convexity-jensen]
 ---
 
 # Variational Inference
@@ -89,6 +90,8 @@ Mean-field $q$ is too simple for complex posteriors. **Normalizing flows** (see 
 
 $$q_K(\mathbf{z}_K) = q_0(\mathbf{z}_0) \prod_{k=1}^K \left|\det J_{f_k}\right|^{-1}$$
 
+where $q_0(\mathbf{z}_0)$ = a simple base distribution (e.g., standard Gaussian), $f_1, \ldots, f_K$ = invertible transformations applied in sequence, $\mathbf{z}_K = f_K \circ \cdots \circ f_1(\mathbf{z}_0)$ = the final transformed variable, $J_{f_k}$ = Jacobian matrix of transformation $f_k$ (its derivative), and $|\det J_{f_k}|^{-1}$ = the change-of-variables factor that accounts for volume distortion under each transformation (see [[change-of-variables]]).
+
 The ELBO with flow-based $q$ is maximized jointly over base distribution parameters and transformation parameters. This trades the bias of mean-field for computational cost ($K$ flow steps per sample).
 
 ---
@@ -119,4 +122,12 @@ For exponential families, the natural gradient has closed form. **Stochastic nat
 
 ---
 
-*See also: [[bayesian-inference]] · [[loss-kl-divergence]] · [[variational-autoencoders]] · [[normalizing-flows]] · [[sampling-methods]] · [[change-of-variables]] · [[expectation-maximization]]*
+## Links
+
+- [[bayesian-inference]] — VI approximates intractable posteriors $p(\theta|x)$ by finding the closest distribution in a tractable family $q_\phi(\theta)$ under KL divergence
+- [[loss-kl-divergence]] — the ELBO is derived by applying Jensen's inequality to $\log p(x)$: $\text{ELBO} = \mathbb{E}_q[\log p(x,z)] - \mathbb{E}_q[\log q(z)]$; maximizing ELBO = minimizing $\text{KL}(q\|p)$
+- [[math-convexity-jensen]] — the ELBO inequality $\log p(x) \geq \text{ELBO}$ follows from Jensen's inequality applied to the concave $\log$ function
+- [[variational-autoencoders]] — VAEs implement amortized VI: an encoder network $q_\phi(z|x)$ learns variational parameters directly from data, rather than optimizing per-datapoint
+- [[normalizing-flows]] — normalizing flows make $q_\phi$ more expressive by composing invertible transformations; this closes the gap between the ELBO and the true log-likelihood
+- [[sampling-methods]] — MCMC and VI are complementary: MCMC is unbiased but slow; VI is biased but fast and scales to large datasets via stochastic optimization
+- [[expectation-maximization]] — EM is a special case of VI where the E-step computes the exact posterior $q = p(z|x,\theta)$; VI replaces the exact E-step with an approximate update

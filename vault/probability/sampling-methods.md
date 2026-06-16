@@ -5,6 +5,7 @@ aliases: [Monte Carlo, MCMC, importance sampling, Metropolis-Hastings, ancestral
 difficulty: 3
 status: complete
 related: [bayesian-inference, markov-chains, diffusion-models, variational-autoencoders, distributions-gaussian, entropy-mutual-info]
+depends_on: [distributions-overview, bayesian-inference, markov-chains]
 ---
 
 # Sampling Methods — Monte Carlo, MCMC, and Importance Sampling
@@ -110,6 +111,8 @@ Standard MH with a Gaussian random walk proposal mixes poorly in high dimensions
 
 $$H(x, p) = -\log \pi(x) + \frac{1}{2}p^\top M^{-1}p$$
 
+where $x$ = position (model parameters), $p$ = auxiliary momentum, $\pi(x)$ = target distribution, and $M$ = mass matrix (positive definite, often $M = I$; scales momentum in each parameter direction).
+
 Leapfrog integration discretizes the Hamiltonian dynamics: $p \leftarrow p - \frac{\epsilon}{2}\nabla_x U(x)$, $x \leftarrow x + \epsilon M^{-1}p$, $p \leftarrow p - \frac{\epsilon}{2}\nabla_x U(x)$.
 
 A Metropolis correction accepts/rejects the proposed $(x', p')$ to correct for numerical integration error. The No-U-Turn Sampler (NUTS, Hoffman & Gelman 2014) automatically tunes the trajectory length, making HMC essentially tuning-free.
@@ -142,8 +145,17 @@ SVGD (Liu & Wang, 2016) maintains a set of particles $\{x_i\}$ and evolves them 
 
 $$x_i \leftarrow x_i + \epsilon \phi^*(x_i), \quad \phi^*(x) = \frac{1}{n}\sum_j [k(x_j, x)\nabla_{x_j}\log p(x_j) + \nabla_{x_j}k(x_j, x)]$$
 
+where $\{x_i\}_{i=1}^n$ = set of particles approximating the target, $k(x_j, x)$ = kernel function (e.g., RBF $k(x,y) = \exp(-\|x-y\|^2/h)$), the first term drives particles toward high-probability regions of $p$, and the second term repels particles from each other to maintain diversity.
+
 The optimal perturbation $\phi^*$ in the RKHS minimizes the KL divergence between the particle distribution and the target. Unlike MCMC, SVGD is deterministic and leverages repulsion (from the kernel gradient term) to maintain particle diversity. It bridges variational inference (deterministic) and particle-based sampling.
 
 ---
 
-*See also: [[bayesian-inference]] · [[markov-chains]] · [[diffusion-models]] · [[variational-autoencoders]] · [[distributions-gaussian]] · [[autoregressive-models]]*
+## Links
+
+- [[distributions-overview]] — sampling methods exist because most non-standard distributions cannot be sampled analytically; they approximate expectations under complex posteriors
+- [[bayesian-inference]] — MCMC and importance sampling are the workhorses of Bayesian inference when the posterior is intractable; they approximate posterior expectations
+- [[markov-chains]] — MCMC methods (Metropolis-Hastings, Gibbs) construct Markov chains whose stationary distribution equals the target; ergodicity guarantees convergence
+- [[diffusion-models]] — Langevin dynamics (a special MCMC method) samples from distributions defined by their score function; denoising diffusion models are trained using this connection
+- [[variational-autoencoders]] — the reparameterization trick makes stochastic sampling differentiable, enabling gradient flow through Monte Carlo estimates
+- [[autoregressive-models]] — autoregressive generation is ancestral sampling: sample $x_1$, then $x_2|x_1$, etc.; this is exact (no MCMC needed) because the joint factorizes causally

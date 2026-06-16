@@ -5,6 +5,7 @@ aliases: [dropout, inverted dropout, DropBlock]
 difficulty: 1
 status: complete
 related: [regularization-weight-decay, normalization-layers, bias-variance-double-descent]
+depends_on: [backpropagation, bias-variance-double-descent]
 ---
 
 # Dropout
@@ -61,6 +62,8 @@ More effective regularization, especially at high-resolution feature maps. Keep 
 **MC Dropout for uncertainty estimation** (Gal & Ghahramani, 2016): keep dropout active at inference and run $T$ forward passes. The variance of predictions estimates **epistemic uncertainty** (model uncertainty from limited data):
 $$\text{uncertainty} \approx \text{Var}_{t=1}^T[f_t(x)]$$
 
+where $T$ = number of stochastic forward passes (typically 20–50), $f_t(x)$ = prediction with different dropout mask at pass $t$, $\text{Var}$ = variance across passes (high = model is uncertain).
+
 Used in medical imaging, autonomous driving — domains where knowing *when the model doesn't know* is critical. MC Dropout with $T=50$ passes approximates a Bayesian neural network's posterior predictive distribution at low cost.
 
 **Spatial dropout / channel dropout:** a variant that drops entire channels in a feature map rather than individual activations. Useful for regularizing fully convolutional networks where channels encode semantic features — dropping a channel forces the network to learn redundant feature representations across channels.
@@ -81,4 +84,11 @@ Used in medical imaging, autonomous driving — domains where knowing *when the 
 
 ---
 
-*See also: [[regularization-weight-decay]] · [[normalization-layers]] · [[bias-variance-double-descent]] · [[ensemble-methods]] · [[bayesian-inference]]*
+## Links
+
+- [[backpropagation]] — dropout masks are applied during the forward pass; during backpropagation, gradients are zeroed for dropped units (using the same mask from forward)
+- [[bias-variance-double-descent]] — dropout reduces variance (by preventing co-adaptation of features) at a small bias cost; it is most effective at intermediate model sizes
+- [[regularization-weight-decay]] — dropout and weight decay are complementary regularizers; dropout targets co-adaptation, weight decay targets weight magnitude; using both often gives better results
+- [[normalization-layers]] — dropout interacts poorly with batch normalization (different effective batch statistics during train/eval); layer norm is preferred with dropout for transformers
+- [[ensemble-methods]] — Monte Carlo dropout: at test time, keep dropout on and run $k$ forward passes; the variance of predictions approximates Bayesian uncertainty (Gal & Ghahramani, 2016)
+- [[bayesian-inference]] — dropout has a Bayesian interpretation as variational inference in a Gaussian process; the dropout mask is a sample from a Bernoulli variational distribution over network architectures

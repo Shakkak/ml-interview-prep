@@ -5,6 +5,8 @@ aliases: [distributions, probability distributions, common distributions]
 difficulty: 1
 status: complete
 related: [distributions-gaussian, maximum-entropy-principle, bayesian-inference, entropy-mutual-info, loss-cross-entropy]
+depends_on: []
+
 ---
 
 # Probability Distributions Overview
@@ -12,6 +14,10 @@ related: [distributions-gaussian, maximum-entropy-principle, bayesian-inference,
 ---
 
 ## Fundamental
+
+**Why different distributions?** Every probabilistic model requires you to describe how the data is generated. A distribution is your claim about which values are likely and how spread out they are. The *wrong* distribution leads to a model that cannot express the true uncertainty in your data — for example, using a Gaussian to model count data forces negative values to have non-zero probability, which is nonsensical. Choosing the right distribution is the first design decision in any probabilistic model.
+
+The key factors: **support** (what values can the variable take?), **generating process** (is this a sum of effects, a count, a probability?), and **tail behavior** (rare events likely or not?).
 
 ### Choosing a Distribution: Decision Framework
 
@@ -130,4 +136,10 @@ The distribution of the maximum of $n$ i.i.d. random variables converges to one 
 
 ---
 
-*See also: [[distributions-gaussian]] · [[maximum-entropy-principle]] · [[bayesian-inference]] · [[entropy-mutual-info]] · [[normalizing-flows]]*
+## Links
+
+- [[distributions-gaussian]] — the most important continuous distribution; full treatment with multivariate, conditional, and GP forms
+- [[maximum-entropy-principle]] — MaxEnt selects the distribution with least information given only the constraints you have (mean, support, etc.)
+- [[bayesian-inference]] — conjugate prior tables connect directly to the likelihood families catalogued here
+- [[entropy-mutual-info]] — Shannon entropy of each distribution measures its average information content
+- [[normalizing-flows]] — change-of-variables formula for transforming simple distributions into complex ones with exact likelihood

@@ -4,6 +4,7 @@ tags: [activation, training, probability]
 aliases: [sigmoid, tanh, logistic function, saturating activations]
 difficulty: 1
 status: complete
+depends_on: [backpropagation-advanced]
 related: [activation-relu-variants, activation-softmax, loss-cross-entropy, backpropagation-advanced]
 ---
 
@@ -12,6 +13,10 @@ related: [activation-relu-variants, activation-softmax, loss-cross-entropy, back
 ---
 
 ## Fundamental
+
+**The problem they solve:** neural network layers need to introduce non-linearity, and early networks needed outputs that could be interpreted as probabilities or bounded signals. Sigmoid and tanh were chosen because they are smooth, bounded, and biologically motivated.
+
+**Why they became limited:** their gradients vanish as $|x|$ grows — both functions flatten out, contributing near-zero gradient signal to backpropagation. This makes training deep networks with these activations extremely slow or impossible. [[activation-relu-variants|ReLU]] solved this for hidden layers; sigmoid and tanh survive today only in output layers and gates.
 
 **Sigmoid** and **tanh** were the original activation functions for neural networks. Sigmoid squashes any real input into $(0, 1)$, making it a natural output for probabilities. Tanh squashes into $(-1, 1)$, giving zero-centered outputs. Both suffer from vanishing gradients in deep networks — the main reason ReLU replaced them in hidden layers — but they still play specific roles in gates and output layers.
 
@@ -41,7 +46,7 @@ In a 10-layer sigmoid network, the gradient at layer 1 involves:
 
 $$\frac{\partial L}{\partial W_1} = \frac{\partial L}{\partial a_{10}} \cdot \prod_{k=2}^{10} \sigma'(z_k) \cdot W_k$$
 
-If neurons are in their saturated regime, $\sigma'(z_k) \approx 0.05$ each. Then:
+where $L$ is the loss, $W_1$ is the weight matrix at layer 1, $a_{10}$ is the activation at the final layer 10, $\sigma'(z_k)$ is the sigmoid derivative at the pre-activation $z_k$ of layer $k$, and the product runs over all intermediate layers (the chain rule). If neurons are in their saturated regime, $\sigma'(z_k) \approx 0.05$ each. Then:
 $$\text{gradient magnitude} \propto (0.05)^{9} \approx 2 \times 10^{-12}$$
 
 Effectively zero. This is why sigmoid was abandoned for hidden layers.
@@ -80,7 +85,7 @@ In an LSTM, the forget gate is $f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)$. Sigmoid
 
 $$c_t = f_t \odot c_{t-1} + i_t \odot \tanh(W_c [h_{t-1}, x_t] + b_c)$$
 
-The tanh squashes values to $[-1, 1]$, preventing unbounded cell state growth. The design choice of tanh for cell states and sigmoid for gates is deliberate and mechanistic — not arbitrary.
+where $c_t$ is the cell state at time $t$, $f_t \in [0,1]^d$ is the forget gate (how much of the old state to keep), $\odot$ is element-wise multiplication, $c_{t-1}$ is the previous cell state, $i_t \in [0,1]^d$ is the input gate (how much new information to add), $W_c$ is the weight matrix for the cell update, $[h_{t-1}, x_t]$ concatenates the previous hidden state and current input, and $b_c$ is the bias. The tanh squashes candidate values to $[-1, 1]$, preventing unbounded cell state growth. The design choice of tanh for cell states and sigmoid for gates is deliberate and mechanistic — not arbitrary.
 
 ### Softplus: The Smooth Envelope of ReLU
 
@@ -90,4 +95,11 @@ This is a smooth approximation of ReLU. Its derivative is $\sigma(x)$. Rarely us
 
 ---
 
-*See also: [[activation-relu-variants]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[backpropagation-advanced]] · [[backpropagation]] · [[rnn-lstm]]*
+## Links
+
+- [[backpropagation-advanced]] — sigmoid's $\sigma'(z) \leq 0.25$ is the root cause of vanishing gradients; the Jacobian product shrinks exponentially per layer
+- [[activation-relu-variants]] — ReLU replaced sigmoid/tanh for hidden layers precisely to avoid saturation-induced vanishing gradients
+- [[activation-softmax]] — softmax is the multi-class generalization of sigmoid; for binary classification they are equivalent
+- [[loss-cross-entropy]] — binary cross-entropy with sigmoid output has gradient $\hat{p} - y$; sigmoid is the canonical output for binary classification
+- [[backpropagation]] — sigmoid's smooth gradient everywhere makes it mathematically convenient; its vanishing gradient problem drove the search for better activations
+- [[rnn-lstm]] — LSTM gates use sigmoid (to produce values in $[0,1]$) and tanh (to produce cell state candidates in $[-1,1]$)

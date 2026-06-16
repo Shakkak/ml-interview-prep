@@ -4,6 +4,7 @@ tags: [evaluation, metrics, classification, detection, segmentation, calibration
 aliases: [precision recall, mAP, AUC, ROC, F1, calibration, IoU, mIoU, ECE]
 difficulty: 3
 status: complete
+depends_on: [statistical-inference-mle, distributions-gaussian]
 related: [feature-pyramid-networks, bayesian-inference, bias-variance-double-descent, model-calibration]
 ---
 
@@ -139,4 +140,12 @@ Report a **learning curve** (performance vs. labeled set size) for active learni
 
 ---
 
-*See also: [[feature-pyramid-networks]] · [[bayesian-inference]] · [[model-calibration]] · [[bias-variance-double-descent]] · [[math-means]] · [[distributions-gaussian]] · [[loss-kl-divergence]]*
+## Links
+
+- [[statistical-inference-mle]] — precision, recall, and F1 are frequentist estimators of class-conditional probabilities; their confidence intervals follow from MLE theory
+- [[distributions-gaussian]] — AUROC computes the probability that a randomly chosen positive ranks above a randomly chosen negative; this has a Gaussian approximation for large samples
+- [[bayesian-inference]] — Bayesian model comparison uses log-likelihood ratios that connect to AUC and information-theoretic metrics
+- [[model-calibration]] — ECE (Expected Calibration Error) measures whether predicted probabilities match empirical frequencies; calibration should be evaluated alongside accuracy
+- [[bias-variance-double-descent]] — train vs. test metric gaps directly measure overfitting; learning curves plot metric vs. dataset size revealing bias-variance tradeoffs
+- [[feature-pyramid-networks]] — mAP (mean Average Precision) is the standard detection metric computed by averaging AP over IoU thresholds and object categories
+- [[loss-kl-divergence]] — KL divergence measures the information cost of using the model distribution instead of the true distribution; closely related to cross-entropy evaluation

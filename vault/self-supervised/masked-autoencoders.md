@@ -5,6 +5,7 @@ aliases: [MAE, masked autoencoder, masked image modeling, MIM, BEiT]
 difficulty: 2
 status: complete
 related: [vision-transformer, bert-mlm, self-supervised-overview, dino-dinov2, contrastive-learning, vit-training-recipe]
+depends_on: [vision-transformer, bert-mlm, self-supervised-overview]
 ---
 
 # Masked Autoencoders (MAE)
@@ -41,6 +42,8 @@ The high ratio also makes encoding cheap (only 25% of patches pass through the e
 MAE predicts raw **pixel values** (not discrete tokens or features). Each masked patch's pixel values are normalized by the patch's mean and standard deviation. The loss is MSE over masked patches only:
 
 $$\mathcal{L} = \frac{1}{|\mathcal{M}|} \sum_{i \in \mathcal{M}} \|p_i - \hat{p}_i\|^2$$
+
+where $\mathcal{M}$ = set of masked patch indices, $|\mathcal{M}|$ = number of masked patches, $p_i$ = true (normalized) pixel values of patch $i$, and $\hat{p}_i$ = decoder's prediction for patch $i$.
 
 **BEiT (Bao et al., 2022)** predicts discrete visual tokens (DALL-E tokenizer) instead of pixels — similar performance but requires a separate tokenizer.
 
@@ -91,4 +94,11 @@ Visualization reveals:
 
 **Reconstruction as a regularizer:** the pixel reconstruction objective prevents representation collapse (unlike contrastive methods without careful design) and encourages local-to-global coherence.
 
-*See also: [[vision-transformer]] · [[bert-mlm]] · [[self-supervised-overview]] · [[dino-dinov2]] · [[vit-training-recipe]]*
+## Links
+
+- [[vision-transformer]] — MAE uses ViT as the encoder/decoder backbone; the asymmetric design (full encoder on visible patches only, lightweight decoder on all patches) exploits ViT's patch tokenization
+- [[bert-mlm]] — MAE is the vision analogue of BERT's masked language modeling; the key difference is that BERT predicts discrete tokens while MAE reconstructs continuous pixel values
+- [[self-supervised-overview]] — MAE is a reconstruction-based SSL method; it achieves strong transfer without contrastive learning or negative pairs, challenging the assumption that negatives are necessary
+- [[dino-dinov2]] — DINOv2 combines DINO's self-distillation objective with MAE's masked reconstruction; iBOT adds a masked token prediction head to the DINO teacher-student setup
+- [[contrastive-learning]] — MAE and contrastive learning learn complementary representations: MAE captures fine-grained local texture, contrastive learns global semantic structure
+- [[vit-training-recipe]] — MAE pretraining enables training ViT-L/H from scratch with strong transfer; the vit-training-recipe file covers the downstream fine-tuning procedure after MAE pretraining

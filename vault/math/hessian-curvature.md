@@ -4,6 +4,7 @@ tags: [hessian, curvature, second-order, optimization, loss-landscape]
 aliases: [Hessian, second-order derivatives, curvature, saddle points]
 difficulty: 2
 status: complete
+depends_on: [matrix-calculus, eigenvalues-pca]
 related: [loss-landscape, matrix-calculus, lagrangian-optimization, numerical-methods, eigenvalues-pca]
 ---
 
@@ -20,6 +21,8 @@ While the gradient tells you which direction to go to reduce a function, the **H
 For a scalar function $f: \mathbb{R}^n \to \mathbb{R}$, the **Hessian** $H \in \mathbb{R}^{n \times n}$ is the matrix of second partial derivatives:
 
 $$H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}$$
+
+where $f: \mathbb{R}^n \to \mathbb{R}$ = scalar function (e.g., the training loss), $x_i, x_j$ = the $i$-th and $j$-th parameters, and $H_{ij}$ = how the gradient in direction $i$ changes as we move in direction $j$.
 
 For smooth $f$, the Hessian is symmetric ($H = H^\top$) by Schwarz's theorem.
 
@@ -40,7 +43,7 @@ At a critical point $\nabla f = 0$, the Hessian determines the type:
 | Mixed signs | Saddle point |
 | Some zero | Degenerate (indeterminate) |
 
-**Curvature in direction $\mathbf{d}$:** $\kappa = \mathbf{d}^\top H \mathbf{d} / \|\mathbf{d}\|^2$. The eigenvalues of $H$ are the principal curvatures — maximum curvature = $\lambda_\text{max}$, minimum = $\lambda_\text{min}$.
+**Curvature in direction $\mathbf{d}$:** $\kappa = \mathbf{d}^\top H \mathbf{d} / \|\mathbf{d}\|^2$, where $\mathbf{d} \in \mathbb{R}^n$ = a unit direction vector and $\kappa$ = the second-order rate of increase of $f$ in that direction. The eigenvalues of $H$ are the principal curvatures — maximum curvature = $\lambda_\text{max}$, minimum = $\lambda_\text{min}$.
 
 ---
 
@@ -79,6 +82,8 @@ Computing the full $n \times n$ Hessian is $O(n^2)$ in memory. For large network
 
 $$H\mathbf{v} = \nabla(\nabla f \cdot \mathbf{v})$$
 
+where $\mathbf{v} \in \mathbb{R}^n$ = an arbitrary direction vector, $\nabla f$ = the gradient vector, $\nabla f \cdot \mathbf{v}$ = a scalar (directional derivative of $f$ in direction $\mathbf{v}$), and taking the gradient of that scalar gives the Hessian-vector product. One forward + one backward pass suffices — no materialization of the full $n\times n$ matrix.
+
 This enables iterative eigenvalue methods (Lanczos) to estimate the spectrum, and Hessian-free optimization (conjugate gradient with $H\mathbf{v}$ oracle).
 
 ### Fisher Information and the Hessian
@@ -98,4 +103,10 @@ The natural gradient (see [[fisher-information]]) uses $F^{-1}$ as a preconditio
 | L-BFGS | Low-rank update from gradient history | $O(mn)$, $m$ history steps |
 | Empirical Fisher | $\sum_i \nabla \ell_i \nabla \ell_i^\top$ | $O(n)$ per batch |
 
-*See also: [[loss-landscape]] · [[matrix-calculus]] · [[eigenvalues-pca]] · [[fisher-information]] · [[numerical-methods]]*
+## Links
+
+- [[matrix-calculus]] — the Hessian is the matrix of second-order partial derivatives; computing it requires the chain rule applied twice
+- [[eigenvalues-pca]] — the Hessian's eigenvalues determine curvature: positive eigenvalues = convex direction, zero = flat direction, negative = saddle; largest eigenvalue = sharpness
+- [[loss-landscape]] — the Hessian characterizes the local geometry of the loss landscape; sharpness (largest eigenvalue) correlates with poor generalization
+- [[fisher-information]] — the Fisher information matrix is equal to the expected Hessian of the negative log-likelihood for exponential family models
+- [[numerical-methods]] — the Hessian is $O(p^2)$ to store and $O(p^3)$ to invert; quasi-Newton methods (L-BFGS) approximate the inverse Hessian implicitly

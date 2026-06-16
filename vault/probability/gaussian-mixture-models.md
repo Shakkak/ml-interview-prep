@@ -5,6 +5,7 @@ aliases: [GMM, Gaussian mixture, mixture model, mixture of Gaussians]
 difficulty: 2
 status: complete
 related: [distributions-gaussian, expectation-maximization, clustering, variational-inference, bayesian-inference, distributions-overview, sampling-methods]
+depends_on: [distributions-gaussian, expectation-maximization, bayesian-inference]
 ---
 
 # Gaussian Mixture Models
@@ -120,4 +121,12 @@ GMMs live on the statistical manifold of positive-definite matrices plus the sim
 
 ---
 
-*See also: [[distributions-gaussian]] · [[expectation-maximization]] · [[clustering]] · [[variational-inference]] · [[bayesian-inference]] · [[anomaly-detection]] · [[distributions-overview]]*
+## Links
+
+- [[distributions-gaussian]] — each GMM component is a Gaussian $\mathcal{N}(\mu_k, \Sigma_k)$; the mixture can approximate any continuous density arbitrarily well
+- [[expectation-maximization]] — GMM training is the canonical EM example: E-step computes soft cluster assignments (responsibilities), M-step updates $\mu_k$, $\Sigma_k$, $\pi_k$ in closed form
+- [[bayesian-inference]] — Bayesian GMMs place Dirichlet priors on mixing weights and Normal-Wishart priors on component parameters; this avoids degenerate solutions and enables model selection
+- [[distributions-overview]] — GMMs extend single Gaussians to multimodal distributions; understanding the component distributions is prerequisite to understanding the mixture
+- [[clustering]] — k-means is hard-assignment GMM with isotropic equal-variance components; GMM relaxes both assumptions to soft assignments with general covariances
+- [[variational-inference]] — for infinite GMMs (Dirichlet processes), VI with stick-breaking priors approximates the posterior over the number of components
+- [[anomaly-detection]] — GMMs model the density of normal data; anomalies are detected by low log-likelihood $\log p(x)$ under the learned mixture

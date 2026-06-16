@@ -4,6 +4,7 @@ tags: [prompt-engineering, in-context-learning, few-shot, chain-of-thought, rag,
 aliases: [prompt engineering, in-context learning, ICL, few-shot prompting, chain-of-thought, CoT, RAG, retrieval augmented generation]
 difficulty: 1
 status: complete
+depends_on: [autoregressive-models, attention-mechanism]
 related: [autoregressive-models, instruction-tuning, rlhf, attention-mechanism, clip]
 ---
 
@@ -14,6 +15,8 @@ related: [autoregressive-models, instruction-tuning, rlhf, attention-mechanism, 
 ## Fundamental
 
 A large language model's behavior can be controlled entirely through its input prompt — no gradient updates, no fine-tuning. The model's weights are frozen; the "learning" happens in the forward pass.
+
+**Intuition:** during pretraining, the model learned not just facts but patterns of reasoning from examples. Prompting exploits this: by showing the model context that resembles the style of the answer you want, you bias its next-token distribution toward that style. Few-shot examples teach format; chain-of-thought teaches reasoning structure. The model is not learning — it is recognizing a pattern it has already seen in training data.
 
 **Zero-shot prompting:** give the instruction only, no examples:
 ```
@@ -55,7 +58,7 @@ LLMs are highly sensitive to prompt wording:
 - Order of few-shot examples affects performance
 - Template mismatch (not using the fine-tuning template) causes degradation
 
-**Mitigation:** test multiple formulations, average predictions (ensemble), or use automated prompt optimization (OPRO, APE).
+**Mitigation:** test multiple formulations, average predictions (ensemble), or use automated prompt optimization: **APE (Automatic Prompt Engineer, Zhou et al., 2022)** — have the LLM generate candidate prompt paraphrases, score them on a validation set, and select the best; **OPRO (Optimization by PROmpting, Yang et al., 2023)** — feed the LLM its past prompt attempts and scores, then ask it to suggest improvements, iterating like gradient descent in text space.
 
 ### System vs User Prompts
 
@@ -105,8 +108,18 @@ Prepend a sequence of **learnable soft token embeddings** to the input. Only the
 
 $$\text{input} = [\underbrace{p_1, \ldots, p_k}_{\text{learned}},\ x_1, \ldots, x_T]$$
 
+where $p_1, \ldots, p_k \in \mathbb{R}^d$ are learnable embedding vectors ($d$ = model embedding dimension; these are not real words but continuous vectors optimized by gradient descent), $x_1, \ldots, x_T$ are the actual input token embeddings (fixed), and $k$ is the prefix length (typically 10–100).
+
 At scale (T5-11B), prompt tuning matches full fine-tuning performance while updating only ~0.01% of parameters. Much cheaper storage than [[lora-quantization|LoRA]] — one vector per task.
 
 ---
 
-*See also: [[autoregressive-models]] · [[instruction-tuning]] · [[attention-mechanism]] · [[clip]] · [[arch-kv-cache]] · [[lora-quantization]]*
+## Links
+
+- [[autoregressive-models]] — prompt engineering works because autoregressive LMs continue any prefix; the prompt shapes the distribution over next tokens
+- [[attention-mechanism]] — in-context examples in the prompt are processed by self-attention; earlier examples attend to later ones, enabling few-shot reasoning
+- [[instruction-tuning]] — instruction-tuned models are more robust to prompt phrasing; raw pretrained models require more careful prompting to elicit desired behavior
+- [[rlhf]] — RLHF-aligned models (InstructGPT, Claude) are trained to follow natural-language instructions, reducing the need for prompt engineering tricks
+- [[clip]] — CLIP's zero-shot classification uses prompt templates like "a photo of a [class]"; prompt engineering directly impacts CLIP accuracy
+- [[arch-kv-cache]] — the KV cache computes prompt representations once at prefill; longer prompts increase prefill latency but not generation latency
+- [[lora-quantization]] — retrieval-augmented generation (RAG) — a prompt engineering technique — is complementary to fine-tuning; RAG adds relevant context, fine-tuning bakes knowledge into weights

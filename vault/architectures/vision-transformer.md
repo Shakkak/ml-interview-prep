@@ -4,6 +4,7 @@ tags: [vision-transformer, vit, patch-embedding, class-token, self-supervised, i
 aliases: [ViT, Vision Transformer, patch tokenization, image patches, DeiT, Swin Transformer]
 difficulty: 2
 status: complete
+depends_on: [attention-mechanism, arch-positional-encoding, linear-algebra-fundamentals]
 related: [attention-mechanism, arch-positional-encoding, cnn-architectures-guide, knowledge-distillation, clip, self-supervised-overview, contrastive-learning]
 ---
 
@@ -111,7 +112,7 @@ ViT scales better than CNNs with both parameters and data:
 
 $$\text{Performance} \approx a - b \cdot N_{\text{data}}^{-\alpha}$$
 
-where $\alpha$ is larger for ViT than for CNN. On JFT-3B (3 billion image-label pairs), ViT-G/14 (1.8B params) achieves 90.4% ImageNet top-1 with fine-tuning — a ceiling CNNs appear unable to reach.
+where $a$ = asymptotic best performance (ceiling), $b$ = a positive constant controlling how far below the ceiling we start, $N_{\text{data}}$ = number of training examples, and $\alpha$ = the scaling exponent (larger $\alpha$ = steeper improvement with more data; ViT's $\alpha$ exceeds CNN's). On JFT-3B (3 billion image-label pairs), ViT-G/14 (1.8B params) achieves 90.4% ImageNet top-1 with fine-tuning — a ceiling CNNs appear unable to reach.
 
 The reason: CNN inductive biases act as a prior that is helpful when data is limited but becomes a **constraint** when data is abundant. ViT can leverage arbitrary relational structure in the image that the CNN's local, translation-equivariant prior would ignore. At 300M+ training examples, the CNN's assumptions are increasingly unnecessary and begin to hurt.
 
@@ -125,4 +126,14 @@ RoPE and Swin's relative position bias handle this more elegantly: they are defi
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[cnn-architectures-guide]] · [[knowledge-distillation]] · [[clip]] · [[self-supervised-overview]] · [[data-augmentation]] · [[bert-mlm]]*
+## Links
+
+- [[attention-mechanism]] — ViT applies standard transformer self-attention to patch tokens; each layer mixes information across all patches
+- [[arch-positional-encoding]] — ViT uses 2D learned position embeddings; without them, the model cannot distinguish spatial arrangement of patches
+- [[linear-algebra-fundamentals]] — patch embedding is a learned linear projection of flattened pixel patches; the class token aggregation is a learned linear operation
+- [[cnn-architectures-guide]] — ViT replaces convolutions with attention; CNNs have translation equivariance built in while ViTs learn it from data
+- [[knowledge-distillation]] — DeiT trains ViT efficiently using a distillation token that learns from a CNN teacher
+- [[clip]] — CLIP trains a ViT image encoder jointly with a text encoder via contrastive loss on image-text pairs
+- [[self-supervised-overview]] — DINO and MAE are self-supervised ViT training methods that avoid label requirements
+- [[data-augmentation]] — ViTs require stronger data augmentation than CNNs because they lack the inductive biases that make CNNs sample-efficient
+- [[bert-mlm]] — Masked Autoencoder (MAE) applies masked prediction to image patches, directly analogous to BERT's masked language modeling

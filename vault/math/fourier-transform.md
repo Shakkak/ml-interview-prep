@@ -4,6 +4,7 @@ tags: [signal-processing, frequency-domain, image-processing, mathematics, fft, 
 aliases: [DFT, FFT, frequency analysis, 2D Fourier, convolution theorem, power spectrum, Gabor filter]
 difficulty: 1
 status: complete
+depends_on: [linear-algebra-fundamentals]
 related: [attention-mechanism, backpropagation-advanced, spectral-bias, dilated-convolution, feature-preprocessing]
 ---
 
@@ -272,4 +273,11 @@ Modern audio deep learning (Whisper, wav2vec 2.0, AudioMAE) uses 80-channel log-
 
 ---
 
-*See also: [[spectral-bias]] · [[dilated-convolution]] · [[feature-preprocessing]] · [[attention-mechanism]] · [[distributions-gaussian]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — the Fourier basis is an orthonormal basis for the function space; the DFT matrix is a unitary matrix with complex entries
+- [[spectral-bias]] — neural networks learn low-frequency components first; spectral bias is explained by the NTK eigenspectrum which mirrors the Fourier spectrum
+- [[dilated-convolution]] — dilation in the spatial domain corresponds to downsampling in the frequency domain; understanding this connection guides receptive field design
+- [[feature-preprocessing]] — frequency-domain features (power spectrum, Mel-filterbank) are Fourier-based preprocessing steps for audio and image data
+- [[attention-mechanism]] — the Fourier transform connection: attention with certain kernels is equivalent to convolution; Performer and FNet use Fourier approximations to attention
+- [[distributions-gaussian]] — the Gaussian is its own Fourier transform; convolution of Gaussians produces a Gaussian (a consequence of the convolution theorem)

@@ -5,6 +5,7 @@ aliases: [domain adaptation, distribution shift, covariate shift, label shift, c
 difficulty: 2
 status: complete
 related: [transfer-learning, bias-variance-double-descent, generative-vs-discriminative, contrastive-learning, regularization-dropout]
+depends_on: [transfer-learning, statistical-inference-mle, distributions-overview]
 ---
 
 # Domain Adaptation and Distribution Shift
@@ -67,6 +68,8 @@ Gradient reversal layer: during backpropagation, multiply gradients by $-\lambda
 
 $$\min_{\theta_f, \theta_y} \max_{\theta_d} \mathcal{L}_y(\theta_f, \theta_y) - \lambda \mathcal{L}_d(\theta_f, \theta_d)$$
 
+where $\theta_f$ = feature extractor parameters, $\theta_y$ = label predictor parameters, $\theta_d$ = domain classifier parameters, $\lambda > 0$ = gradient reversal strength, $\mathcal{L}_y$ = label prediction loss, $\mathcal{L}_d$ = domain discrimination loss.
+
 Intuition: if $G_d$ cannot tell which domain a feature came from, the feature doesn't contain domain-specific information. Limitation: forcing domain invariance can hurt if the domains have genuinely different label-relevant features.
 
 **Practical strategies:**
@@ -97,6 +100,8 @@ where $d_{\mathcal{H}\Delta\mathcal{H}}$ is the $\mathcal{H}\Delta\mathcal{H}$-d
 
 $$\mathcal{L}_{CORAL} = \frac{1}{4d^2} \|C_S - C_T\|_F^2$$
 
+where $C_S, C_T \in \mathbb{R}^{d \times d}$ = feature covariance matrices of source and target respectively, $d$ = feature dimension, $\|\cdot\|_F$ = Frobenius norm (entry-wise squared differences summed).
+
 Computationally simpler than adversarial training, works well when covariate shift is the primary problem. DEEP CORAL learns a transformation that simultaneously minimizes task loss and CORAL alignment loss.
 
 **MCD (Minimax Classifier Discrepancy, Saito et al., 2018):** uses two task-specific classifiers instead of a domain discriminator. The discrepancy between the two classifiers' predictions on target data measures domain confusion. Training alternates between: (1) maximizing discrepancy on target samples to detect uncertain regions; (2) feature extractor minimizes discrepancy to align features where classifiers disagree. This avoids mode collapse — a failure mode of DANN where the feature extractor learns a degenerate mapping.
@@ -107,4 +112,12 @@ Computationally simpler than adversarial training, works well when covariate shi
 
 ---
 
-*See also: [[transfer-learning]] · [[bias-variance-double-descent]] · [[generative-vs-discriminative]] · [[contrastive-learning]] · [[regularization-dropout]] · [[clip]] · [[entropy-mutual-info]]*
+## Links
+
+- [[transfer-learning]] — domain adaptation is transfer learning when source and target share labels but differ in input distribution; covariate shift is the special case where $p(x)$ changes but $p(y|x)$ is unchanged
+- [[statistical-inference-mle]] — importance weighting corrects for covariate shift by reweighting source samples by $p_t(x)/p_s(x)$; this restores unbiasedness of the MLE on the target distribution
+- [[distributions-overview]] — distribution shift is characterized by differences in $p(x)$, $p(y|x)$, or both; different types of shift require different adaptation strategies
+- [[contrastive-learning]] — domain-adversarial training (DANN) uses a gradient reversal layer to learn domain-invariant features; contrastive SSL also learns features that generalize across distributions
+- [[regularization-dropout]] — dropout is a regularizer that reduces overfitting to the source domain; higher dropout rates encourage features that are robust to distribution shift
+- [[clip]] — zero-shot CLIP classifies images without any target-domain labels; its visual-language alignment serves as a natural domain adaptation for zero-shot transfer
+- [[entropy-mutual-info]] — entropy minimization is a self-training technique for domain adaptation: minimizing $H(p(y|x_t))$ on unlabeled target data encourages sharp, confident predictions

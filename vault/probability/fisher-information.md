@@ -4,6 +4,7 @@ tags: [statistics, optimization, fisher-information, natural-gradient, informati
 aliases: [Fisher information, Fisher matrix, natural gradient, Cramér-Rao, KFAC]
 difficulty: 3
 status: complete
+depends_on: [statistical-inference-mle, matrix-calculus, entropy-mutual-info]
 related: [statistical-inference-mle, matrix-calculus, optimizer-adam, entropy-mutual-info, bayesian-inference]
 ---
 
@@ -21,6 +22,8 @@ For a model with parameter $\theta$ and log-likelihood $\ell(\theta; x) = \log p
 
 $$I(\theta) = \mathbb{E}_x\!\left[\left(\frac{\partial}{\partial\theta}\log p(x;\theta)\right)^2\right] = -\mathbb{E}_x\!\left[\frac{\partial^2}{\partial\theta^2}\log p(x;\theta)\right]$$
 
+where $\theta$ = the model parameter we want to estimate, $p(x;\theta)$ = the probability of observation $x$ under parameter $\theta$, $\frac{\partial}{\partial\theta}\log p(x;\theta)$ = the score function (how fast the log-likelihood changes with $\theta$ at a given $x$), $\mathbb{E}_x[\cdot]$ = expectation over all possible observations $x$, and $I(\theta)$ = the expected squared score (high $I(\theta)$ means observations are highly informative about $\theta$).
+
 The two expressions are equal (score identity). $I(\theta) \geq 0$ always.
 
 **Interpretation:** $I(\theta)$ measures how much information a single observation carries about $\theta$. High Fisher information = likelihood changes rapidly with $\theta$ = $\theta$ is easy to estimate from data.
@@ -30,6 +33,8 @@ The two expressions are equal (score identity). $I(\theta) \geq 0$ always.
 For any **unbiased** estimator $\hat\theta$:
 
 $$\text{Var}(\hat\theta) \geq \frac{1}{I(\theta)}$$
+
+where $\text{Var}(\hat\theta)$ = variance of any unbiased estimator, $I(\theta)$ = Fisher information at the true $\theta$, and $1/I(\theta)$ = the minimum achievable variance (the lower bound). The bound says: the more information a sample carries about $\theta$, the lower we can make the estimator's variance.
 
 No unbiased estimator can have variance smaller than $1/I(\theta)$. For $n$ i.i.d. observations: $\text{Var}(\hat\theta) \geq 1/(nI(\theta))$.
 
@@ -63,6 +68,8 @@ For $\theta \in \mathbb{R}^d$:
 
 $$F(\theta) = \mathbb{E}_x\!\left[\nabla_\theta \log p(x;\theta)\; \nabla_\theta \log p(x;\theta)^\top\right] = -\mathbb{E}_x\!\left[\nabla^2_\theta \log p(x;\theta)\right]$$
 
+where $\nabla_\theta \log p(x;\theta) \in \mathbb{R}^d$ = the score vector (gradient of the log-likelihood w.r.t. all $d$ parameters), $\nabla_\theta \log p \cdot (\nabla_\theta \log p)^\top$ = the outer product of the score vector with itself (a $d\times d$ rank-1 matrix), and $\nabla^2_\theta \log p(x;\theta)$ = the Hessian of the log-likelihood (the second expression is the expected negative Hessian).
+
 $F$ is a $d \times d$ positive semi-definite matrix. It equals both the expected outer product of the score vector and the expected negative [[matrix-calculus|Hessian]] of the log-likelihood.
 
 ### The Natural Gradient
@@ -73,7 +80,7 @@ $F$ is a $d \times d$ positive semi-definite matrix. It equals both the expected
 
 $$\theta \leftarrow \theta - \eta\, F(\theta)^{-1} g$$
 
-where $g = \nabla_\theta L$ is the gradient and $F^{-1}g$ is the **natural gradient**.
+where $g = \nabla_\theta L$ = the ordinary gradient of the loss, $F(\theta)$ = the Fisher information matrix (provides the geometry of the parameter space), $F(\theta)^{-1} g$ = the natural gradient (ordinary gradient rotated and scaled to account for distribution curvature), and $\eta$ = learning rate.
 
 **Key property:** the natural gradient is invariant to parameterization — reparameterizing the model does not change the update direction (unlike ordinary gradient).
 
@@ -113,7 +120,7 @@ Martens & Grosse (2015) proposed approximating the layer-wise Fisher block as a 
 
 $$F_\ell \approx A_\ell \otimes G_\ell$$
 
-where $A_\ell = \mathbb{E}[a_\ell a_\ell^\top]$ is the covariance of layer inputs and $G_\ell = \mathbb{E}[\nabla_{s_\ell}\mathcal{L}\, (\nabla_{s_\ell}\mathcal{L})^\top]$ is the covariance of backpropagated gradients. Inversion: $(A \otimes G)^{-1} = A^{-1} \otimes G^{-1}$, reducing cost from $O(d_\ell^3)$ to $O(d_{in}^3 + d_{out}^3)$ per layer.
+where $A_\ell = \mathbb{E}[a_\ell a_\ell^\top]$ is the covariance of layer inputs, $a_\ell \in \mathbb{R}^{d_{in}}$ = activations fed into layer $\ell$, $G_\ell = \mathbb{E}[\nabla_{s_\ell}\mathcal{L}\, (\nabla_{s_\ell}\mathcal{L})^\top]$ is the covariance of backpropagated gradients, and $s_\ell \in \mathbb{R}^{d_{out}}$ = pre-activations (output of the linear map $W_\ell a_\ell$, before the nonlinearity). Inversion: $(A \otimes G)^{-1} = A^{-1} \otimes G^{-1}$, reducing cost from $O(d_\ell^3)$ to $O(d_{in}^3 + d_{out}^3)$ per layer.
 
 **Extensions:** EKFAC (George et al., 2018) improves K-FAC by rescaling eigenvalues; FOOF (Benzing, 2022) uses only the input covariance $A_\ell$ for a cheaper approximation. In practice, K-FAC requires careful damping ($F + \lambda I$) and periodic Fisher updates to remain stable.
 
@@ -135,4 +142,11 @@ is the curvature of the negative log-likelihood at the mode. The Laplace approxi
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[matrix-calculus]] · [[optimizer-adam]] · [[entropy-mutual-info]] · [[bayesian-inference]] · [[loss-kl-divergence]]*
+## Links
+
+- [[statistical-inference-mle]] — the Cramér-Rao bound says no unbiased estimator can have variance less than $1/I(\theta)$; MLE achieves this bound asymptotically
+- [[matrix-calculus]] — the Fisher matrix is the expected outer product of the score; computing and inverting it requires Hessian and gradient machinery
+- [[entropy-mutual-info]] — Fisher information is the second derivative of KL divergence at zero; both measure informativeness of a distribution
+- [[bayesian-inference]] — the Jeffreys prior $p(\theta) \propto \sqrt{\det F(\theta)}$ is invariant under reparameterization; posterior uncertainty shrinks as $1/\sqrt{nI(\theta)}$
+- [[loss-kl-divergence]] — the Fisher information matrix is the Hessian of $D_{KL}(p_\theta \| p_{\theta+d\theta})$ at $d\theta = 0$
+- [[optimizer-adam]] — natural gradient preconditions by $F^{-1}$; K-FAC approximates the Fisher for tractable natural gradient descent in neural networks

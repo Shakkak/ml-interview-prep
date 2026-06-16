@@ -5,6 +5,7 @@ aliases: [LR schedule, warmup, cosine annealing, cyclical LR, LR decay]
 difficulty: 2
 status: complete
 related: [optimizer-adam, optimizer-sgd-momentum, regularization-early-stopping]
+depends_on: [optimizer-sgd-momentum, optimizer-adam, loss-landscape]
 ---
 
 # Learning Rate Schedules
@@ -18,20 +19,28 @@ A fixed learning rate forces a compromise: too large → unstable early training
 **Warmup:** start small, linearly increase to target over $T_w$ steps:
 $$\eta_t = \eta_{\max} \cdot \frac{t}{T_w}, \quad t \leq T_w$$
 
+where $\eta_{\max}$ = peak learning rate, $t$ = current step, $T_w$ = warmup duration in steps, ratio $t/T_w$ linearly interpolates from 0 to 1.
+
 *Why:* early batches have high loss → large gradients → large random weight updates without warmup. Critical for transformers where Adam's $v_t$ is not yet calibrated (see [[optimizer-adam]]).
 
 **Cosine annealing:** decay LR following a half-cosine from $\eta_{\max}$ to $\eta_{\min}$:
 $$\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})\left(1 + \cos\left(\frac{\pi t}{T}\right)\right)$$
+
+where $\eta_{\min}$ = floor LR (often 0 or 1e-6), $\eta_{\max}$ = peak LR, $T$ = total training steps, $\cos(\pi t/T)$ smoothly transitions from 1 (at start) to −1 (at end).
 
 Smooth decay; gentle near the minimum (the cosine is nearly flat at its trough).
 
 **Warmup + cosine decay (standard transformer schedule):**
 $$\eta_t = \begin{cases} \eta_{\max} \cdot t / T_w & t \leq T_w \\ \eta_{\min} + \frac{1}{2}(\eta_{\max}-\eta_{\min})\left(1+\cos\frac{\pi(t-T_w)}{T-T_w}\right) & t > T_w \end{cases}$$
 
+where $T_w$ = warmup steps, $T$ = total training steps, warmup phase linearly ramps from 0 to $\eta_{\max}$, cosine phase decays from $\eta_{\max}$ to $\eta_{\min}$ over the remaining $T - T_w$ steps.
+
 Used in [[bert-mlm|BERT]], GPT, [[vision-transformer|ViT]], and most modern transformers. Typical warmup: 4% of total training steps (Devlin et al., 2019).
 
 **Step decay:** multiply LR by $\gamma$ every $k$ epochs:
 $$\eta_t = \eta_0 \cdot \gamma^{\lfloor t/k \rfloor}$$
+
+where $\eta_0$ = initial learning rate, $\gamma \in (0,1)$ = decay factor (e.g. 0.1), $k$ = step interval between decays, $\lfloor t/k \rfloor$ = number of decays applied so far.
 
 Classic for CNNs: $\gamma = 0.1$ every 30 epochs (original ResNet). Simple and interpretable, but discontinuous drops can destabilize training.
 
@@ -53,6 +62,8 @@ At the midpoint of the cosine phase ($t=550$), $\eta \approx 0.0005$ — exactly
 
 **Cyclical Learning Rates (CLR):** cycle LR linearly between $\eta_{\min}$ and $\eta_{\max}$ over $2c$ steps:
 $$\eta_t = \eta_{\min} + (\eta_{\max} - \eta_{\min}) \cdot \max\left(0, 1 - \left|\frac{t}{c} - 2\left\lfloor\frac{t}{2c}\right\rfloor + 1\right|\right)$$
+
+where $c$ = half-cycle length in steps, $|\ldots|$ = triangular wave oscillating between 0 and 1 with period $2c$, result linearly interpolates between $\eta_{\min}$ and $\eta_{\max}$.
 
 High LR phases help escape saddle points and sharp minima; low LR phases allow fine-grained optimization.
 
@@ -82,10 +93,18 @@ High LR phases help escape saddle points and sharp minima; low LR phases allow f
 **Inverse square root schedule:** used in the original transformer (Vaswani et al., 2017):
 $$\eta_t = d_{\text{model}}^{-0.5} \cdot \min(t^{-0.5}, t \cdot T_w^{-1.5})$$
 
+where $d_{\text{model}}$ = model hidden dimension (scales down LR for larger models), $t^{-0.5}$ = inverse square root decay (infinite horizon), $t \cdot T_w^{-1.5}$ = linear warmup phase (dominates for $t < T_w$), $T_w$ = warmup steps.
+
 This combines warmup (linear phase) with an infinite decay ($t^{-0.5}$). Unlike cosine decay, it has no predetermined endpoint — useful for training without a fixed budget. The $d_{\text{model}}^{-0.5}$ factor scales LR inversely with model size, making the optimal LR roughly model-size independent.
 
 **Grokking and the late-training LR regime (Power et al., 2022):** a surprising phenomenon where models first memorize training data (perfect training accuracy, chance-level validation accuracy), then after many more gradient steps "generalize" (near-perfect validation accuracy). This transition is sharp and occurs long after the model has converged to near-zero training loss. Extended training with a decaying LR causes the network to move from a memorizing solution to a generalizing one. This challenges the conventional wisdom that once training loss converges, further training is wasted — LR schedule endpoint matters even for well-converged models.
 
 ---
 
-*See also: [[optimizer-adam]] · [[optimizer-sgd-momentum]] · [[regularization-early-stopping]] · [[large-batch-training]] · [[bert-mlm]] · [[vision-transformer]]*
+## Links
+
+- [[optimizer-sgd-momentum]] — the LR schedule determines step size for SGD; large LR explores the loss landscape, small LR converges to a local minimum; the schedule balances exploration and exploitation
+- [[optimizer-adam]] — Adam's adaptive LR is per-parameter; the global schedule still controls the overall magnitude; transformers use linear warmup then cosine decay as the standard schedule
+- [[loss-landscape]] — LR schedules are designed to navigate the loss landscape; warmup avoids early instability from large initial steps in high-curvature regions
+- [[large-batch-training]] — larger batches require proportionally larger learning rates (linear scaling rule); the warmup period is extended for very large batches
+- [[regularization-early-stopping]] — learning rate schedules and early stopping are complementary: the schedule determines how learning decays over time, early stopping determines when to stop

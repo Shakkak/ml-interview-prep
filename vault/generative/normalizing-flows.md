@@ -4,6 +4,7 @@ tags: [normalizing-flows, change-of-variables, log-det-jacobian, realnvp, glow, 
 aliases: [normalizing flows, flow-based model, RealNVP, Glow, invertible network, change of variables, Jacobian determinant]
 difficulty: 3
 status: complete
+depends_on: [variational-autoencoders, distributions-gaussian, loss-kl-divergence]
 related: [variational-autoencoders, generative-adversarial-networks, diffusion-models, math-svd, loss-kl-divergence]
 ---
 
@@ -21,8 +22,9 @@ Let $z \sim p_Z(z)$ be a simple distribution (e.g., [[distributions-gaussian|$\m
 
 $$p_X(x) = p_Z(f^{-1}(x)) \cdot \left|\det\frac{\partial f^{-1}}{\partial x}\right|$$
 
-Taking logs:
 $$\log p_X(x) = \log p_Z(z) - \log\left|\det\frac{\partial f}{\partial z}\right|$$
+
+where $p_Z(z)$ = density of the simple base distribution at $z = f^{-1}(x)$, $\frac{\partial f}{\partial z}$ = the Jacobian matrix of $f$ (all partial derivatives of each output w.r.t. each input dimension), $\det(\cdot)$ = determinant (measures the volume scaling factor), $|\cdot|$ = absolute value (density is always positive), and $\log|\det J|$ = log-Jacobian (the correction for how much $f$ stretches or compresses space — subtracted because stretching space decreases density).
 
 **Intuition:** the Jacobian determinant measures how much $f$ locally stretches or compresses volume. If $f$ stretches a region by factor 2 (det = 2), density decreases by factor 2. The log-det-Jacobian is the volume-correction term.
 
@@ -33,6 +35,8 @@ $$\log p_X(x) = \log p_Z(z) - \log\left|\det\frac{\partial f}{\partial z}\right|
 Stack $K$ invertible transformations $z_0 \xrightarrow{f_1} z_1 \xrightarrow{f_2} \cdots \xrightarrow{f_K} x$:
 
 $$\log p_X(x) = \log p_Z(z_0) - \sum_{k=1}^K \log\left|\det J_{f_k}\right|$$
+
+where $z_0$ = sample from the base distribution, $K$ = number of flow transformations stacked in sequence, $J_{f_k} = \frac{\partial f_k}{\partial z_{k-1}}$ = Jacobian matrix of the $k$-th transformation, and $\sum_{k=1}^K \log|\det J_{f_k}|$ = total volume change accumulated across all $K$ transformations.
 
 **Training:** maximize $\log p_X(x)$ directly — exact MLE, no approximation. **Sampling:** sample $z_0 \sim p_Z$, apply $f_1, \ldots, f_K$. **Density evaluation:** invert $f_K, \ldots, f_1$ to get $z_0$, accumulate log-dets.
 
@@ -72,7 +76,7 @@ RealNVP uses fixed channel shuffles between coupling layers. Glow (Kingma & Dhar
 
 $$y = Wz, \qquad \log|\det J| = h \cdot w \cdot \log|\det W|$$
 
-where $h, w$ are spatial dimensions. To compute $\det W$ efficiently, decompose $W = PLU$ (LU decomposition with permutation): $\det(W) = \det(U) = \prod_i U_{ii}$. This costs $O(c^3)$ once and $O(c)$ per forward pass.
+where $W \in \mathbb{R}^{c \times c}$ = learned $1\times1$ convolution weight matrix (mixes channels), $h$ and $w$ = spatial height and width of the feature map (the $1\times1$ conv is applied independently at each of $h \times w$ spatial positions), and $h \cdot w \cdot \log|\det W|$ = total log-Jacobian (the same $c\times c$ mixing is applied at every spatial location, so the per-location log-det is multiplied by the number of locations). To compute $\det W$ efficiently, decompose $W = PLU$ (LU decomposition with permutation): $\det(W) = \det(U) = \prod_i U_{ii}$. This costs $O(c^3)$ once and $O(c)$ per forward pass.
 
 Glow also adds **ActNorm** (per-channel affine transform initialized from the first batch, replacing [[normalization-layers|batch norm]]). Together: stable training, high-quality 256×256 image synthesis, smooth latent interpolation.
 
@@ -123,4 +127,13 @@ Flow Matching + CNF is currently the most active research direction, achieving s
 
 ---
 
-*See also: [[variational-autoencoders]] · [[diffusion-models]] · [[generative-adversarial-networks]] · [[loss-kl-divergence]] · [[math-svd]] · [[distributions-gaussian]] · [[normalization-layers]] · [[anomaly-detection]]*
+## Links
+
+- [[variational-autoencoders]] — VAEs use an ELBO lower bound on log-likelihood; flows compute exact log-likelihood via the change-of-variables formula
+- [[diffusion-models]] — diffusion models are an implicit multi-step flow; normalizing flows are explicit bijections computed in a single forward pass
+- [[generative-adversarial-networks]] — GANs learn implicit densities but cannot evaluate log-likelihoods; flows trade flexibility for tractability
+- [[loss-kl-divergence]] — training maximizes log-likelihood, equivalent to minimizing KL from model to data distribution
+- [[linear-algebra-fundamentals]] — the change-of-variables formula requires a Jacobian determinant; efficient flow architectures make this $O(d)$
+- [[distributions-gaussian]] — the base distribution is typically $\mathcal{N}(0,I)$; the flow transforms it into the data distribution
+- [[normalization-layers]] — ActNorm (used in Glow) is a flow-based normalization layer with data-dependent initialization
+- [[anomaly-detection]] — flows assign exact log-likelihoods, making them natural density estimators for anomaly scoring

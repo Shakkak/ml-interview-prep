@@ -5,6 +5,7 @@ aliases: [sufficiency, sufficient statistic, minimal sufficient statistic, Fishe
 difficulty: 2
 status: complete
 related: [statistical-inference-mle, exponential-family, bayesian-inference, fisher-information, distributions-overview]
+depends_on: [statistical-inference-mle, exponential-family, fisher-information]
 ---
 
 # Sufficient Statistics
@@ -83,4 +84,10 @@ $$I_T(\theta) = I_X(\theta)$$
 
 This is equivalent to sufficiency — a sufficient statistic preserves all the Fisher information about $\theta$ in the data. Reducing data to $T(X)$ loses no statistical efficiency.
 
-*See also: [[statistical-inference-mle]] · [[exponential-family]] · [[fisher-information]] · [[bayesian-inference]]*
+## Links
+
+- [[statistical-inference-mle]] — the MLE depends only on the sufficient statistic $T(x)$; for exponential families, the MLE satisfies $E_\theta[T(x)] = T(x_{\text{obs}})$
+- [[exponential-family]] — exponential families are exactly the distributions with finite-dimensional sufficient statistics (Pitman-Koopman-Darmois theorem); $T(x)$ is the natural sufficient statistic
+- [[fisher-information]] — Fisher-Neyman factorization: $T(X)$ is sufficient iff $I(T(X);\theta) = I(X;\theta)$ — no Fisher information is lost by reducing to $T$
+- [[bayesian-inference]] — in Bayesian inference with conjugate priors, the posterior depends on data only through the sufficient statistic; this makes conjugate updating tractable
+- [[distributions-overview]] — each standard distribution has a natural sufficient statistic: Bernoulli → $\sum x_i$, Gaussian → $(\sum x_i, \sum x_i^2)$, Poisson → $\sum x_i$

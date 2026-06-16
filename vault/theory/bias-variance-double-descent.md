@@ -5,6 +5,7 @@ aliases: [bias-variance, double descent, interpolation threshold, implicit regul
 difficulty: 2
 status: complete
 related: [bayesian-inference, backpropagation, normalization-layers]
+depends_on: [statistical-inference-mle, regularization-weight-decay, generalization-bounds]
 ---
 
 # Bias-Variance Tradeoff and Double Descent
@@ -16,6 +17,8 @@ related: [bayesian-inference, backpropagation, normalization-layers]
 We train a model $\hat{f}$ on training set $\mathcal{D}$ drawn from distribution $P(X, Y)$. The **expected test error** for a new point $x_0$ with true relationship $Y = f(x_0) + \epsilon$:
 
 $$\mathbb{E}_{\mathcal{D}, \epsilon}\left[(Y - \hat{f}(x_0))^2\right] = \underbrace{\left(f(x_0) - \mathbb{E}[\hat{f}(x_0)]\right)^2}_{\text{Bias}^2} + \underbrace{\mathbb{E}\left[\left(\hat{f}(x_0) - \mathbb{E}[\hat{f}(x_0)]\right)^2\right]}_{\text{Variance}} + \underbrace{\mathbb{E}[\epsilon^2]}_{\text{Irreducible Noise}}$$
+
+where $\hat{f}$ = the model trained on dataset $\mathcal{D}$, $x_0$ = a test point, $f(x_0)$ = the true underlying function value at $x_0$, $\mathbb{E}[\hat{f}(x_0)]$ = expected prediction of $\hat{f}$ at $x_0$ averaged over all possible training sets $\mathcal{D}$, $\epsilon$ = irreducible observation noise (e.g., label noise), and $\mathbb{E}_{\mathcal{D}, \epsilon}$ = expectation over both the random training set and noise.
 
 **Bias:** systematic error — how far the average prediction (over all possible training sets) is from the truth. A linear model fitted to a cubic relationship always misses the curvature regardless of how much data it sees. No amount of training data fixes structural model limitations.
 
@@ -60,7 +63,7 @@ The cross term $2(f-\bar{f})\mathbb{E}[\bar{f} - \hat{f}] = 0$ by definition of 
 
 KNN: as $k$ increases, variance decreases (average more neighbors → stable prediction) and bias increases (farther neighbors may be wrong class). Optimal $k$ via [[cross-validation]].
 
-Ridge regression: $\hat{\beta} = (X^TX + \lambda I)^{-1}X^Ty$. As $\lambda$ increases, variance decreases ($\hat{\beta}$ shrinks toward 0, less sensitivity to training set) but bias increases (solutions pulled away from truth). The $\lambda$ that minimizes test MSE is the bias-variance sweet spot.
+Ridge regression: $\hat{\beta} = (X^TX + \lambda I)^{-1}X^Ty$ (where $X \in \mathbb{R}^{n \times p}$ = data matrix, $y \in \mathbb{R}^n$ = targets, $\lambda I$ = ridge penalty added to diagonal — makes the matrix invertible and shrinks $\hat{\beta}$). As $\lambda$ increases, variance decreases ($\hat{\beta}$ shrinks toward 0, less sensitivity to training set) but bias increases (solutions pulled away from truth). The $\lambda$ that minimizes test MSE is the bias-variance sweet spot.
 
 **Practical implications:**
 
@@ -123,4 +126,12 @@ Rule of thumb: if you have enough compute, larger models almost always generaliz
 
 ---
 
-*See also: [[bayesian-inference]] · [[backpropagation]] · [[normalization-layers]] · [[generalization-bounds]] · [[spectral-bias]] · [[regularization-dropout]] · [[neural-tangent-kernel]] · [[cross-validation]]*
+## Links
+
+- [[statistical-inference-mle]] — the classical bias-variance tradeoff is derived from the MLE expected error decomposition: $E[\text{err}] = \text{Bias}^2 + \text{Variance} + \text{Noise}$
+- [[regularization-weight-decay]] — regularization reduces variance at the cost of bias; the tradeoff minimum is found by cross-validation over the regularization strength
+- [[generalization-bounds]] — double descent is explained by implicit regularization in overparameterized models; PAC-Bayes bounds and NTK theory formalize why interpolating models generalize
+- [[spectral-bias]] — double descent occurs at the interpolation threshold; spectral bias explains why wide networks converge to minimum-norm solutions that generalize despite zero training error
+- [[regularization-dropout]] — dropout is a variance reduction technique; too much dropout increases bias; the optimal rate trades off variance (model capacity) against bias
+- [[neural-tangent-kernel]] — in the NTK regime, the test error of overparameterized models can be analyzed analytically; the NTK theory explains the second descent in the double-descent curve
+- [[cross-validation]] — cross-validation estimates the bias-variance tradeoff empirically; k-fold CV selects the model complexity minimizing validation error

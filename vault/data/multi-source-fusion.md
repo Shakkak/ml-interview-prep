@@ -1,278 +1,126 @@
 ---
 title: "Multi-Source Data Fusion for Earth Observation"
 tags: [multi-source-fusion, data-fusion, drone-satellite, early-fusion, late-fusion, mid-fusion, multimodal-eo, sensor-fusion]
-aliases: [Multi-Modal Fusion EO, Sensor Fusion Remote Sensing, Drone Satellite Fusion]
+aliases: [Multi-Modal Fusion EO, Sensor Fusion Remote Sensing, Drone Satellite Fusion, Multi-Source EO]
+difficulty: 3
 status: complete
+depends_on: [earth-observation-fundamentals, attention-mechanism]
+related: [satellite-imagery-preprocessing, vlm-architectures, clip, knowledge-distillation]
 ---
 
-Multi-source fusion combines data from different sensors, platforms, or time points to produce richer information than any single source. In Earth observation and ecology, the three main sources are: satellite imagery, drone (UAV) imagery, and in-situ ground measurements. This file covers the technical challenges and strategies for fusing them.
+# Multi-Source Data Fusion for Earth Observation
 
-## 1. Why Multi-Source Fusion?
+---
 
-Each data source has unique strengths and limitations:
+## Fundamental
+
+**The problem:** each EO data source has unique strengths and blind spots. Satellite imagery (Sentinel-2) covers the whole landscape every 5 days but at 10 m resolution. Drone imagery reveals individual plants sub-centimeter but covers only a few hectares. In-situ ground sensors give direct physical measurements at single points.
+
+**Intuition:** combine what each source knows well and compensate for what it cannot see. The satellite gives regional context; the drone gives detail; in-situ gives truth. A model trained on all three can predict fine-grained traits at landscape scale — impossible from any single source alone.
 
 | Source | Strengths | Limitations |
-|--------|-----------|------------|
-| **Satellite** (Sentinel-2, Landsat) | Global coverage, free, daily–weekly revisit, multispectral | 10–30 m resolution, clouded, temporal lag |
-| **Drone (UAV)** | Sub-cm to dm resolution, flexible timing, RGB+NIR+thermal | Small area coverage, expensive per ha, weather dependent |
-| **In-situ sensors** | Direct measurement (soil moisture, temperature, species count) | Point data, sparse, labor intensive, biased by access |
-| **Hyperspectral (airborne)** | 100+ narrow bands, sub-meter resolution | Very expensive, limited coverage |
+|---|---|---|
+| Satellite (Sentinel-2, Landsat) | Global coverage, free, multispectral, daily–weekly revisit | 10–30 m resolution, cloud-limited, temporal lag |
+| Drone (UAV) | Sub-cm resolution, flexible timing, RGB+NIR+thermal | Small area coverage, expensive per ha, weather dependent |
+| In-situ sensors | Direct physical measurement (soil moisture, species count, plant traits) | Point data, sparse, labor intensive |
+| Hyperspectral (airborne) | 100+ narrow bands, sub-meter resolution | Very expensive, limited coverage |
 
-**Why combine?**
-- Satellite gives context (land cover, seasonal trend) for the whole landscape
-- Drone gives fine-grained detail (individual plants, species counts) at sample sites
-- In-situ provides ground truth (actual species presence, measured plant traits)
+### Core Fusion Challenges
 
-The combination enables predictions at landscape scale (from satellite) calibrated with fine-grained detail (from drone) and validated by ground truth (from in-situ).
+**Spatial scale mismatch:** a Sentinel-2 pixel is 100 m² (10×10 m). A single satellite pixel covers thousands to millions of drone pixels. Aggregating drone measurements to satellite scale requires handling heterogeneous land cover and mixed pixels.
 
----
+**Temporal mismatch:** Sentinel-2 revisits every 5 days; drone surveys happen once per season; in-situ measurements may be monthly. Vegetation phenology changes significantly over 2–4 weeks — a satellite composite from June may not match a drone survey from late August.
 
-## 2. The Core Challenges
+**Geometric misalignment:** satellite imagery has ~10 m absolute geolocation accuracy; drone imagery needs ground control points (GCPs) for sub-meter accuracy; standard GPS has ±3 m accuracy. Without careful coregistration, fusion adds noise rather than information.
 
-### 2.1 Spatial Scale Mismatch
-
-- A Sentinel-2 pixel is 100 m² (10×10 m)
-- A drone pixel at 10 m flight height is 0.25 cm² (0.005×0.005 m at 1 m flight height, ~1 cm at typical ecology surveys)
-- A single satellite pixel covers thousands to millions of drone pixels
-
-Aggregating drone measurements to satellite pixel scale requires careful attention to:
-- Spatial variability within a pixel (heterogeneous land cover)
-- Mixed pixel problem: a satellite pixel over an ecotone contains both forest and grassland
-- Representativeness of the drone sample area for the satellite pixel
-
-### 2.2 Temporal Mismatch
-
-- Sentinel-2 captures a snapshot every 5 days (weather permitting)
-- Drone surveys are typically conducted once per season (spring, summer, autumn)
-- In-situ measurements may be weekly, monthly, or annual
-
-Temporal interpolation is needed to align all sources to a common time reference. Vegetation phenology changes significantly over 2–4 weeks — a satellite composite from June may not match a drone survey from late August.
-
-### 2.3 Geometric Misalignment
-
-Even with GPS-tagged data from all sources:
-- Satellite imagery has ~10 m absolute geolocation accuracy
-- Drone imagery requires ground control points (GCPs) for sub-meter accuracy
-- In-situ GPS measurements have ±3 m accuracy with standard receivers, ±cm with RTK-GPS
-
-Without careful coregistration, a "fusion" model actually trains on misaligned data — adding noise rather than information.
-
-### 2.4 Modality Gap
-
-Each modality lives in a different feature space:
-- Satellite: 13-channel reflectance tensors (physical units)
-- Drone RGB: 3-channel normalized intensities
-- In-situ: structured tabular data (temperature, species counts, soil pH)
-
-A naive concatenation of these representations may cause one modality to dominate due to scale differences.
+**Modality gap:** satellite = 13-channel reflectance tensors; drone = 3-channel normalized intensities; in-situ = structured tabular data. Naive concatenation causes one modality to dominate due to scale differences.
 
 ---
 
-## 3. Fusion Strategies
+## Intermediate
 
-### 3.1 Early Fusion (Input-Level)
+### Three Fusion Architectures
 
-Concatenate all modalities at the input level and feed to a single model.
-
-```
-Satellite features (13 bands, 10 m resolution)
-Drone features (3 bands, 0.1 m resolution) → resample to 10 m → stack
-In-situ tabular features → interpolate to grid → stack
-
-Model input: concatenated tensor → single encoder → prediction
-```
-
-**Advantages**:
-- Model learns cross-modality interactions from the start
-- Single forward pass, efficient at inference
-
-**Disadvantages**:
-- Requires all modalities at inference time (no missing modality handling)
-- Spatial resampling of drone → satellite scale loses fine-grained information
-- Hard to train: gradients for rare modalities (in-situ) may be overwhelmed by common modalities (satellite)
-
-**Best for**: all modalities always available, same spatial resolution after resampling.
-
-### 3.2 Late Fusion (Decision-Level)
-
-Train separate models on each modality independently; combine predictions at the output level.
+**Early Fusion (input-level):** concatenate all modalities before any model sees them.
 
 ```
-Satellite data → Model A → score_A
-Drone data     → Model B → score_B
-In-situ data   → Model C → score_C
-
-Ensemble: prediction = f(score_A, score_B, score_C)
-where f is weighted average, stacking, or a learned combiner
+Satellite (13 bands, 10 m) + Drone (3 bands, 0.1 m→resampled to 10 m) + In-situ (tabular→interpolated)
+  → stacked tensor → single encoder → prediction
 ```
 
-**Advantages**:
-- Easy to implement: train models independently
-- Missing modalities: just skip that branch
-- Can use different model architectures for each modality
+Best when: all modalities always available, similar spatial resolution after resampling. Loss: spatial resampling of drone to satellite scale discards fine-grained information; harder training when modality quality varies.
 
-**Disadvantages**:
-- Loses cross-modality complementarity at feature level
-- Ensemble weights may be wrong if modality quality varies by location
-
-**Best for**: prototyping, when modalities arrive at different times, or when modalities have very different architectures.
-
-### 3.3 Mid-Level Fusion (Feature-Level)
-
-Each modality has its own encoder; features are fused at an intermediate representation layer.
+**Late Fusion (decision-level):** train separate models per modality, combine predictions.
 
 ```
-Satellite data → Encoder_S → features f_S ∈ ℝ^{D_S}
-Drone data     → Encoder_D → features f_D ∈ ℝ^{D_D}
-In-situ data   → Encoder_I → features f_I ∈ ℝ^{D_I}
-
-Fusion module → fused features → task head → prediction
+Satellite → Model A → score_A
+Drone     → Model B → score_B
+In-situ   → Model C → score_C
+  → f(score_A, score_B, score_C) = weighted average, stacking, or learned combiner
 ```
 
-**Fusion modules:**
+Best when: prototyping, modalities arrive at different times, or missing modality tolerance is needed. Loss: no cross-modality feature-level complementarity.
 
-**Concatenation + MLP**: simplest, just concatenate and pass through MLP.
-$$f_{fused} = \text{MLP}([f_S; f_D; f_I])$$
+**Mid-Level Fusion (feature-level):** each modality has its own encoder; features are fused at an intermediate layer.
 
-**[[attention-mechanism|Cross-attention]] (Transformer fusion)**:
-Satellite features as queries; drone + in-situ as keys and values. The satellite tokens attend to fine-grained drone information.
 ```
-Q = W_Q f_S   (satellite as query — what context do I need?)
-K = W_K f_D   (drone as key — what fine-grained info is available?)
-V = W_V f_D
-f_fused = softmax(QK^T/√d) V
+Satellite → Encoder_S → f_S ∈ ℝ^{D_S}
+Drone     → Encoder_D → f_D ∈ ℝ^{D_D}   →  Fusion module → task head → prediction
+In-situ   → Encoder_I → f_I ∈ ℝ^{D_I}
 ```
 
-**FiLM conditioning (Feature-wise Linear Modulation)**:
-Use one modality to condition another by scaling and shifting:
-$$f_S^{conditioned} = \gamma(f_I) \odot f_S + \beta(f_I)$$
-where $\gamma, \beta$ are learned from in-situ features. In-situ measurements condition the satellite representation.
+**Mid-level fusion modules:**
 
-### 3.4 Hierarchical Fusion
+*Concatenation + MLP:* $f_\text{fused} = \text{MLP}([f_S; f_D; f_I])$ — simplest; learns linear interactions after concat.
 
-For the drone-satellite case, exploit the natural scale hierarchy:
-1. Process drone imagery at native resolution → fine-grained features
-2. Aggregate drone features spatially to satellite pixel scale (mean/max pooling)
-3. Concatenate aggregated drone features with satellite features
+*[[attention-mechanism|Cross-attention]] (Transformer fusion):* satellite features as queries; drone + in-situ as keys/values — the satellite representation learns which parts of the drone to attend to. Best for fine-grained trait prediction.
+
+*FiLM conditioning (Feature-wise Linear Modulation):* $f_S^\text{conditioned} = \gamma(f_I) \odot f_S + \beta(f_I)$ — in-situ measurements condition the satellite representation by learned channel-wise scale $\gamma$ and shift $\beta$.
+
+**Hierarchical Fusion:** exploit the natural scale hierarchy for drone-satellite pairing:
+1. Encode drone imagery at native resolution → fine-grained features (N_drone patches per satellite pixel)
+2. Aggregate drone features spatially using attention pooling (satellite queries over drone patches)
+3. Concatenate aggregated drone features with satellite backbone features
 4. Predict at satellite pixel scale
 
-This preserves fine-grained drone information without losing spatial resolution to a naive resampling.
-
-```python
-# Hierarchical fusion pseudocode
-drone_features = drone_encoder(drone_patches)  # (N_drone, D)
-# N_drone = number of drone patches within this satellite pixel
-
-# Aggregate: attention pooling over drone patches
-attn = softmax(Q_sat @ drone_features.T)  # satellite queries drone patches
-aggregated_drone = attn @ drone_features   # (D,)
-
-# Fuse with satellite features
-satellite_feature = satellite_encoder(sat_chip)   # (D_sat,)
-fused = MLP(cat(satellite_feature, aggregated_drone))
-```
+Preserves drone fine-grained information without naive resampling.
 
 ---
 
-## 4. Drone + Satellite Fusion in Practice
+## Advanced
 
-### 4.1 Preprocessing Steps Required
+### Drone + Satellite Preprocessing Requirements
 
-Before any fusion, all data must be:
+Before any fusion, data must be coregistered (align drone orthomosaic to satellite CRS using GCPs to sub-pixel accuracy), resampled to a common grid if fusing at satellite scale (use area-weighted average, not nearest neighbor), radiometrically calibrated (satellite: atmospheric correction to surface reflectance; drone: calibration panel → reflectance), and temporally matched (use satellite composite from the same date/week as drone survey).
 
-1. **Coregistered**: align drone orthomosaic to satellite CRS.
-   - Compute GCPs (Ground Control Points) manually or with automatic feature matching
-   - Apply affine or polynomial warp to drone imagery
-   - Target: sub-pixel alignment (< 0.5 satellite pixels)
+### Training Strategy: Semi-Supervised Distillation
 
-2. **Resampled to common grid (if needed)**: if fusing at satellite pixel scale.
-   - Drone 5 cm → Sentinel-2 10 m: 200× aggregation
-   - Use area-weighted average (not nearest neighbor) to preserve reflectance statistics
+The typical scenario: drone data covers 50 field sites × 1 ha each = 50 ha; satellite data covers the full landscape (100,000 ha). 
 
-3. **Radiometrically calibrated**:
-   - Satellite: [[satellite-imagery-preprocessing|atmospheric correction]] (DN → surface reflectance)
-   - Drone: calibration panel measurements → reflectance conversion
+**Approach:** train a fusion model (drone + satellite) at field sites → use it as a teacher to generate soft labels at landscape scale → train a satellite-only student model on the full landscape using those soft labels. This is [[knowledge-distillation|knowledge distillation]] across modalities: the multi-sensor teacher trains the single-sensor student.
 
-4. **Temporally matched**: use satellite composite from same date/week as drone survey.
+### Self-Supervised Pretraining for Multi-Source EO
 
-### 4.2 Training Data Strategy
+**SeCo (Seasonal Contrast):** positive pairs = same location at different seasons; negative pairs = different locations. Forces the model to learn location-invariant representations that separate land cover types, not seasonal appearance.
 
-You likely have drone data for a small subset of the area (e.g., 50 field sites × 1 ha each = 50 ha total) and satellite data for the entire landscape (e.g., 100,000 ha).
+**Cross-Modal Contrastive Learning:** treat optical (Sentinel-2) and SAR (Sentinel-1) images of the same location as positive pairs. Forces representations invariant to the sensing modality — "forest" from SAR and "forest" from optical map to nearby embeddings.
 
-**Semi-supervised approach**:
-1. Use drone + satellite together at field sites → train fusion model → get fine-grained predictions at those sites
-2. Use satellite alone at landscape scale → predict landscape-scale trait/habitat maps
-3. Use drone-calibrated site predictions as "soft labels" for satellite-only training
+### When to Use Each Strategy
 
-This is analogous to **[[knowledge-distillation|teacher-student learning]]**: the drone+satellite fusion model (teacher) trains the satellite-only model (student) at landscape scale.
+| Strategy | Best scenario |
+|---|---|
+| Early fusion | All modalities always available; same spatial scale |
+| Late fusion | Prototyping; modalities sometimes missing |
+| Mid-level cross-attention | Model needs to select which parts of one modality are relevant to another |
+| Hierarchical | Very high-resolution drone + lower-resolution satellite; preserve both scales |
 
 ---
 
-## 5. In-Situ + Satellite Fusion
+## Links
 
-### 5.1 Spatial Matching
-
-An in-situ observation (e.g., a plant trait measured at GPS coordinate [lat, lon]) must be matched to a satellite pixel:
-
-```python
-# Find satellite pixel containing the GPS point
-row, col = ~transform * (lon, lat)  # rasterio inverse affine transform
-satellite_features = raster[:, int(row), int(col)]  # (bands,)
-```
-
-But a single satellite pixel (10×10 m) contains many plants — the in-situ measurement at one location within the pixel is not representative of the whole pixel.
-
-**Strategy**: average multiple in-situ measurements within the same satellite pixel. Or use the closest pixel center + a distance weight.
-
-### 5.2 Temporal Interpolation
-
-The satellite composite may be from a different date than the in-situ measurement. If vegetation changes rapidly (e.g., phenological peak), this introduces noise.
-
-**Options**:
-- Use the satellite image closest in time to the in-situ measurement
-- Fit a phenological curve (double logistic) to the satellite time series; evaluate the curve at the in-situ measurement date
-- Include time-of-year as an additional feature in the model
-
----
-
-## 6. Self-Supervised Pretraining for Multi-Source EO
-
-### 6.1 SeCo (Seasonal Contrast)
-
-**Paper**: "Seasonal Contrast: Unsupervised Pre-Training from Uncurated Remote Sensing Data" (Mañas et al., 2021)
-
-Uses temporal self-supervision: images of the same location at different seasons should be similar (they show the same underlying land cover), while images from different locations should be different.
-
-**Positive pairs**: same location, different season.
-**Negative pairs**: different locations.
-
-This teaches the model to produce location-invariant representations that separate land cover types, not seasonal appearance.
-
-### 6.2 TiCo (Time-Invariant Contrastive Learning)
-
-Similar to SeCo but explicitly minimizes the variance of representations across time for the same location while maximizing variance across locations.
-
-### 6.3 Cross-Modal Contrastive Learning
-
-Treat optical (Sentinel-2) and SAR (Sentinel-1) images of the same location as positive pairs:
-- Optical and SAR see the same land cover from different physical perspectives
-- Training forces the model to learn representations invariant to the sensing modality
-- Result: a unified embedding space where "forest" from SAR and "forest" from optical are similar
-
----
-
-## 7. Practical Guidelines
-
-**When to use early fusion**: you have plenty of training data and all modalities are always available. Good for: crop type mapping with multitemporal Sentinel-1 + Sentinel-2.
-
-**When to use late fusion**: you're prototyping or modalities are sometimes missing. Good for: species detection where drone imagery is only available for some sites.
-
-**When to use mid-level (cross-attention) fusion**: you want the model to learn which parts of one modality are relevant to another. Best for: fine-grained trait prediction where drone close-ups should inform which satellite spectral region to focus on.
-
-**When to use hierarchical fusion**: you have very high-resolution drone data and lower-resolution satellite data and want to keep both scales. Best for: individual plant counting from drone + landscape-scale habitat mapping from satellite.
-
----
-
-## See Also
-
-[[earth-observation-fundamentals]], [[satellite-imagery-preprocessing]], [[vlm-architectures]], [[biodiversity-ml]], [[remote-sensing-foundation-models]], [[attention-mechanism]], [[knowledge-distillation]], [[clip]]
+- [[earth-observation-fundamentals]] — understanding each sensor's spatial, spectral, and temporal resolution is the prerequisite for fusion; physical differences drive design choices
+- [[attention-mechanism]] — cross-attention is the standard deep fusion mechanism: queries from one modality, keys/values from another; it learns which parts to attend to
+- [[satellite-imagery-preprocessing]] — each sensor requires different preprocessing before fusion; misaligned preprocessing choices are a common failure mode
+- [[vlm-architectures]] — multimodal VLMs use identical fusion architectures (projection or cross-attention) as multi-source EO models
+- [[clip]] — CLIP-based alignment enables text-guided fusion; text descriptions can guide which sensor features to emphasize
+- [[knowledge-distillation]] — multi-source distillation trains a single-sensor student to mimic a multi-sensor teacher; enables deployment without all sensors at inference

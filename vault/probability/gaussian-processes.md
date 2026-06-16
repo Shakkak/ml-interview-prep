@@ -4,6 +4,7 @@ tags: [gaussian-processes, bayesian, kernel, non-parametric, regression]
 aliases: [GP, GP regression, Gaussian process regression, GPR, Kriging]
 difficulty: 3
 status: complete
+depends_on: [distributions-gaussian, kernel-methods, bayesian-inference]
 related: [bayesian-inference, kernel-methods, distributions-gaussian, variational-inference, sampling-methods, statistical-inference-mle, neural-tangent-kernel]
 ---
 
@@ -42,6 +43,8 @@ $$f(X_*)|\mathcal{D} \sim \mathcal{N}(\bar{f}_*, \text{Cov}_*)$$
 $$\bar{f}_* = K_{X_*X}(K_{XX} + \sigma_n^2 I)^{-1}\mathbf{y}$$
 $$\text{Cov}_* = K_{X_*X_*} - K_{X_*X}(K_{XX} + \sigma_n^2 I)^{-1} K_{XX_*}$$
 
+where $X_*$ = test inputs, $X$ = training inputs, $\mathbf{y}$ = training targets, $K_{X_*X} \in \mathbb{R}^{n_* \times n}$ = cross-covariance matrix between test and training points ($[K_{X_*X}]_{ij} = k(x^*_i, x_j)$), $K_{XX} \in \mathbb{R}^{n \times n}$ = training covariance matrix, $\sigma_n^2 I$ = noise variance added to the diagonal (prevents matrix singularity and models observation noise), $K_{X_*X_*}$ = prior covariance at test points, and $K_{X_*X}(K_{XX}+\sigma_n^2 I)^{-1}K_{XX_*}$ = variance reduction from observing training data.
+
 **Key insight:** the predictive mean $\bar{f}_*$ is a linear combination of training observations — a kernel smoother. The predictive variance $\text{Cov}_*$ quantifies uncertainty: it is large far from training points and small near them.
 
 **Computational cost:** requires inverting $K_{XX} + \sigma_n^2 I$ — $O(n^3)$ time and $O(n^2)$ memory. The bottleneck for large datasets.
@@ -73,6 +76,8 @@ where $r = \|x - x'\|$ and $\ell$ is the length-scale hyperparameter.
 GP hyperparameters (length-scale $\ell$, signal variance $\sigma_f^2$, noise variance $\sigma_n^2$) are optimized by maximizing the **log marginal likelihood**:
 
 $$\log p(\mathbf{y}|X, \theta) = -\frac{1}{2}\mathbf{y}^\top(K + \sigma_n^2 I)^{-1}\mathbf{y} - \frac{1}{2}\log|K + \sigma_n^2 I| - \frac{n}{2}\log 2\pi$$
+
+where $\mathbf{y}$ = vector of training targets, $K = K_{XX}$ = kernel matrix at training points, $\sigma_n^2$ = noise variance, $\theta$ = GP hyperparameters (length-scale, signal variance, noise variance), $\log|K + \sigma_n^2 I|$ = log-determinant (complexity term — a larger, smoother model has higher determinant), and $n/2 \cdot \log 2\pi$ = constant.
 
 - First term: data fit (penalizes poor fit)
 - Second term: complexity penalty (penalizes over-fit via large $\log|K|$)
@@ -118,4 +123,12 @@ A deep GP is a composition of GPs: $f^{(l+1)} = f^{(l)} \circ f^{(l-1)} \circ \c
 
 ---
 
-*See also: [[bayesian-inference]] · [[kernel-methods]] · [[distributions-gaussian]] · [[variational-inference]] · [[neural-tangent-kernel]] · [[statistical-inference-mle]] · [[sampling-methods]]*
+## Links
+
+- [[bayesian-inference]] — GPs place a prior over functions and update to a posterior after data; GP regression is exact Bayesian inference for Gaussian likelihoods
+- [[kernel-methods]] — the GP covariance function is a kernel; the posterior mean is kernel ridge regression; Mercer's theorem connects the two formalisms
+- [[distributions-gaussian]] — a GP is defined as a collection of Gaussian random variables; conditioning preserves Gaussianity, giving a closed-form posterior
+- [[statistical-inference-mle]] — kernel hyperparameters (length-scale, noise variance) are fit by maximizing the marginal log-likelihood
+- [[neural-tangent-kernel]] — infinitely wide neural networks converge to GPs in function space; the NTK is the corresponding covariance kernel
+- [[variational-inference]] — sparse GPs use inducing points with a variational lower bound (ELBO) to scale GP inference to large datasets
+- [[sampling-methods]] — posterior predictive sampling generates plausible functions from the GP posterior distribution

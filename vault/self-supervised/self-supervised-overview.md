@@ -5,6 +5,7 @@ aliases: [SSL, pretraining, SimCLR, BYOL, MAE, DINO]
 difficulty: 3
 status: complete
 related: [contrastive-learning, attention-mechanism, bayesian-inference]
+depends_on: [backpropagation, distributions-overview]
 ---
 
 # Self-supervised Learning — Unified Overview
@@ -49,6 +50,8 @@ Do you have labeled data?
 All contrastive methods maximize a lower bound on mutual information between two views:
 
 $$\mathcal{I}(v_1; v_2) \geq \mathcal{L}_{NCE} = \mathbb{E}\left[\log \frac{e^{f(v_1)^T f(v_2)/\tau}}{\frac{1}{K}\sum_{k=1}^K e^{f(v_1)^T f(v_k^-)/\tau}}\right]$$
+
+where $v_1, v_2$ = two augmented views of the same image, $f(\cdot)$ = encoder, $\tau$ = temperature, $K$ = number of negative examples, $v_k^-$ = negative views (from different images), and $\mathcal{I}(v_1; v_2)$ = mutual information between the two view representations (how much they share).
 
 Maximizing mutual information $\mathcal{I}(v_1; v_2)$ forces the encoder to capture shared information between views — the semantic content that survives augmentation. The **information bottleneck** principle applied via data augmentation: by choosing augmentations that preserve class identity but destroy irrelevant variation, the model learns to retain class-relevant information.
 
@@ -132,4 +135,12 @@ This provides the first theoretical justification for why contrastive SSL repres
 
 ---
 
-*See also: [[contrastive-learning]] · [[attention-mechanism]] · [[bayesian-inference]] · [[bert-mlm]] · [[knowledge-distillation]] · [[clip]] · [[vision-transformer]]*
+## Links
+
+- [[backpropagation]] — all SSL methods are trained by backpropagation; the key difference is the pretext task that defines the self-supervised loss function
+- [[distributions-overview]] — SSL methods implicitly model the data distribution: contrastive methods learn a metric, generative methods learn the density; the choice shapes downstream representations
+- [[contrastive-learning]] — contrastive SSL (SimCLR, MoCo, CLIP) pulls positive pairs together and pushes negatives apart; it learns an embedding metric without explicit density modeling
+- [[bert-mlm]] — masked prediction SSL (BERT, MAE) predicts masked tokens/patches from context; it learns bidirectional contextual representations
+- [[knowledge-distillation]] — self-distillation (BYOL, DINO) is a hybrid: the teacher is the student's own EMA; no negatives, no explicit reconstruction — just match your past self
+- [[clip]] — multimodal SSL (CLIP) aligns representations across modalities; it learns a shared embedding space for images and text using paired data
+- [[vision-transformer]] — ViT is the dominant backbone for visual SSL; its patch tokenization enables both contrastive (DINO) and reconstruction (MAE) pretraining without CNN inductive biases

@@ -5,6 +5,7 @@ aliases: [CLIP, contrastive language-image pretraining, OpenAI CLIP]
 difficulty: 2
 status: complete
 related: [contrastive-learning, attention-mechanism, self-supervised-overview, generative-adversarial-networks]
+depends_on: [contrastive-learning, attention-mechanism, vision-transformer]
 ---
 
 # CLIP — Contrastive Language-Image Pretraining
@@ -29,6 +30,8 @@ Similarity is cosine similarity: $s(x,t) = e_I \cdot e_T$. A learnable temperatu
 Given a batch of $N$ (image, text) pairs, construct an $N \times N$ similarity matrix. Diagonal entries are correct pairs; off-diagonal entries are negatives.
 
 $$\mathcal{L} = -\frac{1}{2N}\sum_{i=1}^N \left[\log\frac{\exp(s_{ii}/\tau)}{\sum_j \exp(s_{ij}/\tau)} + \log\frac{\exp(s_{ii}/\tau)}{\sum_j \exp(s_{ji}/\tau)}\right]$$
+
+where $N$ = batch size, $s_{ij} = e_I^i \cdot e_T^j$ = cosine similarity between image $i$ and text $j$ (L2-normalised dot product), $\tau$ = learnable temperature (initially $\approx 0.07$, small value sharpens the distribution), and the two log terms are the image-to-text and text-to-image cross-entropy losses.
 
 The first term is the image-to-text direction; the second is text-to-image. The loss is averaged across both directions.
 
@@ -112,7 +115,7 @@ Minimising the InfoNCE loss maximises a lower bound on [[entropy-mutual-info|mut
 
 $$\mathcal{L} = -\sum_{i,j} \left[y_{ij} \log \sigma(s_{ij}/\tau + b) + (1-y_{ij}) \log(1 - \sigma(s_{ij}/\tau + b))\right]$$
 
-where $y_{ij} = 1$ iff pair $(i,j)$ is matched. Unlike InfoNCE, this does not require a softmax over all negatives in the batch — each pair is treated independently. This removes the large-batch requirement (works with batch 256) while improving performance. The key difference: InfoNCE competes each positive against all batch negatives; SigLIP treats every pair as an independent binary classification.
+where $y_{ij} = 1$ iff pair $(i,j)$ is matched, $\sigma(\cdot)$ = sigmoid function, $b$ = learnable bias (allows the model to shift the decision boundary), and $\tau$ = temperature. Unlike InfoNCE, this does not require a softmax over all negatives in the batch — each pair is treated independently. This removes the large-batch requirement (works with batch 256) while improving performance. The key difference: InfoNCE competes each positive against all batch negatives; SigLIP treats every pair as an independent binary classification.
 
 **EVA-CLIP (Fang et al., 2023):** scales to 18B parameters by combining CLIP's [[contrastive-learning|contrastive]] objective with masked image modeling as a secondary [[self-supervised-overview|pretraining]] task. The dual objective forces the encoder to simultaneously learn discriminative cross-modal features (from contrastive) and dense reconstructive features (from masking), producing representations that excel at both retrieval and dense prediction tasks.
 
@@ -120,4 +123,12 @@ where $y_{ij} = 1$ iff pair $(i,j)$ is matched. Unlike InfoNCE, this does not re
 
 ---
 
-*See also: [[contrastive-learning]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[blip]] · [[loss-nt-xent]] · [[entropy-mutual-info]] · [[vision-transformer]]*
+## Links
+
+- [[contrastive-learning]] — CLIP is large-scale contrastive learning: image-text pairs are positive, all other combinations in the batch are negatives; the NT-Xent loss maximizes alignment
+- [[attention-mechanism]] — both CLIP's image encoder (ViT) and text encoder (GPT-style transformer) use self-attention; the dual-encoder design keeps them separate until the final dot product
+- [[vision-transformer]] — CLIP popularized ViT as an image encoder for large-scale training; ViT-L/14 at 336px is the standard CLIP backbone for downstream tasks
+- [[self-supervised-overview]] — CLIP is weakly supervised (image-alt-text pairs from the web), not purely self-supervised; the text labels are noisy but plentiful (400M pairs)
+- [[blip]] — BLIP extends CLIP by adding a decoder head for generation; BLIP-2 adds a Q-Former to bridge frozen CLIP encoders with large language models
+- [[loss-nt-xent]] — NT-Xent (normalized temperature-scaled cross-entropy) is the InfoNCE objective used in CLIP; temperature $\tau$ controls the sharpness of the similarity distribution
+- [[entropy-mutual-info]] — CLIP's objective maximizes mutual information between image and text representations; InfoNCE is a lower bound on the mutual information

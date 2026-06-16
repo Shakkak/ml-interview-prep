@@ -4,6 +4,7 @@ tags: [rope, rotary-embeddings, positional-encoding, relative-position, llm]
 aliases: [RoPE, rotary embeddings, rotary position encoding, RoPE scaling, NTK-aware RoPE]
 difficulty: 2
 status: complete
+depends_on: [arch-positional-encoding, attention-mechanism, linear-algebra-fundamentals]
 related: [arch-positional-encoding, attention-mechanism, arch-kv-cache, autoregressive-models, flash-attention]
 ---
 
@@ -27,6 +28,8 @@ For 2D vectors, multiply each pair of dimensions by a rotation matrix at angle $
 
 $$\mathbf{q}_m = R_m \mathbf{q}, \quad R_m = \begin{pmatrix}\cos m\theta & -\sin m\theta \\ \sin m\theta & \cos m\theta\end{pmatrix}$$
 
+where $\mathbf{q}$ = original 2D query vector, $m$ = absolute position of the token in the sequence, $\theta$ = rotation frequency (a fixed constant), and $R_m$ = a 2D rotation matrix that rotates $\mathbf{q}$ by angle $m\theta$. The key identity: $R_m^\top R_n = R_{n-m}$ (rotating forward by $n$ then backward by $m$ = net rotation of $n-m$).
+
 Then: $\mathbf{q}_m^\top \mathbf{k}_n = \mathbf{q}^\top R_m^\top R_n \mathbf{k} = \mathbf{q}^\top R_{n-m} \mathbf{k}$
 
 The inner product depends only on $n - m$ — relative position — not on absolute positions $m$ and $n$.
@@ -41,7 +44,7 @@ For $d$-dimensional query/key vectors, pair up dimensions and apply 2D rotations
 
 $$\text{RoPE}(\mathbf{x}, m)_{2i}, \text{RoPE}(\mathbf{x}, m)_{2i+1} = \begin{pmatrix}x_{2i}\cos m\theta_i - x_{2i+1}\sin m\theta_i \\ x_{2i}\sin m\theta_i + x_{2i+1}\cos m\theta_i\end{pmatrix}$$
 
-where $\theta_i = 10000^{-2i/d}$ — the same base frequencies as sinusoidal PE, applied multiplicatively.
+where $\mathbf{x}$ = original query or key vector, $m$ = token position, $i$ = dimension-pair index (ranges 0 to $d/2 - 1$), $x_{2i}, x_{2i+1}$ = the two components of dimension pair $i$, and $\theta_i = 10000^{-2i/d}$ = rotation frequency for pair $i$ (same base as sinusoidal PE — small $i$ rotates fast, large $i$ rotates slowly).
 
 **Properties:**
 - Each dimension pair rotates at a different frequency; low-index pairs rotate faster, high-index pairs rotate slower
@@ -82,4 +85,11 @@ RoPE is applied per-head to the Q and K projections only — not to V. This pres
 
 In grouped query attention (see [[grouped-query-attention]]), RoPE is applied to all Q heads and to the fewer K heads independently.
 
-*See also: [[arch-positional-encoding]] · [[attention-mechanism]] · [[arch-kv-cache]] · [[autoregressive-models]]*
+## Links
+
+- [[arch-positional-encoding]] — RoPE supersedes absolute sinusoidal and learned position embeddings by encoding positions as rotations in QK space
+- [[attention-mechanism]] — RoPE is applied to queries and keys before the dot product; the rotation means $q_m^\top k_n$ depends only on the relative offset $m-n$
+- [[linear-algebra-fundamentals]] — rotation matrices in 2D pairs of dimensions encode position; the block-diagonal structure keeps computation $O(d)$
+- [[arch-kv-cache]] — RoPE rotations must be applied at inference time when extending context beyond training length; NTK-aware scaling adjusts the base frequency for longer contexts
+- [[autoregressive-models]] — autoregressive transformers (LLaMA, Mistral, GPT-4) use RoPE for its superior length-generalization properties
+- [[flash-attention]] — Flash Attention implementations must account for RoPE being applied inside the kernel

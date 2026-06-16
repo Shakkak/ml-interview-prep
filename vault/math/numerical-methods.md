@@ -5,6 +5,7 @@ aliases: [numerical stability, floating point, log-sum-exp, numerical precision]
 difficulty: 2
 status: complete
 related: [mixed-precision, taylor-series, matrix-calculus, loss-cross-entropy, activation-softmax, linear-algebra-fundamentals]
+depends_on: [linear-algebra-fundamentals, taylor-series]
 ---
 
 # Numerical Methods & Floating-Point Arithmetic
@@ -171,4 +172,11 @@ The design principle: do the bulk computation (matmul, which dominates FLOPS) in
 
 ---
 
-*See also: [[mixed-precision]] · [[taylor-series]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[normalization-layers]] · [[linear-algebra-fundamentals]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — ill-conditioned matrices cause numerical instability in linear solves; the condition number $\kappa = \sigma_{\max}/\sigma_{\min}$ quantifies how many bits of precision are lost
+- [[taylor-series]] — numerical differentiation (finite differences) is derived from the Taylor expansion; truncation error is $O(h)$ for forward differences, $O(h^2)$ for central differences
+- [[mixed-precision]] — FP16/BF16 has 3–4 fewer decimal digits of precision than FP32; numerical stability techniques (loss scaling, stable softmax) prevent underflow/overflow
+- [[activation-softmax]] — numerically stable softmax subtracts $\max(x)$ before exponentiating; this prevents overflow without changing the output (since it cancels in numerator and denominator)
+- [[loss-cross-entropy]] — log-sum-exp is the numerically stable way to compute $\log \sum_i e^{x_i}$; PyTorch's `CrossEntropyLoss` fuses softmax + log + NLL for stability
+- [[normalization-layers]] — layer/batch norm adds $\epsilon$ to the denominator to prevent division by zero; $\epsilon=10^{-5}$ is standard

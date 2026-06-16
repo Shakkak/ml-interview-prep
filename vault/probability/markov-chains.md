@@ -4,6 +4,7 @@ tags: [probability, markov-chains, mcmc, sequential]
 aliases: [Markov chain, Markov property, stationary distribution, MCMC, Markov decision process]
 difficulty: 2
 status: complete
+depends_on: [distributions-overview, linear-algebra-fundamentals]
 related: [distributions-overview, bayesian-inference, entropy-mutual-info]
 ---
 
@@ -98,6 +99,8 @@ Key: only $\pi(x')/\pi(x)$ is needed — the normalizing constant cancels. Perfe
 
 $$\pi = d P^\top \pi + (1-d)/n \cdot \mathbf{1}$$
 
+where $\pi$ = PageRank vector (stationary distribution), $d \approx 0.85$ = damping factor (probability of following a link), $P$ = web transition matrix, $n$ = total number of pages, and $\mathbf{1}$ = vector of all ones (uniform teleportation).
+
 **MDPs (Markov Decision Processes):** RL environments are MDPs: $(S, A, T, R, \gamma)$. The Markov property is the key assumption — the optimal policy depends only on the current state. Bellman equation: $V^\pi(s) = R(s) + \gamma \sum_{s'} T(s'|s, \pi(s)) V^\pi(s')$.
 
 ---
@@ -131,6 +134,8 @@ Standard Metropolis-Hastings with a random walk proposal mixes poorly in high di
 
 $$H(x, p) = -\log \pi(x) + \frac{1}{2}p^\top M^{-1}p$$
 
+where $x$ = position (model parameters), $p$ = auxiliary momentum, $\pi(x)$ = target distribution (e.g., posterior), and $M$ = mass matrix (positive definite; often $M = I$, controls the scale of momentum in each direction).
+
 Leapfrog integration approximates Hamiltonian dynamics, producing proposals that can travel far while maintaining high acceptance rates. HMC scales to hundreds of parameters; the No-U-Turn Sampler (NUTS, Hoffman & Gelman 2014) automatically tunes the trajectory length.
 
 **Practical insight:** HMC requires gradients of the log-target density — available in modern probabilistic programming frameworks (Stan, PyMC, Pyro). For neural posteriors, this requires [[backpropagation]] through the network.
@@ -145,4 +150,11 @@ As the learning rate $\epsilon_t \to 0$ following a specific schedule, the itera
 
 ---
 
-*See also: [[bayesian-inference]] · [[distributions-overview]] · [[entropy-mutual-info]] · [[sampling-methods]] · [[backpropagation]] · [[distributions-gaussian]]*
+## Links
+
+- [[distributions-overview]] — the transition kernel is a conditional distribution; the stationary distribution $\pi$ is a special distribution satisfying $\pi P = \pi$
+- [[linear-algebra-fundamentals]] — the stationary distribution is the left eigenvector of the transition matrix for eigenvalue 1; convergence rate is governed by the second-largest eigenvalue
+- [[bayesian-inference]] — MCMC methods (Metropolis-Hastings, Gibbs) construct Markov chains whose stationary distribution is the Bayesian posterior
+- [[entropy-mutual-info]] — the entropy rate of an ergodic Markov chain is $\bar{H} = -\sum_{ij} \pi_i P_{ij} \log P_{ij}$
+- [[sampling-methods]] — MCMC sampling constructs a Markov chain whose stationary distribution matches the target; detailed balance ensures correctness
+- [[distributions-gaussian]] — Gaussian HMMs use Markov chains over discrete states with Gaussian emission distributions

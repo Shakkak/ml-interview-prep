@@ -4,6 +4,7 @@ tags: [generating-functions, moment-generating-function, characteristic-function
 aliases: [moment generating function, MGF, characteristic function, cumulant generating function, cumulants]
 difficulty: 2
 status: complete
+depends_on: [distributions-overview, matrix-calculus]
 related: [distributions-overview, distributions-gaussian, central-limit-theorem, fisher-information, exponential-family]
 ---
 
@@ -55,7 +56,8 @@ $$\varphi_X(t) = \int_{-\infty}^\infty f_X(x) e^{itx} \, dx$$
 
 **Central Limit Theorem via characteristic functions:** for iid $X_i$ with mean $\mu$, variance $\sigma^2$:
 $$\varphi_{\bar{X}_n}(t) = \left(\varphi_X\!\left(\frac{t}{\sigma\sqrt{n}}\right)\right)^n \to e^{-t^2/2}$$
-which is the characteristic function of $\mathcal{N}(0,1)$ — the CLT in a few lines.
+
+where $\bar{X}_n = \frac{1}{n}\sum_{i=1}^n X_i$ = sample mean of $n$ iid copies, $\varphi_X$ = characteristic function of a single $X_i$, $\sigma$ = standard deviation of $X_i$, and $e^{-t^2/2}$ = characteristic function of $\mathcal{N}(0,1)$ — the CLT in a few lines.
 
 ### Cumulants and Cumulant Generating Function
 
@@ -84,6 +86,8 @@ The **cumulants** $\kappa_k = K_X^{(k)}(0)$ are more natural than moments:
 For exponential families (see [[exponential-family]]), the log-partition function $A(\eta)$ is the CGF of the sufficient statistic $T(x)$:
 $$A(\eta) = K_{T(X)}(\eta) = \log \mathbb{E}[e^{\eta T(x)}]$$
 
+where $\eta$ = natural parameter of the exponential family, $T(x)$ = sufficient statistic (the function of data that captures all information about $\eta$), $A(\eta)$ = log-partition function (a normalizing constant that makes the distribution sum to 1 — also the CGF of $T(X)$ evaluated at $\eta$).
+
 Therefore: $\nabla A(\eta) = \mathbb{E}[T(X)]$ and $\nabla^2 A(\eta) = \text{Cov}[T(X)]$ — the gradient and Hessian of the log-partition are the mean and variance of the sufficient statistic.
 
 ### Laplace Transform
@@ -93,4 +97,11 @@ The **Laplace transform** $\mathcal{L}_X(s) = \mathbb{E}[e^{-sX}] = M_X(-s)$ for
 - Queueing theory: transforms of service time distributions
 - Differential equations: converting ODEs to algebraic equations
 
-*See also: [[distributions-overview]] · [[central-limit-theorem]] · [[exponential-family]] · [[fisher-information]]*
+## Links
+
+- [[distributions-overview]] — the MGF $M_X(t) = E[e^{tX}]$ encodes all moments of a distribution; different distributions have different MGF forms
+- [[matrix-calculus]] — moments are computed by differentiating the MGF: $E[X^n] = M_X^{(n)}(0)$; this is a calculus operation on the generating function
+- [[distributions-gaussian]] — the Gaussian MGF is $e^{\mu t + \sigma^2 t^2/2}$; the normal distribution is uniquely characterized by its cumulants (mean and variance, all higher cumulants zero)
+- [[central-limit-theorem]] — the CLT is proved using characteristic functions (Fourier transform of the density); convergence of CFs implies convergence in distribution
+- [[exponential-family]] — exponential family distributions have MGFs of the form $e^{A(\theta+t) - A(\theta)}$; the log-MGF $A(\theta)$ is the cumulant generating function
+- [[fisher-information]] — Fisher information is the second derivative of the log-likelihood (log-MGF) at the natural parameter; cumulant generating functions connect the two

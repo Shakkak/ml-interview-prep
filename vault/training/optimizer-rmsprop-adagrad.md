@@ -5,6 +5,7 @@ aliases: [RMSProp, Adagrad, adaptive gradient]
 difficulty: 2
 status: complete
 related: [optimizer-adam, optimizer-sgd-momentum, optimizer-lr-schedules]
+depends_on: [optimizer-sgd-momentum, backpropagation]
 ---
 
 # RMSProp and Adagrad
@@ -17,6 +18,8 @@ related: [optimizer-adam, optimizer-sgd-momentum, optimizer-lr-schedules]
 $$G_t = G_{t-1} + g_t^2$$
 $$\theta_t \leftarrow \theta_t - \frac{\eta}{\sqrt{G_t} + \epsilon}\, g_t$$
 
+where $G_t$ = accumulated sum of squared gradients up to step $t$, $g_t$ = gradient at step $t$, $\eta$ = base learning rate, $\epsilon$ = small constant for numerical stability, effective learning rate $= \eta/\sqrt{G_t}$ shrinks monotonically.
+
 **Key idea:** parameters with large past gradients get smaller effective learning rates. Parameters with sparse/small gradients get larger effective rates.
 
 **Best use case:** sparse features (NLP bag-of-words, recommendation systems). A rarely-updated embedding parameter gets a full $\eta$ update; a frequently-updated one gets a smaller step — addressing the frequency imbalance naturally.
@@ -26,6 +29,8 @@ $$\theta_t \leftarrow \theta_t - \frac{\eta}{\sqrt{G_t} + \epsilon}\, g_t$$
 **RMSProp** (Hinton, 2012) — replaces cumulative sum with exponential moving average:
 $$v_t \leftarrow \beta v_{t-1} + (1 - \beta) g_t^2$$
 $$\theta_t \leftarrow \theta_t - \frac{\eta}{\sqrt{v_t} + \epsilon}\, g_t$$
+
+where $v_t$ = exponential moving average of squared gradients, $\beta$ = decay factor (typically 0.9), $(1-\beta)$ = weight on current gradient squared, effective learning rate $= \eta/\sqrt{v_t}$ adapts to recent gradient scale.
 
 Typical $\beta = 0.9$. Now $v_t$ reflects *recent* gradient magnitudes; the effective learning rate no longer decays to zero. RMSProp = [[optimizer-adam|Adam]] without the first moment ($m_t$) and without bias correction.
 
@@ -71,4 +76,8 @@ At step 4: Adagrad barely changes step size despite $30\times$ smaller gradient 
 
 ---
 
-*See also: [[optimizer-adam]] · [[optimizer-sgd-momentum]]*
+## Links
+
+- [[optimizer-sgd-momentum]] — Adagrad and RMSProp address SGD's fixed learning rate; Adagrad accumulates squared gradients, RMSProp uses an exponential moving average to prevent the LR from decaying to zero
+- [[backpropagation]] — adaptive optimizers maintain per-parameter state (accumulated squared gradients); this state is updated after each backward pass and used to scale the gradient update
+- [[optimizer-adam]] — Adam = RMSProp + momentum; the first moment (momentum) and second moment (RMSProp's $v_t$) are combined with bias correction; Adam subsumes both Adagrad and RMSProp

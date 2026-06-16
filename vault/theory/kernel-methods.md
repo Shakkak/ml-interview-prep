@@ -4,6 +4,7 @@ tags: [kernel-methods, svm, linear-algebra, statistics, machine-learning]
 aliases: [kernel trick, kernel methods, SVM, RBF kernel, Mercer's theorem, kernel PCA, RKHS]
 difficulty: 3
 status: complete
+depends_on: [linear-algebra-fundamentals, lagrangian-optimization, eigenvalues-pca]
 related: [linear-algebra-fundamentals, eigenvalues-pca, math-svd, curse-of-dimensionality, generative-vs-discriminative]
 ---
 
@@ -13,13 +14,19 @@ related: [linear-algebra-fundamentals, eigenvalues-pca, math-svd, curse-of-dimen
 
 ## Fundamental
 
-Many ML algorithms only ever use dot products $\langle x_i, x_j \rangle$ between data points — never the individual vectors. The **kernel trick** replaces every dot product with a kernel function:
+**The problem:** most real-world datasets are not linearly separable in their original feature space. A linear classifier (e.g., SVM or logistic regression) would fail. One fix is to manually engineer nonlinear features — for example, adding $x_1^2$, $x_2^2$, and $x_1 x_2$ to make quadratic boundaries possible. But this is expensive: a $d$-dimensional polynomial feature expansion of degree $p$ has $O(d^p)$ terms. For $d=1000$ and $p=3$, that is $10^9$ features — computationally intractable.
+
+**The key insight:** many linear algorithms (SVM, PCA, ridge regression) never actually use the individual feature values $\phi(x)$ — they only use **pairwise dot products** $\langle \phi(x_i), \phi(x_j) \rangle$. If we can compute that dot product cheaply without ever building $\phi(x)$ explicitly, we get all the power of working in high-dimensional feature space at the cost of computing just a single number per pair.
+
+This is the **kernel trick**: replace every dot product with a kernel function:
 
 $$k(x_i, x_j) = \langle \phi(x_i), \phi(x_j) \rangle_\mathcal{H}$$
 
-where $\phi: \mathbb{R}^d \to \mathcal{H}$ maps inputs to a (possibly infinite-dimensional) feature space. We compute $k(x_i, x_j)$ directly without ever forming $\phi(x)$.
+where $\phi: \mathbb{R}^d \to \mathcal{H}$ maps inputs to a (possibly infinite-dimensional) feature space $\mathcal{H}$, and $k(x_i, x_j)$ = the resulting inner product (a single real number). We compute $k(x_i, x_j)$ directly without ever forming $\phi(x)$ — enabling linear algorithms to operate in infinite-dimensional spaces.
 
-**Why this matters:** use linear algorithms in very high-dimensional (or infinite-dimensional) feature spaces without the computational cost of the mapping.
+**Worked example:** the polynomial kernel $k(x, z) = (x^\top z)^2$ for $x, z \in \mathbb{R}^2$ corresponds to $\phi(x) = [x_1^2, x_2^2, x_1 x_2, x_2 x_1]^\top$ — a degree-2 feature map. Computing $k(x, z) = (x^\top z)^2$ takes 2 multiplications; computing $\phi(x)^\top \phi(z)$ takes 4 multiplications plus a sum. The gap grows exponentially with degree and dimension.
+
+**Why this matters:** use linear algorithms in very high-dimensional (or infinite-dimensional) feature spaces without the computational cost of the mapping. With the RBF kernel, the effective feature space is **infinite-dimensional** — yet we compute only a single number per pair.
 
 **Mercer's Theorem:** a function $k$ is a valid kernel if and only if it is symmetric and the kernel matrix $K_{ij} = k(x_i, x_j)$ is positive semi-definite for all finite sets of points.
 
@@ -40,6 +47,8 @@ $$\min_{w,b} \frac{1}{2}\|w\|^2 \quad \text{s.t.} \quad y_i(w^\top x_i + b) \geq
 **SVM dual:** depends on data only through dot products $x_i^\top x_j$. Replace with $k(x_i, x_j)$ → kernel SVM. Decision function:
 
 $$f(x) = \text{sign}\!\left(\sum_i \alpha_i y_i k(x_i, x) + b\right)$$
+
+where $\alpha_i \geq 0$ = dual variables (Lagrange multipliers), nonzero only for support vectors; $y_i \in \{-1,+1\}$ = training labels; $b$ = bias term.
 
 **Support vectors:** training points with $\alpha_i > 0$ (points closest to the boundary). Most $\alpha_i = 0$ — sparse solution.
 
@@ -84,6 +93,8 @@ Kernel methods scale poorly with $n$ — impractical for $n > 10^5$.
 
 $$\phi_\omega(x) = \sqrt{\frac{2}{D}}\cos(\omega_i^\top x + b_i)_{i=1}^D, \quad \omega_i \sim \mathcal{N}(0, I/\sigma^2)$$
 
+where $D$ = number of random features (controls approximation quality), $\omega_i$ = random frequency sampled from the kernel's spectral density, $b_i \sim \text{Uniform}[0, 2\pi]$ = random phase, $\sigma$ = RBF bandwidth.
+
 > [!tip] Why sampling $\omega$ from the kernel's spectral density works ([[fourier-transform]])
 > **Bochner's theorem:** every continuous shift-invariant kernel $k(x,z) = k(x-z)$ is the Fourier transform
 > of a non-negative measure $p(\omega)$ — its **spectral density**:
@@ -110,6 +121,8 @@ The training dynamics are linear: $\dot{f}(x;t) = -K_{\text{NTK}}(x, X)(f(X;t) -
 
 $$\min_{w,b,\xi} \frac{1}{2}\|w\|^2 + C\sum_i \xi_i \quad \text{s.t.} \quad y_i(w^\top x_i + b) \geq 1 - \xi_i, \; \xi_i \geq 0$$
 
+where $\xi_i \geq 0$ = slack variable for example $i$ (amount by which margin is violated), $C > 0$ = regularization parameter trading off margin size vs. total slack.
+
 The dual:
 $$\max_\alpha \sum_i \alpha_i - \frac{1}{2}\sum_{i,j}\alpha_i\alpha_j y_i y_j k(x_i, x_j) \quad \text{s.t.} \quad 0 \leq \alpha_i \leq C$$
 
@@ -121,4 +134,13 @@ The box constraint $\alpha_i \leq C$ limits how much any single training point c
 
 ---
 
-*See also: [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[curse-of-dimensionality]] · [[generative-vs-discriminative]] · [[spectral-bias]] · [[neural-tangent-kernel]] · [[lagrangian-optimization]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — the kernel replaces dot products $x_i^\top x_j$; inner-product spaces and Gram matrices are the foundation
+- [[lagrangian-optimization]] — the SVM dual is derived via Lagrangian optimization with KKT conditions; the kernel appears in the dual objective
+- [[eigenvalues-pca]] — kernel PCA eigendecomposes the $n \times n$ kernel matrix instead of the $d \times d$ covariance
+- [[math-svd]] — the pseudoinverse connects to the minimum-norm interpolant that kernel regression finds
+- [[curse-of-dimensionality]] — kernels implicitly operate in high-dimensional spaces where distance intuition breaks down
+- [[neural-tangent-kernel]] — wide neural networks converge to kernel regression with the NTK; deep learning theory as kernel methods
+- [[spectral-bias]] — the NTK eigenspectrum governs convergence rate; smooth kernels learn low frequencies first
+- [[generative-vs-discriminative]] — SVMs are discriminative; kernel density estimation is generative

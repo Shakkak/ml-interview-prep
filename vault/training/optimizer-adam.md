@@ -4,6 +4,7 @@ tags: [optimizer, training, adaptive-learning-rate]
 aliases: [Adam, AdamW, adaptive moment estimation]
 difficulty: 2
 status: complete
+depends_on: [optimizer-sgd-momentum, backpropagation]
 related: [optimizer-sgd-momentum, optimizer-rmsprop-adagrad, optimizer-lr-schedules]
 ---
 
@@ -16,14 +17,20 @@ related: [optimizer-sgd-momentum, optimizer-rmsprop-adagrad, optimizer-lr-schedu
 [[optimizer-sgd-momentum|SGD]] with momentum adapts direction (accumulates gradient history) but uses the same learning rate for every parameter. Adam adds **per-parameter adaptive learning rates**: parameters with historically large gradients get smaller updates; sparse/small-gradient parameters get larger updates.
 
 **Algorithm:** maintain two running averages per parameter:
-$$m_t \leftarrow \beta_1 m_{t-1} + (1 - \beta_1) g_t \qquad \text{(first moment — mean)}$$
-$$v_t \leftarrow \beta_2 v_{t-1} + (1 - \beta_2) g_t^2 \qquad \text{(second moment — uncentered variance)}$$
+$$m_t \leftarrow \beta_1 m_{t-1} + (1 - \beta_1) g_t \qquad \text{(first moment — exponential moving average of gradients)}$$
+$$v_t \leftarrow \beta_2 v_{t-1} + (1 - \beta_2) g_t^2 \qquad \text{(second moment — exponential moving average of squared gradients)}$$
 
-**Bias correction** (corrects for initialization at zero):
+where $g_t = \nabla_\theta L_t$ is the gradient at step $t$, $\beta_1$ controls how fast the first moment forgets old gradients (typical: 0.9 = 90% memory), and $\beta_2$ controls the second moment decay (typical: 0.999 = 99.9% memory).
+
+**Bias correction** (corrects for both moments being initialized at zero):
 $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \qquad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
+
+where $1 - \beta_1^t$ and $1 - \beta_2^t$ are correction factors that shrink toward 1 as $t$ grows (after ~50 steps, $(1-0.9^{50}) \approx 1$ and correction becomes negligible).
 
 **Parameter update:**
 $$\theta_t \leftarrow \theta_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$$
+
+where $\eta$ = global learning rate, $\hat{m}_t$ = bias-corrected gradient estimate (direction), $\sqrt{\hat{v}_t}$ = root-mean-square of historical gradients (scale), and $\epsilon$ = small constant for numerical stability (prevents division by zero when $\hat{v}_t \approx 0$).
 
 Defaults: $\beta_1 = 0.9$, $\beta_2 = 0.999$, $\epsilon = 10^{-8}$, $\eta = 10^{-3}$.
 
@@ -55,6 +62,8 @@ Step 3 (gradient reverses to $-0.3$): $m_3 = 0.0825$, $v_3 \approx 0.000979$. Th
 **AdamW: decoupled weight decay** — L2 regularization in the loss adds $\lambda w$ to the gradient, which then gets divided by $\sqrt{\hat{v}} + \epsilon$. Parameters with large gradient history get their regularization scaled down — unintended behavior. AdamW separates weight decay from the gradient:
 $$\theta_t \leftarrow \theta_t - \eta\left(\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda \theta_t\right)$$
 
+where $\lambda$ is the weight decay coefficient (e.g., $10^{-2}$). The $\lambda \theta_t$ term directly shrinks each parameter by a fraction $\eta\lambda$ per step, independent of gradient history — unlike L2 regularization in the loss which would also get divided by $\sqrt{\hat{v}_t}$.
+
 Every parameter decays by the same fraction regardless of gradient history. **AdamW is almost always preferred over Adam for transformers and large vision models.**
 
 **Common failure modes:**
@@ -80,4 +89,10 @@ The practical implication: for tasks where generalization matters most (image cl
 
 ---
 
-*See also: [[optimizer-sgd-momentum]] · [[optimizer-rmsprop-adagrad]] · [[optimizer-lr-schedules]] · [[regularization-weight-decay]]*
+## Links
+
+- [[optimizer-sgd-momentum]] — Adam extends SGD+momentum by adding per-parameter adaptive learning rates; read this first
+- [[backpropagation]] — provides the gradients $g_t$ that Adam's moment estimates are built from
+- [[optimizer-rmsprop-adagrad]] — RMSProp is Adam's direct predecessor; Adam adds bias correction and a first-moment term
+- [[optimizer-lr-schedules]] — Adam still benefits from LR warmup/decay because adaptive scaling does not replace scheduling
+- [[regularization-weight-decay]] — AdamW decouples weight decay from the gradient update to fix the unintended interaction in Adam

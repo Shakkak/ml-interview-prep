@@ -4,6 +4,7 @@ tags: [activation, probability, classification]
 aliases: [softmax, softmax function, normalized exponential]
 difficulty: 1
 status: complete
+depends_on: [linear-algebra-fundamentals, loss-cross-entropy]
 related: [activation-sigmoid-tanh, loss-cross-entropy, attention-mechanism, backpropagation-advanced]
 ---
 
@@ -83,9 +84,9 @@ $$e^0=1,\ e^{-1}=0.368,\ e^{-1.9}=0.150,\ \text{sum}=1.518 \quad \to p=[0.659, 0
 
 Softmax is identical to the Boltzmann distribution from statistical physics:
 
-$$p_k = \frac{e^{-E_k / kT}}{\sum_j e^{-E_j / kT}}$$
+$$p_k = \frac{e^{-E_k / (k_B T)}}{\sum_j e^{-E_j / (k_B T)}}$$
 
-where $E_k$ is the energy of state $k$, $T$ is temperature, and $k$ is Boltzmann's constant. Setting $E_k = -z_k$ and $1/kT = 1/\tau$: exactly the temperature-scaled softmax.
+where $E_k$ is the energy of state $k$, $T$ is temperature, and $k_B$ is Boltzmann's constant (a physical constant $\approx 1.38 \times 10^{-23}$ J/K). Note: $k_B$ here is the physical constant, not a class index — the class index $k$ used elsewhere in this file is a different variable. Setting $E_k = -z_k$ and $k_B T = \tau$: exactly the temperature-scaled softmax.
 
 This connection is not cosmetic. It implies:
 - Logits are **negative energies** — the model assigns lower energy to more probable classes
@@ -122,4 +123,13 @@ In scaled dot-product attention, dividing by $\sqrt{d_k}$ before softmax is nece
 
 ---
 
-*See also: [[activation-sigmoid-tanh]] · [[loss-cross-entropy]] · [[attention-mechanism]] · [[loss-nt-xent]] · [[knowledge-distillation]] · [[loss-kl-divergence]] · [[variational-autoencoders]] · [[model-calibration]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — softmax is a mapping from $\mathbb{R}^K$ to the probability simplex $\Delta^{K-1}$; it is not linear but is differentiable
+- [[loss-cross-entropy]] — softmax + cross-entropy is the canonical multi-class output; the combined gradient simplifies to $\hat{p} - y$ (see backpropagation-advanced)
+- [[attention-mechanism]] — attention uses softmax to normalize dot products into a probability distribution over positions
+- [[backpropagation-advanced]] — the Jacobian of softmax is $\text{diag}(p) - pp^\top$; composed with cross-entropy, this simplifies to $p - y$
+- [[loss-nt-xent]] — NT-Xent uses softmax over the similarity scores of all negative pairs; temperature scales the softmax sharpness
+- [[knowledge-distillation]] — soft targets are softmax outputs with high temperature; distillation trains the student on these smooth distributions
+- [[loss-kl-divergence]] — KL divergence between the softmax output and the true distribution is the categorical cross-entropy; minimizing CE = minimizing KL
+- [[model-calibration]] — overconfident softmax outputs (probabilities too close to 0 or 1) signal poor calibration; temperature scaling is the standard fix

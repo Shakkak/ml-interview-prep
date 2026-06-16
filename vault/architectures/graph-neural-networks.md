@@ -4,6 +4,7 @@ tags: [gnn, graph-neural-networks, message-passing, gcn, graphsage, gat, point-c
 aliases: [GNN, graph neural network, message passing, GCN, GraphSAGE, GAT, graph attention network]
 difficulty: 3
 status: complete
+depends_on: [linear-algebra-fundamentals, attention-mechanism]
 related: [attention-mechanism, arch-positional-encoding, cnn-architectures-guide, feature-pyramid-networks, contrastive-learning]
 ---
 
@@ -71,7 +72,7 @@ $$\alpha_{uv} = \frac{\exp\left(\text{LeakyReLU}\!\left(a^T [Wh_v \| Wh_u]\right
 
 $$h_v' = \sigma\!\left(\sum_{u \in \mathcal{N}(v)} \alpha_{uv} W h_u\right)$$
 
-The attention coefficient $\alpha_{uv}$ depends on the pair $(h_v, h_u)$ — allowing the network to selectively weight informative neighbors and suppress noisy ones. Multi-head GAT runs $K$ independent attention mechanisms; intermediate layers concatenate outputs, the final layer averages them.
+where $W \in \mathbb{R}^{d' \times d}$ = shared linear transformation applied to all nodes, $a \in \mathbb{R}^{2d'}$ = a learned attention vector, $[\cdot \| \cdot]$ = concatenation, $\alpha_{uv}$ = the normalized attention weight from neighbor $u$ to node $v$, and $\mathcal{N}(v)$ = the neighborhood of $v$ (including $v$ itself via a self-loop). The attention coefficient $\alpha_{uv}$ depends on the pair $(h_v, h_u)$ — allowing the network to selectively weight informative neighbors and suppress noisy ones. Multi-head GAT runs $K$ independent attention mechanisms; intermediate layers concatenate outputs, the final layer averages them.
 
 **Advantage over GCN:** no normalization by degree required; naturally handles heterogeneous graphs where edge informativeness varies. **Disadvantage:** $O(|\mathcal{E}|)$ attention computations — expensive on dense graphs.
 
@@ -97,7 +98,7 @@ A concrete failure case: 1-WL (and hence any standard GNN) cannot distinguish a 
 
 $$h_v^{(k)} = \text{MLP}^{(k)}\!\left((1+\epsilon^{(k)}) h_v^{(k-1)} + \sum_{u \in \mathcal{N}(v)} h_u^{(k-1)}\right)$$
 
-The learnable $\epsilon$ allows the model to interpolate between ignoring ($\epsilon=0$) and heavily weighting ($\epsilon \gg 1$) the node's own features.
+where $h_v^{(k)}$ = node $v$'s representation at layer $k$, $\mathcal{N}(v)$ = the set of neighbors of $v$, $\epsilon^{(k)}$ = a learnable scalar (or fixed, e.g., 0) that controls how much the node's own representation is weighted relative to the sum of neighbor representations, and $\text{MLP}^{(k)}$ = a multi-layer perceptron applied element-wise after aggregation. The learnable $\epsilon$ allows the model to interpolate between ignoring ($\epsilon=0$) and heavily weighting ($\epsilon \gg 1$) the node's own features.
 
 ### Higher-Order GNNs and Positional Encodings
 
@@ -128,4 +129,12 @@ Going beyond 1-WL requires either: (1) $k$-WL methods operating on $k$-tuples of
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[contrastive-learning]] · [[feature-pyramid-networks]] · [[eigenvalues-pca]] · [[linear-algebra-fundamentals]] · [[rnn-lstm]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — GNN message passing is matrix multiplication on the adjacency matrix; spectral GNNs use the graph Laplacian eigenvectors
+- [[attention-mechanism]] — Graph Attention Networks (GAT) weight neighbor messages by learned attention coefficients; graph transformers apply full self-attention over node sets
+- [[arch-positional-encoding]] — GNNs lack inherent position information; positional encodings (Laplacian eigenvectors, random walk stats) are needed for position-sensitive tasks
+- [[eigenvalues-pca]] — spectral GCNs use the Laplacian eigenvectors as graph Fourier basis; graph convolution is filtering in this spectral domain
+- [[contrastive-learning]] — graph contrastive learning (GraphCL, GRACE) pre-trains GNN encoders via contrastive objectives on augmented graph views
+- [[feature-pyramid-networks]] — point cloud detection combines GNNs with FPN-style multi-scale aggregation; PointNet++ is the canonical example
+- [[rnn-lstm]] — graph RNNs apply recurrence to graphs; GNNs have largely replaced them for structured prediction tasks

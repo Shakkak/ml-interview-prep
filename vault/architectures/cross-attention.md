@@ -4,6 +4,7 @@ tags: [cross-attention, encoder-decoder, attention, transformers, multimodal]
 aliases: [cross-attention, encoder-decoder attention, cross-modal attention]
 difficulty: 1
 status: complete
+depends_on: [attention-mechanism, arch-kv-cache]
 related: [attention-mechanism, arch-kv-cache, vision-transformer, vlm-architectures, rnn-lstm, arch-positional-encoding]
 ---
 
@@ -13,9 +14,13 @@ related: [attention-mechanism, arch-kv-cache, vision-transformer, vlm-architectu
 
 ## Fundamental
 
+**The problem cross-attention solves:** self-attention lets tokens within one sequence communicate. But many tasks require one sequence to query information from a completely separate sequence — a decoder generating a translation needs to read from the encoded source sentence; a diffusion model needs to read from a text description. Cross-attention is the mechanism for this inter-sequence communication.
+
+**Intuition:** think of cross-attention as a search engine query. The decoder is the query; the encoder output is the database. Each decoder token issues a query, searches the encoder output for relevant entries, and retrieves a weighted blend of their content. The encoder runs once; the decoder can query it repeatedly at each generation step.
+
 ### Self-Attention vs Cross-Attention
 
-In **self-attention**, queries, keys, and values all come from the same sequence: $Q = K = V = X W_Q, X W_K, X W_V$.
+In **self-attention**, queries, keys, and values all come from the same sequence: $Q = XW_Q,\ K = XW_K,\ V = XW_V$ (one sequence $X$ projects itself into all three).
 
 In **cross-attention**, queries come from one sequence (the **target/decoder**) and keys/values come from a different sequence (the **source/encoder**):
 
@@ -23,7 +28,7 @@ $$Q = X_\text{dec} W_Q, \quad K = X_\text{enc} W_K, \quad V = X_\text{enc} W_V$$
 
 $$\text{CrossAttention}(X_\text{dec}, X_\text{enc}) = \text{softmax}\!\left(\frac{Q K^\top}{\sqrt{d_k}}\right) V$$
 
-Each decoder position attends over the full encoder output — the decoder "looks up" relevant information from the encoded source.
+where $X_\text{dec} \in \mathbb{R}^{T \times d}$ = decoder token representations (the queries, length $T$), $X_\text{enc} \in \mathbb{R}^{S \times d}$ = encoder output representations (the keys and values, length $S$), $W_Q, W_K, W_V \in \mathbb{R}^{d \times d_k}$ = learned projection matrices, and $d_k$ = key/query dimension for scaling. Each decoder position attends over the full encoder output — the decoder "looks up" relevant information from the encoded source.
 
 ### Where Cross-Attention Appears
 
@@ -80,4 +85,11 @@ Cross-attention can be interpreted as **soft retrieval**: the query vector selec
 
 In very large encoder-decoder models, cross-attention heads can use grouped/multi-query attention (see [[grouped-query-attention]]) to reduce the KV cache size. Since the cross-attention KV cache is fixed and shared across decode steps, reducing its size reduces memory proportionally.
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[vlm-architectures]] · [[vision-transformer]] · [[arch-positional-encoding]]*
+## Links
+
+- [[attention-mechanism]] — cross-attention is attention where queries come from one sequence and keys/values come from another; the math is identical to self-attention
+- [[arch-kv-cache]] — in encoder-decoder models, the encoder KV cache is fixed across all decoding steps; cross-attention reuses these cached KVs
+- [[vlm-architectures]] — VLMs use cross-attention to fuse image features (keys/values) with text representations (queries), or inject visual tokens via prefix
+- [[vision-transformer]] — ViT with cross-attention to text embeddings is the foundation for image-conditioned generation (Stable Diffusion U-Net)
+- [[rnn-lstm]] — the original attention mechanism (Bahdanau, 2015) was cross-attention in an RNN encoder-decoder; transformers generalized this
+- [[arch-positional-encoding]] — cross-attention queries and keys may use different positional encodings depending on whether the source and target sequences are aligned

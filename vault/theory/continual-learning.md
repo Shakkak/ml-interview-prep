@@ -5,6 +5,7 @@ aliases: [lifelong learning, catastrophic forgetting, EWC, elastic weight consol
 difficulty: 2
 status: complete
 related: [transfer-learning, domain-adaptation, regularization-weight-decay, meta-learning, neural-tangent-kernel]
+depends_on: [transfer-learning, backpropagation, regularization-weight-decay]
 ---
 
 # Continual Learning
@@ -57,6 +58,8 @@ where $\theta^*$ are weights after training on task $A$ and $F_i$ is the Fisher 
 **Experience replay:** maintain a small buffer $\mathcal{B}$ of examples from previous tasks. When training on $T_n$, mix in buffer samples:
 $$\mathcal{L} = \mathcal{L}_n + \alpha \mathcal{L}_{\text{replay from } \mathcal{B}}$$
 
+where $\mathcal{L}_n$ = current task loss, $\mathcal{B}$ = replay buffer of stored examples from previous tasks, $\alpha$ = replay mixing coefficient (weight of old task loss).
+
 Buffer management: random sampling, reservoir sampling, or prioritized (store "hard" examples).
 
 **Generative replay (DGR):** train a generative model (GAN, VAE) alongside the main model. When learning $T_n$, generate pseudo-examples of $T_1, \ldots, T_{n-1}$ and replay them. No real data buffer needed — but generative quality degrades over time.
@@ -91,4 +94,11 @@ Large-scale continual learning for LLMs:
 
 Catastrophic forgetting is less severe for large pretrained models: the large overparameterized network has many redundant parameters, so a new task can use different parameters than those critical for the original distribution.
 
-*See also: [[transfer-learning]] · [[domain-adaptation]] · [[regularization-weight-decay]] · [[meta-learning]] · [[lora-quantization]]*
+## Links
+
+- [[transfer-learning]] — continual learning is transfer learning across a sequence of tasks; the key challenge is backward transfer (forgetting old tasks when learning new ones)
+- [[backpropagation]] — catastrophic forgetting is caused by SGD's gradient updates overwriting weights critical to previous tasks; EWC adds a quadratic penalty on weight changes to prevent this
+- [[regularization-weight-decay]] — EWC is a form of L2 regularization towards previous weights: $\Omega = \sum_i F_i(\theta_i - \theta_i^*)^2$ where $F_i$ is the Fisher information importance weight
+- [[meta-learning]] — meta-continual learning (OML, ANML) finds initializations that minimize forgetting across tasks; MAML's inner loop is adapted to support replay and fast adaptation
+- [[domain-adaptation]] — domain-incremental learning is a CL setting where the input distribution shifts; the model must adapt without access to old data
+- [[lora-quantization]] — LoRA for continual learning trains separate low-rank adapters per task and merges them; the low rank limits interference between tasks

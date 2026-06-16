@@ -4,6 +4,7 @@ tags: [tta, test-time-augmentation, mc-dropout, model-ensembling, uncertainty, d
 aliases: [test-time augmentation, TTA, MC Dropout, model ensembling, deep ensembles, snapshot ensemble]
 difficulty: 2
 status: complete
+depends_on: [regularization-dropout, ensemble-methods, bayesian-inference]
 related: [regularization-dropout, data-augmentation, model-calibration, ensemble-methods, bayesian-inference]
 ---
 
@@ -111,4 +112,12 @@ Total training cost ≈ one normal training run. Diversity is lower than indepen
 
 ---
 
-*See also: [[regularization-dropout]] · [[data-augmentation]] · [[model-calibration]] · [[ensemble-methods]] · [[bayesian-inference]] · [[entropy-mutual-info]] · [[optimizer-lr-schedules]]*
+## Links
+
+- [[regularization-dropout]] — MC Dropout enables Bayesian uncertainty estimation at test time by keeping dropout active; multiple stochastic forward passes give a distribution over predictions
+- [[ensemble-methods]] — test-time ensembling averages predictions from multiple models; the theoretical justification is variance reduction through averaging
+- [[bayesian-inference]] — MC Dropout and deep ensembles approximate Bayesian posteriors over model parameters; both estimate epistemic uncertainty
+- [[data-augmentation]] — TTA applies augmentations at test time and averages predictions; it is equivalent to model averaging over the augmentation-induced distribution
+- [[model-calibration]] — ensembles and TTA improve calibration as well as accuracy; averaging softens overconfident predictions
+- [[entropy-mutual-info]] — BALD uses mutual information between predictions and model weights to select uncertain examples; MC Dropout enables approximating this at inference
+- [[optimizer-lr-schedules]] — snapshot ensembling saves checkpoints at cyclical LR minima; the cycle period determines the diversity of ensemble members

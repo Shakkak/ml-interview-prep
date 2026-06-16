@@ -3,6 +3,7 @@ title: "VLM Explainability and Interpretability"
 tags: [explainability, grad-cam, attention-rollout, concept-bottleneck-model, tcav, vlm-attribution, interpretability, xai]
 aliases: [VLM Interpretability, Explainable VLMs, Grad-CAM, Attention Rollout, CBM]
 status: complete
+depends_on: [attention-mechanism, clip, vision-transformer]
 ---
 
 Explainability methods let us understand why a model makes a particular prediction. For scientific applications like ecology and biodiversity monitoring, explainability is not optional — it is a core requirement for trust, debugging, and regulatory compliance. This file covers methods from first principles.
@@ -30,6 +31,8 @@ The simplest attribution: compute the gradient of the output class score with re
 
 $$\text{Saliency}(x_i) = \left|\frac{\partial f(x)}{\partial x_i}\right|$$
 
+where $f(x)$ = class score (logit before softmax) for the predicted class, $x_i$ = $i$-th pixel value of the input image.
+
 High gradient at pixel $i$ means changing that pixel slightly would strongly change the output. Intuition: the model is "sensitive" to that pixel.
 
 **Problem**: gradients are noisy and locally inconsistent. A pixel important for the classification may have low gradient if the loss surface is flat around the correct class.
@@ -47,8 +50,10 @@ High gradient at pixel $i$ means changing that pixel slightly would strongly cha
 3. Backpropagate to get gradients: $\frac{\partial y^c}{\partial A^k_{ij}}$ for each feature map pixel $(i,j)$ in channel $k$
 4. Global average pool the gradients to get per-channel importance weights:
 $$\alpha_k^c = \frac{1}{Z}\sum_i\sum_j \frac{\partial y^c}{\partial A^k_{ij}}$$
+where $Z$ = $H_{fm} \times W_{fm}$ = total number of spatial positions in the feature map (normalization constant), $A^k_{ij}$ = activation at spatial position $(i,j)$ of feature map channel $k$, $y^c$ = class $c$ score before softmax.
 5. Combine: weighted sum of feature maps, ReLU to keep only positive contributions:
 $$\text{Grad-CAM}^c = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)$$
+where $\alpha_k^c$ = importance weight for channel $k$ (from step 4), $A^k$ = spatial feature map for channel $k$, and ReLU retains only regions that positively activate class $c$.
 6. Upsample to input image size via bilinear interpolation
 
 **Result**: a heatmap showing which image regions activated for class $c$.
@@ -90,6 +95,8 @@ Computes the integral of gradients along a straight path from a baseline input $
 
 $$\text{IntGrad}_i(x) = (x_i - x'_i) \int_0^1 \frac{\partial F(x' + \alpha(x-x'))}{\partial x_i} d\alpha$$
 
+where $x'$ = baseline input (e.g., black image), $x_i$ = pixel $i$ of actual input, $\alpha \in [0,1]$ = integration path parameter, $F(\cdot)$ = model output (class score).
+
 This satisfies the *completeness axiom*: attributions sum to the model output difference $F(x) - F(x')$.
 
 More principled than Grad-CAM but requires many forward passes (approximated with ~50 steps).
@@ -115,6 +122,8 @@ Attention rollout propagates attention through all transformer layers by multipl
 
 $$\hat{A}^{(l)} = 0.5 \cdot A^{(l)} + 0.5 \cdot I$$  (add residual identity)
 $$\text{Rollout}^{(L)} = \hat{A}^{(L)} \cdot \hat{A}^{(L-1)} \cdots \hat{A}^{(1)}$$
+
+where $A^{(l)}$ = attention weight matrix at layer $l$ (rows = queries, columns = keys), $I$ = identity matrix (models the residual connection bypassing attention), and the product propagates attention flow from input tokens to output.
 
 This gives the *effective* attention from the output to each input token, accounting for how information flows through skip connections.
 
@@ -160,6 +169,8 @@ SHAP computes each feature's contribution by its Shapley value — the average m
 
 $$\phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F|-|S|-1)!}{|F|!} [f(S \cup \{i\}) - f(S)]$$
 
+where $F$ = set of all features (superpixels or pixels), $S$ = subset of features excluding feature $i$, $f(S)$ = model prediction using only features in $S$ (others set to baseline), and $\phi_i$ = Shapley value = average marginal contribution of feature $i$ across all orderings.
+
 For images: features are superpixels or individual pixels. Very expensive to compute exactly; KernelSHAP approximates it efficiently.
 
 **Advantage over LIME**: SHAP has theoretical guarantees (completeness, symmetry, dummy) that LIME lacks.
@@ -184,7 +195,7 @@ This is the most natural explainability tool for Flamingo-style VLMs.
 LLaVA uses self-attention, not cross-attention. To explain which visual tokens influenced a generated answer token $t$:
 
 1. Compute gradient of log-probability of $t$ with respect to each visual token embedding: $\frac{\partial \log P(t)}{\partial h_i}$ for visual token $i$
-2. Multiply by token value (integrated gradients idea): $\alpha_i = h_i \cdot \frac{\partial \log P(t)}{\partial h_i}$
+2. Multiply by token value (integrated gradients idea): $\alpha_i = h_i \cdot \frac{\partial \log P(t)}{\partial h_i}$, where $h_i$ = hidden state of visual token $i$, $\frac{\partial \log P(t)}{\partial h_i}$ = gradient of log-probability of output token $t$ w.r.t. $h_i$
 3. Take L2 norm: $\text{importance}_i = \|\alpha_i\|_2$
 
 This gives per-visual-token importance scores for generating a specific answer word.
@@ -282,6 +293,12 @@ For a CNN predicting habitat suitability from Sentinel-2:
 
 ---
 
-## See Also
+## Links
 
-[[vlm-architectures]], [[biodiversity-ml]], [[vision-transformer]], [[clip]], [[attention-mechanism]], [[contrastive-learning]], [[self-supervised-overview]]
+- [[attention-mechanism]] — attention rollout and raw attention visualization are the simplest VLM explainability methods; they show which input tokens the model "attends to" when generating outputs
+- [[clip]] — CLIP attribution methods (GradCAM applied to the image encoder) explain which image regions contribute to a CLIP embedding; used for zero-shot classification debugging
+- [[vision-transformer]] — ViT attention maps produce semantically meaningful heatmaps at large scales (DINOv2); the CLS token's cross-attention to patch tokens highlights salient regions
+- [[vlm-architectures]] — explainability is applied separately to the vision encoder and the language decoder in VLMs; cross-attention layers between modalities are the primary attribution targets
+- [[biodiversity-ml]] — ecology applications require explainability for scientific trust and regulatory compliance; Grad-CAM shows whether the model attends to the correct plant/animal features
+- [[contrastive-learning]] — CLIP probing studies (what does each attention head learn?) use linear probes to identify which representations encode color, shape, texture, or object class
+- [[self-supervised-overview]] — SSL-pretrained ViTs (DINO) produce more interpretable attention maps than supervised ViTs; they develop emergent segmentation without explicit segmentation labels

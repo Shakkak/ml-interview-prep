@@ -5,6 +5,7 @@ aliases: [loss surface, loss landscape, flat minima, sharp minima, saddle points
 difficulty: 3
 status: complete
 related: [backpropagation, backpropagation-advanced, optimizer-adam, optimizer-sgd-momentum, optimizer-lr-schedules, normalization-layers, generalization-bounds, bias-variance-double-descent]
+depends_on: [backpropagation, hessian-curvature, optimizer-sgd-momentum]
 ---
 
 # Loss Landscape & Optimization Geometry
@@ -66,6 +67,8 @@ SAM (Foret et al., 2021) directly optimizes for flat minima by minimizing the ma
 
 $$\min_\theta \max_{\|\delta\| \leq \rho} L(\theta + \delta)$$
 
+where $\theta$ = model parameters, $\delta$ = perturbation vector, $\rho$ = perturbation radius (neighborhood size), $\|\delta\| \leq \rho$ = constraint to a ball of radius $\rho$, inner $\max$ = find worst-case perturbation, outer $\min$ = optimize parameters for worst-case robustness.
+
 The inner maximization finds the worst perturbation $\delta^*$; the outer minimization moves to reduce even the worst-case perturbed loss. The first-order approximation: $\delta^* \approx \rho \frac{g}{\|g\|}$, so SAM's update computes the gradient at $\theta + \rho g / \|g\|$ (one extra forward+backward pass) and uses that for the descent step.
 
 **SAM on ImageNet:** consistently 0.5–1.5% improvement in top-1 accuracy at the cost of 2× compute. Particularly effective for fine-tuning pretrained models where sharpness correlates strongly with overfitting.
@@ -120,4 +123,11 @@ Cohen et al. (2021) documented a surprising phenomenon in full-batch gradient de
 
 ---
 
-*See also: [[backpropagation-advanced]] · [[optimizer-sgd-momentum]] · [[optimizer-adam]] · [[optimizer-lr-schedules]] · [[generalization-bounds]] · [[bias-variance-double-descent]] · [[normalization-layers]]*
+## Links
+
+- [[backpropagation]] — the loss landscape is the function $L(\theta)$ navigated by gradient descent; the gradient $\nabla_\theta L$ defines the descent direction at each point
+- [[hessian-curvature]] — the Hessian characterizes the local landscape: positive eigenvalues = valley, mixed = saddle, large $\lambda_{\max}$ = sharp minimum; SAM minimizes the worst-case loss in a Hessian ball
+- [[optimizer-sgd-momentum]] — SGD with large learning rates implicitly regularizes toward flat minima; this is because large LR steps overshoot sharp minima but settle in flat ones
+- [[optimizer-adam]] — Adam's adaptive learning rates navigate the landscape by dividing gradients by their running variance; it handles anisotropic curvature but may converge to sharper minima
+- [[generalization-bounds]] — flat minima (small $\lambda_{\max}$) correlate with better generalization; the PAC-Bayes bound for flat minima is tighter because small perturbations don't change the loss
+- [[normalization-layers]] — batch norm dramatically changes the loss landscape shape; it makes the landscape smoother (reduces the ratio $\lambda_{\max}/\lambda_{\min}$), which is why BN enables larger learning rates

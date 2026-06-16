@@ -4,6 +4,7 @@ tags: [architecture, transformers, attention]
 aliases: [positional encoding, sinusoidal encoding, RoPE, ALiBi, learned position embedding]
 difficulty: 2
 status: complete
+depends_on: [attention-mechanism, linear-algebra-fundamentals]
 related: [attention-mechanism, arch-kv-cache]
 ---
 
@@ -22,6 +23,8 @@ related: [attention-mechanism, arch-kv-cache]
 For position $t$ and dimension index $i$ (of $d_{\text{model}}$ total):
 
 $$PE(t, 2i) = \sin\left(\frac{t}{10000^{2i/d_{\text{model}}}}\right), \qquad PE(t, 2i+1) = \cos\left(\frac{t}{10000^{2i/d_{\text{model}}}}\right)$$
+
+where $t$ = token position in the sequence (0, 1, 2, …), $i$ = dimension index pair (ranges from 0 to $d_{\text{model}}/2 - 1$), $d_{\text{model}}$ = total embedding size, and $10000^{2i/d_{\text{model}}}$ = the period/wavelength for dimension pair $i$ (small $i$ → fast cycling, large $i$ → slow cycling).
 
 Add to the token embedding: $x_t \leftarrow x_t + PE(t, :)$
 
@@ -54,7 +57,7 @@ Add a position-dependent penalty to attention logits before softmax:
 
 $$\text{Attention}(Q, K) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}} - m \cdot |i - j|\right)$$
 
-$m$ is a head-specific slope (e.g., $m_h = 2^{-8h/H}$, geometric sequence across heads). $|i-j|$ is the token distance.
+where $m$ = head-specific slope (e.g., $m_h = 2^{-8h/H}$, a geometric sequence making each head penalize distance at a different rate), $|i - j|$ = distance in tokens between query position $i$ and key position $j$, and the subtracted term linearly penalizes attending to far-away tokens.
 
 **Intuition:** penalize attending to distant tokens. No parameters to learn.
 
@@ -79,9 +82,13 @@ Instead of adding positions to embeddings, **rotate** Q and K vectors by a posit
 
 $$\tilde{q}_t = R_{\Theta,t}\, q_t, \qquad \tilde{k}_s = R_{\Theta,s}\, k_s$$
 
+where $q_t, k_s$ = original query and key vectors at positions $t$ and $s$, $R_{\Theta,t}$ = a block-diagonal rotation matrix that rotates by position-dependent angle $t\theta_i$ for each dimension pair $i$, and $\tilde{q}_t, \tilde{k}_s$ = rotated versions used in the attention score.
+
 For each pair of dimensions $(2i, 2i+1)$, the rotation matrix is:
 
 $$R_{\Theta,t}^{(i)} = \begin{bmatrix} \cos(t\theta_i) & -\sin(t\theta_i) \\ \sin(t\theta_i) & \cos(t\theta_i) \end{bmatrix}, \qquad \theta_i = 10000^{-2i/d}$$
+
+where $t$ = token position, $\theta_i = 10000^{-2i/d}$ = the base frequency for dimension pair $i$ (same as sinusoidal PE), and $d$ = total embedding dimension. Each dimension pair is rotated by a different speed.
 
 **Key property:** the dot product depends only on the relative position $t - s$:
 
@@ -108,4 +115,12 @@ Extending beyond training length: if trained at context $L$, directly applying R
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[bert-mlm]] · [[vision-transformer]] · [[fourier-transform]] · [[neural-tangent-kernel]]*
+## Links
+
+- [[attention-mechanism]] — attention is permutation-invariant by design; positional encodings inject sequence order that attention cannot discover on its own
+- [[linear-algebra-fundamentals]] — sinusoidal encodings use orthogonal frequency vectors so different positions have distinct inner products
+- [[arch-kv-cache]] — absolute positional encodings are baked into embeddings; RoPE is applied to queries and keys at each layer, enabling flexible cache extension
+- [[bert-mlm]] — BERT uses learned absolute position embeddings summed with token embeddings
+- [[vision-transformer]] — ViT uses 2D learned position embeddings for image patches; position information is crucial for spatial understanding
+- [[fourier-transform]] — sinusoidal positional encodings are discrete Fourier features; the choice of frequencies mirrors signal processing sampling theory
+- [[rotary-embeddings]] — RoPE encodes positions as rotations in the query-key dot product space, generalizing sinusoidal encodings to relative positions

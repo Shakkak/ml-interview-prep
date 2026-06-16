@@ -5,6 +5,7 @@ aliases: [Wasserstein distance, Earth Mover's Distance, EMD, optimal transport, 
 difficulty: 4
 status: complete
 related: [generative-adversarial-networks, loss-kl-divergence, normalizing-flows, entropy-mutual-info]
+depends_on: [distributions-overview, loss-kl-divergence, linear-algebra-fundamentals]
 ---
 
 # Optimal Transport and Wasserstein Distance
@@ -87,7 +88,9 @@ The solution satisfies $\gamma_{ij}^* = u_i K_{ij} v_j$ where $K_{ij} = e^{-C_{i
 
 $$u \leftarrow a / (Kv), \quad v \leftarrow b / (K^\top u)$$
 
-until convergence. Each iteration is $O(n^2)$ — a dramatic speedup. The approximation quality improves as $\epsilon \to 0$ (recovers exact OT) and degrades as $\epsilon \to \infty$ (approaches independence coupling, $W = 0$).
+where $a \in \mathbb{R}^n_+$ = discrete probability vector for distribution $p$ (marginal constraint), $b \in \mathbb{R}^m_+$ = discrete probability vector for distribution $q$ (marginal constraint), $K = e^{-C/\epsilon}$ = elementwise exponential of cost matrix divided by temperature, $u \in \mathbb{R}^n_+$ and $v \in \mathbb{R}^m_+$ = scaling vectors that enforce the marginal constraints. Division is elementwise.
+
+Until convergence. Each iteration is $O(n^2)$ — a dramatic speedup. The approximation quality improves as $\epsilon \to 0$ (recovers exact OT) and degrades as $\epsilon \to \infty$ (approaches independence coupling, $W = 0$).
 
 **GeomLoss** and **POT** (Python Optimal Transport) implement differentiable Sinkhorn for use in neural network losses.
 
@@ -112,4 +115,11 @@ FID is thus a Wasserstein-2 distance in feature space, which is why it is more s
 
 ---
 
-*See also: [[generative-adversarial-networks]] · [[loss-kl-divergence]] · [[normalizing-flows]] · [[entropy-mutual-info]] · [[distributions-gaussian]]*
+## Links
+
+- [[distributions-overview]] — OT defines distances between probability distributions; the Wasserstein distance is defined as the minimum-cost transport plan between two measures
+- [[loss-kl-divergence]] — KL divergence is another distance between distributions but is asymmetric and infinite when supports don't overlap; Wasserstein distance is continuous and symmetric
+- [[linear-algebra-fundamentals]] — the Kantorovich LP formulation of OT has $n^2$ variables and $2n$ constraints; the Sinkhorn algorithm solves it with matrix scaling operations
+- [[generative-adversarial-networks]] — WGAN uses the Wasserstein distance as its training objective; the critic approximates the Kantorovich dual of the transport problem
+- [[normalizing-flows]] — flow matching and rectified flows find straight-line transport plans; OT theory explains why straight paths minimize transport cost
+- [[entropy-mutual-info]] — entropic regularization adds $\epsilon H(\gamma)$ to the OT objective; this converts the LP into the Sinkhorn algorithm and makes OT differentiable

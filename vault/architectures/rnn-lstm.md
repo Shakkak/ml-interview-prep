@@ -4,6 +4,7 @@ tags: [rnn, lstm, gru, sequence-modeling, recurrent-networks, bptt]
 aliases: [RNN, LSTM, GRU, recurrent neural network, vanilla RNN, gated recurrent unit, BPTT, backpropagation through time, long short-term memory, sequence model]
 difficulty: 2
 status: complete
+depends_on: [backpropagation-advanced, activation-sigmoid-tanh]
 related: [backpropagation-advanced, attention-mechanism, activation-sigmoid-tanh, autoregressive-models, variational-autoencoders]
 ---
 
@@ -17,6 +18,8 @@ related: [backpropagation-advanced, attention-mechanism, activation-sigmoid-tanh
 state $h_t$ that summarizes everything seen so far:
 
 $$h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h), \qquad y_t = W_{hy} h_t + b_y$$
+
+where $h_t \in \mathbb{R}^H$ = hidden state at step $t$ (the "memory" vector), $x_t \in \mathbb{R}^d$ = input at step $t$, $W_{hh} \in \mathbb{R}^{H \times H}$ = hidden-to-hidden weight matrix (how much of the previous state to carry), $W_{xh} \in \mathbb{R}^{H \times d}$ = input-to-hidden weight matrix, $b_h$ = bias, $y_t$ = output at step $t$, and $W_{hy}$ = hidden-to-output weight matrix.
 
 The same weight matrices $W_{hh}, W_{xh}, W_{hy}$ are reused at every time step — this weight
 sharing is what lets one fixed-size parameter set handle sequences of any length.
@@ -77,6 +80,8 @@ h_t &= o_t \odot \tanh(c_t)
 \end{aligned}
 $$
 
+where $[h_{t-1}, x_t]$ = concatenation of previous hidden state and current input, $\sigma$ = sigmoid (outputs values in $[0,1]$, acting as an open/close gate), $f_t \in [0,1]^H$ = forget gate (how much of the old cell state to keep — 0 = forget all, 1 = keep all), $i_t \in [0,1]^H$ = input gate (how much of the new candidate to add), $o_t \in [0,1]^H$ = output gate (how much of the cell state to expose as the hidden state), $c_t \in \mathbb{R}^H$ = cell state (the "long-term memory" that flows via additive updates), $\odot$ = element-wise multiplication.
+
 > [!tip] Why sigmoid for gates and tanh for content — the load-bearing slice
 > [[activation-sigmoid-tanh]] explains this design choice mechanistically: gates must output
 > values in $[0,1]$ to act as "how much passes through" multipliers — exactly sigmoid's range —
@@ -103,6 +108,8 @@ r_t &= \sigma(W_r[h_{t-1}, x_t]) &&\text{reset gate} \\
 h_t &= (1-z_t)\odot h_{t-1} + z_t \odot \tilde h_t
 \end{aligned}
 $$
+
+where $z_t \in [0,1]^H$ = update gate (blend between old $h_{t-1}$ and new candidate $\tilde{h}_t$ — when $z_t = 1$ fully replaces old state, when $z_t = 0$ keeps old state unchanged), $r_t \in [0,1]^H$ = reset gate (how much of the old hidden state to use when computing the candidate), $\tilde{h}_t$ = candidate new hidden state, and the final $h_t$ is a learned interpolation between past and candidate.
 
 Roughly 25% fewer parameters than an LSTM at the same hidden size, with competitive performance
 on many tasks — often the "try this first" default before reaching for a full LSTM.
@@ -148,4 +155,12 @@ RNN-style $O(1)$ inference with transformer-style training throughput.
 
 ---
 
-*See also: [[backpropagation-advanced]] · [[attention-mechanism]] · [[activation-sigmoid-tanh]] · [[autoregressive-models]] · [[variational-autoencoders]] · [[graph-neural-networks]] · [[arch-kv-cache]]*
+## Links
+
+- [[backpropagation-advanced]] — BPTT is a product of per-timestep Jacobians; vanishing/exploding gradients in RNNs are the direct consequence
+- [[activation-sigmoid-tanh]] — LSTM gates use sigmoid (to produce values in $[0,1]$ for gating) and tanh (to produce cell state candidates in $[-1,1]$)
+- [[attention-mechanism]] — self-attention replaced RNNs for long sequences; transformers process all positions in parallel vs. RNNs' sequential dependency
+- [[autoregressive-models]] — autoregressive language models were implemented with RNNs/LSTMs before transformers
+- [[variational-autoencoders]] — VAEs over sequences often use RNN encoders/decoders for variable-length inputs
+- [[graph-neural-networks]] — graph RNNs adapt the recurrence to graph-structured data instead of sequences
+- [[arch-kv-cache]] — RNNs have $O(1)$ state per step but fixed capacity; KV cache in transformers is the transformer analogue of the hidden state

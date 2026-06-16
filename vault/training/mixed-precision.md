@@ -5,6 +5,7 @@ aliases: [mixed precision, AMP, automatic mixed precision, fp16 training, bf16 t
 difficulty: 2
 status: complete
 related: [optimizer-adam, large-batch-training, normalization-layers, backpropagation-advanced]
+depends_on: [backpropagation, numerical-methods, optimizer-adam]
 ---
 
 # Mixed Precision Training (FP16 / BF16 / AMP)
@@ -103,4 +104,10 @@ Optimizer states dominate and stay in FP32 regardless — the 25% savings comes 
 
 ---
 
-*See also: [[optimizer-adam]] · [[large-batch-training]] · [[normalization-layers]] · [[backpropagation-advanced]]*
+## Links
+
+- [[backpropagation]] — mixed precision stores forward activations in FP16 but accumulates gradients in FP32; the master weights in FP32 prevent precision loss from small gradient updates
+- [[numerical-methods]] — FP16 has a range of $\approx 6 \times 10^{-5}$ to $65504$; loss scaling multiplies the loss by a large factor before backprop to prevent underflow in small gradients
+- [[optimizer-adam]] — Adam's second-moment accumulation benefits from FP32 precision; storing optimizer states in BF16 requires careful handling of the bias-corrected estimates
+- [[large-batch-training]] — BF16 with Flash Attention is the standard recipe for large-batch transformer training; it reduces memory by 2× compared to FP32, enabling larger batches or longer sequences
+- [[normalization-layers]] — layer norm is numerically sensitive to precision; keeping layer norm weights in FP32 (even in BF16 training) prevents training instability from rounding errors

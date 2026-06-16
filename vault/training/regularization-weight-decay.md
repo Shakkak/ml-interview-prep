@@ -4,6 +4,7 @@ tags: [regularization, training, overfitting]
 aliases: [weight decay, L2 regularization, L1 regularization, ridge regression, lasso]
 difficulty: 1
 status: complete
+depends_on: [bayesian-inference, statistical-inference-mle, optimizer-adam]
 related: [regularization-dropout, optimizer-adam, loss-cross-entropy, bias-variance-double-descent, regularization-early-stopping, bayesian-inference]
 ---
 
@@ -19,9 +20,13 @@ A model with too many parameters relative to training data memorizes noise. Regu
 
 $$\mathcal{L}_{\text{reg}} = \mathcal{L}_{\text{task}} + \frac{\lambda}{2}\|w\|_2^2$$
 
+where $\mathcal{L}_{\text{task}}$ = the original task loss (e.g., cross-entropy), $\lambda > 0$ = regularization strength (larger = more penalty on weight magnitude), $w$ = all model parameters, $\|w\|_2^2 = \sum_i w_i^2$ = squared L2 norm (sum of squared weights), and $1/2$ is a convenience factor that cancels with the derivative.
+
 Gradient update:
 
 $$w \leftarrow w - \eta\frac{\partial \mathcal{L}}{\partial w} - \eta\lambda w = (1-\eta\lambda)w - \eta\frac{\partial \mathcal{L}}{\partial w}$$
+
+where $\eta$ = learning rate (step size), $\frac{\partial \mathcal{L}}{\partial w}$ = gradient of the task loss, and $-\eta\lambda w$ = the weight decay term (shrinks each weight by $\eta\lambda$ fraction of its current value every step).
 
 The factor $(1 - \eta\lambda)$ shrinks every weight by a constant fraction per step — hence "weight decay." Small and large weights are both reduced proportionally; no weight reaches exactly zero.
 
@@ -29,9 +34,13 @@ The factor $(1 - \eta\lambda)$ shrinks every weight by a constant fraction per s
 
 $$\mathcal{L}_{\text{reg}} = \mathcal{L}_{\text{task}} + \lambda\|w\|_1$$
 
+where $\|w\|_1 = \sum_i |w_i|$ = L1 norm (sum of absolute values), $\lambda > 0$ = regularization strength, L1 induces sparsity unlike the smooth L2 penalty.
+
 Gradient:
 
 $$w \leftarrow w - \eta\frac{\partial \mathcal{L}}{\partial w} - \eta\lambda\cdot\text{sign}(w)$$
+
+where $\text{sign}(w)$ = element-wise sign (constant-magnitude shrinkage toward zero, zeroing small weights exactly).
 
 L1 applies *constant* shrinkage regardless of weight magnitude. Small weights cross zero and are set to exactly 0 → **sparse solutions**.
 
@@ -66,6 +75,8 @@ With standard [[optimizer-adam|Adam]] + L2 in the loss, the gradient $\nabla \ma
 
 $$w_{t+1} = (1 - \eta\lambda)w_t - \eta\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
 
+where $(1-\eta\lambda)w_t$ = weight decay applied directly to parameters (not via gradient), $\hat{m}_t/(\sqrt{\hat{v}_t}+\epsilon)$ = Adam's adaptive gradient step, $\eta$ = learning rate, $\lambda$ = weight decay coefficient.
+
 Every parameter is decayed uniformly, independent of gradient history. **AdamW is almost always preferred over Adam + L2 for transformers.**
 
 ### Choosing $\lambda$
@@ -98,6 +109,8 @@ Even without explicit $\lambda$, gradient descent with small step size and initi
 
 $$w^* = X^\top (XX^\top)^{-1} y$$
 
+where $X \in \mathbb{R}^{n \times d}$ = data matrix ($n < d$ underdetermined), $y$ = targets, $w^*$ = minimum-$\ell_2$-norm interpolating solution (pseudoinverse / Moore-Penrose).
+
 This is the pseudoinverse solution (see [[math-svd]]). No explicit regularization needed — the optimization geometry itself prefers small-norm solutions. This implicit bias is one reason large overparameterized neural networks generalize without requiring aggressive explicit regularization.
 
 ### Equivalence to Early Stopping for Linear Models
@@ -106,8 +119,17 @@ For linear regression trained with gradient descent, after $t$ steps from $w_0 =
 
 $$w(t) \approx (X^\top X + \frac{1}{\eta t}I)^{-1}X^\top y$$
 
+where $t$ = training steps, $\eta$ = learning rate, $\frac{1}{\eta t}$ = effective regularization strength (large early on, decreasing as training continues), $I$ = identity matrix (ridge term).
+
 This is the ridge regression solution with $\lambda_{\text{eff}} = 1/(\eta t)$. Fewer training steps → larger effective $\lambda$ → stronger regularization. This is the formal equivalence between [[regularization-early-stopping|early stopping]] and weight decay in the linear case (Goodfellow et al., §7.8). In neural networks, the relationship is approximate but qualitatively holds.
 
 ---
 
-*See also: [[regularization-dropout]] · [[regularization-early-stopping]] · [[optimizer-adam]] · [[bias-variance-double-descent]] · [[bayesian-inference]]*
+## Links
+
+- [[bayesian-inference]] — L2 regularization is MAP estimation with a Gaussian prior; L1 is MAP with a Laplace prior
+- [[statistical-inference-mle]] — regularization transforms MLE into MAP by adding a prior term to the log-likelihood
+- [[optimizer-adam]] — AdamW decouples weight decay from adaptive gradient scaling; standard Adam + L2 has unintended interactions
+- [[regularization-dropout]] — orthogonal regularization strategy; they can be combined
+- [[regularization-early-stopping]] — formally equivalent to L2 regularization for linear models trained with gradient descent
+- [[bias-variance-double-descent]] — regularization reduces variance at the cost of increased bias; setting $\lambda$ is bias-variance tradeoff

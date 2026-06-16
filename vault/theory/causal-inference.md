@@ -5,6 +5,7 @@ aliases: [causal inference, causality, confounding, RCT, do-calculus]
 difficulty: 3
 status: complete
 related: [statistical-inference-mle, distributions-overview, bayesian-inference]
+depends_on: [statistical-inference-mle, bayesian-inference, hypothesis-testing]
 ---
 
 # Causal Inference
@@ -53,6 +54,8 @@ This is the gold standard. But RCTs are expensive, sometimes unethical, or impos
 
 $$P(Y|\text{do}(X=x)) = \sum_z P(Y|X=x, Z=z)P(Z=z)$$
 
+where $Z$ = measured confounders, $z$ = specific value of $Z$, and $P(Z=z)$ = marginal distribution of confounders in the *population* (not in the treated group).
+
 Numerical example: using population severity split (60% mild, 40% severe) from the Simpson's paradox example:
 
 $$P(\text{recovery}|\text{do}(\text{drug})) = 0.6 \times 0.93 + 0.4 \times 0.73 = 0.85$$
@@ -67,6 +70,8 @@ Drug is better: 85% vs 79.8%. The backdoor adjustment recovers the true causal e
 **Difference-in-Differences:** compare the change in outcomes over time between treated and control groups:
 
 $$\hat{\tau} = (Y_{T,\text{after}} - Y_{T,\text{before}}) - (Y_{C,\text{after}} - Y_{C,\text{before}})$$
+
+where $Y_{T,\text{after}/\text{before}}$ = outcome for the treated group after/before treatment, $Y_{C,\text{after}/\text{before}}$ = outcome for the control group after/before, and $\hat{\tau}$ = estimated causal effect (the "double difference").
 
 Removes time-invariant confounders and common time trends. Assumption: parallel trends — in the absence of treatment, treated and control groups would have evolved similarly.
 
@@ -96,6 +101,8 @@ The inner constraint forces the same classifier to be optimal across all environ
 
 $$\text{ATE} = \mathbb{E}[Y^{(1)} - Y^{(0)}]$$
 
+where $Y^{(1)}$ = potential outcome if treated, $Y^{(0)}$ = potential outcome if untreated, and the expectation is over the population. The "fundamental problem" is that for each unit only one of $Y^{(1)}, Y^{(0)}$ is ever observed.
+
 This requires the **Stable Unit Treatment Value Assumption (SUTVA)**: each unit's outcome is unaffected by other units' treatments (no interference). In social networks or epidemics, SUTVA is violated — individuals affect each other.
 
 **Double machine learning (Chernozhukov et al., 2018):** estimates treatment effects while controlling for high-dimensional confounders. Two stages: (1) use an ML model to predict $X$ from $Z$ (confounders) and obtain residuals $\tilde{X}$; (2) use another ML model to predict $Y$ from $Z$ and obtain residuals $\tilde{Y}$; (3) regress $\tilde{Y}$ on $\tilde{X}$. The Frisch-Waugh-Lovell theorem guarantees that this partialing-out procedure recovers the causal effect even with non-parametric ML estimators, under the Neyman orthogonality condition.
@@ -104,4 +111,9 @@ This requires the **Stable Unit Treatment Value Assumption (SUTVA)**: each unit'
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[distributions-overview]] · [[bayesian-inference]]*
+## Links
+
+- [[statistical-inference-mle]] — MLE estimates associations (correlations); causal inference identifies which associations are causal vs. confounded; the do-calculus separates $p(y|x)$ from $p(y|do(x))$
+- [[bayesian-inference]] — Bayesian networks encode causal structure as DAGs with conditional independence; do-calculus is defined relative to a causal graph, not just a probability model
+- [[hypothesis-testing]] — randomized controlled trials (RCTs) are the gold standard for causal effect estimation; they eliminate confounding by randomly assigning treatment
+- [[distributions-overview]] — potential outcome framework models counterfactual distributions $Y(1)$ and $Y(0)$; the ATE is $E[Y(1) - Y(0)]$, a difference of expected distributions

@@ -5,6 +5,7 @@ aliases: [bootstrapping, bootstrap resampling, bootstrap sample, bootstrap CI, p
 difficulty: 1
 status: complete
 related: [statistical-inference-mle, ensemble-methods, cross-validation, bias-variance-double-descent, hypothesis-testing]
+depends_on: [statistical-inference-mle, distributions-overview]
 ---
 
 # Bootstrap (Resampling)
@@ -140,4 +141,11 @@ extreme-tail quantiles (which need more replicates to populate the tails reliabl
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[ensemble-methods]] · [[cross-validation]] · [[bias-variance-double-descent]] · [[hypothesis-testing]]*
+## Links
+
+- [[statistical-inference-mle]] — the bootstrap approximates the sampling distribution of any estimator (not just MLE); bootstrap CIs are valid when MLE asymptotic assumptions fail
+- [[distributions-overview]] — bootstrap resampling empirically estimates a sampling distribution without assuming a parametric form for the population
+- [[ensemble-methods]] — bagging (bootstrap aggregating) trains an ensemble on independent bootstrap samples; variance reduction comes from the same averaging principle as bootstrap CIs
+- [[cross-validation]] — both bootstrap and CV estimate out-of-sample performance; the .632 bootstrap estimator corrects for overfitting in leave-one-out bootstrap estimates
+- [[bias-variance-double-descent]] — bootstrap can estimate the bias-variance decomposition empirically; it is more flexible than analytical formulas
+- [[hypothesis-testing]] — bootstrap permutation tests directly compute the null distribution of a test statistic without distributional assumptions

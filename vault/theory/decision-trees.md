@@ -4,6 +4,7 @@ tags: [decision-trees, classification, regression, non-parametric, splitting-cri
 aliases: [decision tree, CART, Gini impurity, information gain, tree pruning, regression tree]
 difficulty: 1
 status: complete
+depends_on: [entropy-mutual-info, statistical-inference-mle]
 related: [ensemble-methods, entropy-mutual-info, bias-variance-double-descent, parametric-nonparametric, logistic-regression]
 ---
 
@@ -12,6 +13,10 @@ related: [ensemble-methods, entropy-mutual-info, bias-variance-double-descent, p
 ---
 
 ## Fundamental
+
+**What problem does this solve?** We want a classifier that (1) is interpretable — a human can read the decision rules and understand why a prediction was made, (2) handles mixed feature types (continuous, categorical, ordinal) without preprocessing, (3) requires no feature scaling, and (4) can capture nonlinear patterns without feature engineering.
+
+**The core question:** given a dataset with labels, how should we partition the feature space to best separate the classes? The decision tree answers this greedily: at each step, find the single binary question about one feature that best separates the classes in the current subset of data. Repeat until each region is pure (one class only) or stopping criteria are met.
 
 **Definition.** A decision tree recursively partitions the feature space with axis-aligned
 splits ("is feature $x_j \leq t$?"), forming a binary tree. Each internal node tests one
@@ -26,6 +31,8 @@ from the class proportions $p_k$ in a node:
 
 $$\text{Gini}(S) = 1 - \sum_{k} p_k^2 \qquad\qquad H(S) = -\sum_k p_k \log_2 p_k \;\;\text{(entropy, see [[entropy-mutual-info]])}$$
 
+where $S$ = the set of training examples at a node, $k$ = class index (e.g., 0 or 1 for binary), $p_k$ = fraction of examples in $S$ belonging to class $k$ (so $\sum_k p_k = 1$), and $p_k^2$ = squared probability (subtracting from 1 gives probability of misclassification if we randomly label with the class distribution).
+
 > [!tip] Gini impurity vs. entropy — same shape, different cost
 > Both are 0 for a pure node (one class only) and maximal for a perfectly mixed node. For two
 > classes with proportions $(p, 1-p)$: Gini $= 2p(1-p)$ peaks at $0.5$ when $p=0.5$; entropy
@@ -36,6 +43,8 @@ $$\text{Gini}(S) = 1 - \sum_{k} p_k^2 \qquad\qquad H(S) = -\sum_k p_k \log_2 p_k
 
 **Information gain** is the impurity reduction a split produces:
 $$\text{IG} = \text{Impurity(parent)} - \sum_{\text{child } c} \frac{|c|}{|S|}\,\text{Impurity}(c)$$
+
+where $\text{Impurity(parent)}$ = Gini or entropy of the node before splitting, $|c|$ = number of examples in child $c$, $|S|$ = total examples at this node, and $\frac{|c|}{|S|}$ = the weight for child $c$ (larger children contribute more to the average). Higher IG = better split.
 — the weighted-average impurity of the children, subtracted from the parent's impurity. The
 tree picks the (feature, threshold) pair that maximizes this at every node. This is exactly the
 **mutual information** $I(X;Y)$ between a feature and the label, viewed locally at a node — see
@@ -85,7 +94,8 @@ trees — it is *why* ensembling them works so well (see Advanced).
 **Post-pruning (cost-complexity / weakest-link pruning)** — grow the full tree, then remove
 subtrees that don't justify their complexity. Minimize:
 $$R_\alpha(T) = R(T) + \alpha\,|T|$$
-where $R(T)$ is the tree's training error, $|T|$ is the number of leaves, and $\alpha \geq 0$
+
+where $R(T)$ = tree's total training error (e.g., misclassification rate or MSE across all leaves), $|T|$ = number of leaf nodes (complexity of the tree), and $\alpha \geq 0$ = complexity parameter (larger $\alpha$ = more pruning, fewer leaves).
 controls the complexity penalty (chosen by [[cross-validation]] — directly analogous to the
 regularization strength in [[regularization-weight-decay|weight decay]]). As $\alpha$
 increases, more subtrees collapse into single leaves. Post-pruning generally generalizes better
@@ -162,4 +172,14 @@ single-tree model they're built from.
 
 ---
 
-*See also: [[ensemble-methods]] · [[entropy-mutual-info]] · [[bias-variance-double-descent]] · [[parametric-nonparametric]] · [[logistic-regression]] · [[regularization-weight-decay]] · [[bootstrap]] · [[cross-validation]]*
+## Links
+
+- [[entropy-mutual-info]] — Gini impurity and entropy are both impurity measures; information gain is the mutual information between a feature and the class label at a node
+- [[statistical-inference-mle]] — regression trees minimize MSE; classification trees maximize likelihood under a categorical model
+- [[ensemble-methods]] — Random Forests and gradient boosting are built on decision trees; the tree's high variance makes variance-reducing ensembles effective
+- [[bias-variance-double-descent]] — deep unpruned trees have low bias and high variance; this is precisely why bagging helps
+- [[regularization-weight-decay]] — cost-complexity pruning parameter $\alpha$ is analogous to the weight decay strength $\lambda$
+- [[parametric-nonparametric]] — trees are non-parametric; complexity grows with the data rather than being fixed
+- [[logistic-regression]] — logistic regression draws a single hyperplane; trees approximate any boundary with axis-aligned rectangles
+- [[bootstrap]] — Random Forests use bootstrap resampling to decorrelate tree predictions
+- [[cross-validation]] — used to choose `max_depth`, `min_samples_leaf`, and the pruning parameter $\alpha$

@@ -4,6 +4,7 @@ tags: [instruction-tuning, sft, supervised-fine-tuning, flan, alpaca, chat-templ
 aliases: [instruction tuning, SFT, supervised fine-tuning, FLAN, Alpaca, instruction following, chat fine-tuning]
 difficulty: 2
 status: complete
+depends_on: [transfer-learning, loss-cross-entropy, autoregressive-models]
 related: [rlhf, lora-quantization, transfer-learning, autoregressive-models, regularization-weight-decay]
 ---
 
@@ -16,6 +17,8 @@ related: [rlhf, lora-quantization, transfer-learning, autoregressive-models, reg
 A pretrained language model (GPT, LLaMA) is trained on [[autoregressive-models|next-token prediction]] over raw text. It learns to continue text — not to follow instructions. Given "Write a summary of this article:", a raw pretrained model may respond by continuing with more instructions or producing irrelevant text.
 
 **Instruction tuning** (also called supervised fine-tuning, SFT) bridges this gap by fine-tuning the model on curated (instruction, response) pairs. After SFT, the model learns the format: "given an instruction, produce a helpful response."
+
+**Intuition:** pretraining gives the model knowledge of the world; instruction tuning teaches it to use that knowledge on demand. Think of a knowledgeable person who has never been asked direct questions before — SFT is the training that teaches them to answer when asked, without forgetting what they know.
 
 SFT is the first step in the alignment pipeline:
 ```
@@ -31,7 +34,7 @@ Pretraining → SFT → Reward model training → RL fine-tuning (PPO)
 
 FLAN (Finetuned Language Networks, Wei et al., 2022) showed that instruction tuning dramatically improves zero-shot generalization.
 
-**Key idea:** fine-tune on many NLP tasks, all expressed as natural language instructions. Tasks: summarization, translation, classification, QA, NLI, etc. Each task has multiple instruction templates ("Summarize:", "TL;DR:", "Give a brief description:").
+**Key idea:** fine-tune on many NLP tasks, all expressed as natural language instructions. Tasks: summarization, translation, classification, QA, Natural Language Inference (NLI — determining whether one sentence entails, contradicts, or is neutral with respect to another), etc. Each task has multiple instruction templates ("Summarize:", "TL;DR:", "Give a brief description:").
 
 **Result:** FLAN-137B outperformed GPT-3-175B zero-shot on most benchmarks despite being smaller. The model learned to generalize the instruction-following pattern to unseen tasks.
 
@@ -128,4 +131,11 @@ SFT is almost always done first. RLHF/DPO then refines the SFT model to match hu
 
 ---
 
-*See also: [[rlhf]] · [[lora-quantization]] · [[transfer-learning]] · [[autoregressive-models]] · [[loss-cross-entropy]]*
+## Links
+
+- [[transfer-learning]] — instruction tuning is a form of supervised fine-tuning; the pretrained model provides the foundation that SFT refines for instruction following
+- [[loss-cross-entropy]] — SFT minimizes cross-entropy on the response tokens only; the instruction/prompt tokens are typically masked from the loss
+- [[autoregressive-models]] — the backbone is an autoregressive LM; instruction tuning teaches it to generate helpful completions given instruction prompts
+- [[rlhf]] — RLHF is applied after instruction tuning; SFT provides the reference policy that PPO and DPO fine-tune with human preferences
+- [[lora-quantization]] — LoRA is the standard approach to instruction-tune large models efficiently without full-parameter fine-tuning
+- [[regularization-weight-decay]] — catastrophic forgetting during SFT is controlled via small learning rates, warmup schedules, and sometimes EWC regularization

@@ -5,6 +5,7 @@ aliases: [PAC, probably approximately correct, VC dimension, sample complexity, 
 difficulty: 3
 status: complete
 related: [generalization-bounds, bias-variance-double-descent, rademacher-complexity, cross-validation, statistical-inference-mle]
+depends_on: [statistical-inference-mle, generalization-bounds]
 ---
 
 # PAC Learning
@@ -36,6 +37,8 @@ For a finite class $|\mathcal{H}| < \infty$, a consistent learner (outputs $h$ w
 
 $$m \geq \frac{1}{\epsilon}\left(\ln|\mathcal{H}| + \ln\frac{1}{\delta}\right)$$
 
+where $m$ = number of training samples needed, $\epsilon$ = error tolerance (we want $\text{err}(h) \leq \epsilon$), $\delta$ = failure probability (the bound holds with probability $\geq 1-\delta$), $|\mathcal{H}|$ = number of hypotheses in the class.
+
 **Key insight:** complexity is $\log|\mathcal{H}|$ — not $|\mathcal{H}|$. A class of $2^{100}$ hypotheses (exponentially many) only requires ~100 samples to learn. The description length of the best hypothesis governs sample complexity.
 
 ---
@@ -59,6 +62,8 @@ For infinite hypothesis classes (e.g., linear classifiers in $\mathbb{R}^d$), $\
 **PAC bound with VC dimension (Fundamental Theorem of Statistical Learning):**
 
 $$m_\mathcal{H}(\epsilon, \delta) = O\!\left(\frac{d_\mathcal{H} + \log(1/\delta)}{\epsilon^2}\right)$$
+
+where $d_\mathcal{H}$ = VC dimension of the hypothesis class, $\epsilon$ = error tolerance, $\delta$ = failure probability. The $\epsilon^2$ denominator (vs $\epsilon$ in the realizable case) reflects the harder agnostic setting.
 
 The class is PAC-learnable if and only if $d_\mathcal{H} < \infty$.
 
@@ -88,4 +93,10 @@ Deep networks have large VC dimension ($\sim WL$) — PAC bounds give vacuous (u
 
 This **generalization puzzle** motivates newer complexity measures: sharpness, PAC-Bayes bounds, compressibility bounds, and algorithmic stability — which give tighter bounds matching observed behavior.
 
-*See also: [[generalization-bounds]] · [[rademacher-complexity]] · [[bias-variance-double-descent]] · [[cross-validation]]*
+## Links
+
+- [[statistical-inference-mle]] — PAC learning bounds the generalization error of the empirical risk minimizer; MLE is ERM under log-loss
+- [[generalization-bounds]] — PAC bounds are the foundational generalization bounds; Rademacher complexity and PAC-Bayes bounds are tighter extensions
+- [[rademacher-complexity]] — Rademacher complexity provides data-dependent PAC bounds; it measures how well the hypothesis class can fit random labels on the training set
+- [[bias-variance-double-descent]] — classical PAC theory predicts generalization improves with fewer parameters; double descent violates this prediction for overparameterized models
+- [[cross-validation]] — CV is the empirical counterpart of PAC bounds: it estimates the generalization error without making distributional assumptions about the hypothesis class

@@ -5,6 +5,7 @@ aliases: [maximum entropy, MaxEnt, principle of maximum entropy]
 difficulty: 3
 status: complete
 related: [distributions-gaussian, distributions-overview, entropy-mutual-info, math-convexity-jensen, bayesian-inference]
+depends_on: [entropy-mutual-info, distributions-overview, lagrangian-optimization]
 ---
 
 # Maximum Entropy Principle
@@ -119,4 +120,12 @@ This maps directly to score-based generative models, where $T$ controls the nois
 
 ---
 
-*See also: [[distributions-gaussian]] · [[distributions-overview]] · [[entropy-mutual-info]] · [[math-convexity-jensen]] · [[bayesian-inference]] · [[activation-softmax]] · [[loss-kl-divergence]]*
+## Links
+
+- [[entropy-mutual-info]] — MaxEnt maximizes Shannon entropy $H(p) = -\sum p_i \log p_i$ subject to moment constraints; entropy is the objective being maximized
+- [[distributions-overview]] — MaxEnt uniquely derives standard distributions: uniform (no constraints), Gaussian (mean + variance), exponential (mean only), categorical (normalization only)
+- [[lagrangian-optimization]] — the MaxEnt problem is solved via Lagrange multipliers: one multiplier per constraint; the solution always has exponential family form
+- [[math-convexity-jensen]] — MaxEnt is a convex optimization problem (entropy is concave, constraints are linear); strong duality holds and the Lagrangian solution is globally optimal
+- [[bayesian-inference]] — Jaynes' maximum entropy principle provides a principled way to choose priors: pick the prior with maximum entropy subject to known constraints
+- [[activation-softmax]] — the softmax function is the MaxEnt distribution over $k$ categories subject to linear constraints on the log-unnormalized probabilities
+- [[loss-kl-divergence]] — minimizing $\text{KL}(p\|q)$ subject to moment constraints is equivalent to MaxEnt; the KL divergence measures how far a distribution is from maximum entropy

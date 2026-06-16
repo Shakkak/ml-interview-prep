@@ -5,6 +5,7 @@ aliases: [generative discriminative, generative model, discriminative model, p(y
 difficulty: 2
 status: complete
 related: [statistical-inference-mle, bayesian-inference, distributions-gaussian, variational-autoencoders, diffusion-models]
+depends_on: [statistical-inference-mle, bayesian-inference, distributions-overview]
 ---
 
 # Generative vs Discriminative Models
@@ -18,6 +19,8 @@ related: [statistical-inference-mle, bayesian-inference, distributions-gaussian,
 **Generative model:** learns $p(x, y) = p(x | y)\,p(y)$ — how is data generated? Can derive $p(y|x)$ via [[bayesian-inference|Bayes' theorem]] if needed:
 
 $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
+
+where $p(x|y)$ = class-conditional likelihood (how likely is input $x$ given class $y$), $p(y)$ = class prior, $p(x)$ = marginal likelihood (normalizer), $p(y|x)$ = posterior class probability used for prediction.
 
 **Discriminative examples:** logistic regression, SVM, neural network classifiers, CRF.
 
@@ -100,4 +103,13 @@ $$p(y | x) = \frac{p(x | y)\,p(y)}{p(x)}$$
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[bayesian-inference]] · [[distributions-gaussian]] · [[variational-autoencoders]] · [[diffusion-models]] · [[normalizing-flows]] · [[clip]] · [[bert-mlm]]*
+## Links
+
+- [[statistical-inference-mle]] — discriminative models maximize $p(y|x)$ directly; generative models maximize $p(x,y) = p(x|y)p(y)$; the MLE objective differs but both use maximum likelihood
+- [[bayesian-inference]] — generative models allow Bayesian inference via Bayes' rule: $p(y|x) = p(x|y)p(y)/p(x)$; discriminative models skip computing $p(x)$, which is the hard part
+- [[distributions-overview]] — generative models must model $p(x)$, which requires specifying a full probability distribution over inputs; discriminative models only need a conditional
+- [[variational-autoencoders]] — VAEs are generative models: they model $p(x) = \int p(x|z)p(z)dz$; they can generate new samples by decoding from the prior $z \sim p(z)$
+- [[diffusion-models]] — diffusion models are generative models that learn $p(x)$ by reversing a diffusion process; they currently achieve the best sample quality for images
+- [[normalizing-flows]] — flows compute exact $\log p(x)$ via change-of-variables; they are generative models with tractable likelihood, unlike VAEs (ELBO) or GANs (no likelihood)
+- [[clip]] — CLIP is a discriminative model in the generative-vs-discriminative sense: it models $p(\text{text}|\text{image})$ (or a scoring function) but cannot generate images
+- [[bert-mlm]] — BERT is discriminative (predicts masked tokens given context) but is not a generative model — it cannot autoregressively sample new text

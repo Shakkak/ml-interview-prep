@@ -4,6 +4,7 @@ tags: [architecture, cnn, efficiency, mobilenet]
 aliases: [depthwise separable conv, depthwise conv, MobileNet, separable convolution]
 difficulty: 2
 status: complete
+depends_on: [convolution-math, arch-bottleneck-1x1]
 related: [arch-bottleneck-1x1, cnn-architectures-guide]
 ---
 
@@ -13,9 +14,15 @@ related: [arch-bottleneck-1x1, cnn-architectures-guide]
 
 ## Fundamental
 
+**The problem:** a standard convolution combines spatial filtering (how pixels near each other relate) and channel mixing (how features from different channels combine) in a single operation. This coupling is expensive: every input channel talks to every output filter at every spatial location.
+
+**The insight:** these two operations can be separated. Apply spatial filtering per-channel first (depthwise), then mix channels with a cheap $1 \times 1$ convolution (pointwise). The result is nearly identical representation power at a fraction of the cost.
+
 A standard $k \times k$ conv on $H \times W \times C_{in}$ to $C_{out}$ channels costs:
 
 $$\text{FLOPs} = H \cdot W \cdot C_{in} \cdot C_{out} \cdot k^2$$
+
+where $H, W$ = spatial height and width of the feature map, $C_{in}$ = number of input channels, $C_{out}$ = number of output channels, $k$ = kernel size (e.g., 3 for a $3 \times 3$ filter).
 
 The $C_{in} \cdot C_{out}$ term is expensive — every input channel combines with every output filter.
 
@@ -23,6 +30,8 @@ The $C_{in} \cdot C_{out}$ term is expensive — every input channel combines wi
 
 **Step 1 — Depthwise conv:** one $k \times k$ filter per input channel (no cross-channel mixing):
 $$\text{FLOPs}_{\text{DW}} = H \cdot W \cdot C \cdot k^2 \qquad \text{(output: } H \times W \times C\text{)}$$
+
+where $C = C_{in}$ (same channel count in and out — one filter per channel, no mixing).
 
 **Step 2 — Pointwise conv (1×1):** mix information across channels:
 $$\text{FLOPs}_{\text{PW}} = H \cdot W \cdot C_{in} \cdot C_{out} \qquad \text{(output: } H \times W \times C_{out}\text{)}$$
@@ -85,8 +94,15 @@ EfficientNet (Tan & Le, 2019) makes three observations:
 2. **Compound scaling** all three together under a fixed FLOP budget outperforms scaling any one dimension.
 3. The optimal MBConv block (= MobileNetV2 inverted residual with [[squeeze-excitation|Squeeze-and-Excitation]]) is found via neural architecture search.
 
-Scaling rule: $d = \alpha^\phi$, $w = \beta^\phi$, $r = \gamma^\phi$ where $\phi$ is the compound coefficient and $\alpha \approx 1.2$, $\beta \approx 1.1$, $\gamma \approx 1.15$ (found by grid search under $\alpha \cdot \beta^2 \cdot \gamma^2 \approx 2$ constraint). EfficientNet-B7 achieves 84.4% ImageNet top-1 at 37B FLOPs — higher accuracy than GPipe (557B FLOPs) at 15× lower cost.
+Scaling rule: $d = \alpha^\phi$, $w = \beta^\phi$, $r = \gamma^\phi$ where $\phi$ is the compound coefficient controlling overall scale, $\alpha, \beta, \gamma$ are the per-dimension scaling factors found by grid search, and the constraint $\alpha \cdot \beta^2 \cdot \gamma^2 \approx 2$ ensures FLOPs roughly double with each unit increase in $\phi$ — since depth scales linearly with FLOPs while width and resolution each scale quadratically. EfficientNet-B7 achieves 84.4% ImageNet top-1 at 37B FLOPs — higher accuracy than GPipe (557B FLOPs) at 15× lower cost.
 
 ---
 
-*See also: [[arch-bottleneck-1x1]] · [[cnn-architectures-guide]] · [[squeeze-excitation]] · [[arch-residual-block]] · [[activation-relu-variants]]*
+## Links
+
+- [[convolution-math]] — standard convolution mixes spatial and channel dimensions simultaneously; depthwise separable convolution factors this into two separate steps
+- [[arch-bottleneck-1x1]] — the pointwise ($1\times 1$) step in depthwise separable convolution is identical to a bottleneck $1\times 1$ conv that remixes channels
+- [[cnn-architectures-guide]] — MobileNet and EfficientNet are built on depthwise separable convolutions; the FLOPs reduction makes them deployable on mobile hardware
+- [[squeeze-excitation]] — SE blocks add channel-wise attention on top of depthwise separable convolutions in MobileNetV3
+- [[arch-residual-block]] — Xception combines depthwise separable convolutions with residual connections; this is the design used in EfficientNet's inverted residuals
+- [[activation-relu-variants]] — ReLU6 (clipped ReLU) is used after depthwise separable convolutions in MobileNet for quantization compatibility

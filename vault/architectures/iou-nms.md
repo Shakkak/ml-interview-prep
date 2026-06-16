@@ -4,6 +4,7 @@ tags: [iou, nms, non-maximum-suppression, bounding-box, detection]
 aliases: [IoU, intersection over union, NMS, non-maximum suppression, soft-NMS, GIoU, DIoU]
 difficulty: 1
 status: complete
+depends_on: [feature-pyramid-networks, statistical-inference-mle]
 related: [arch-roi-align, feature-pyramid-networks, open-vocabulary-detection, evaluation-metrics-guide]
 ---
 
@@ -12,6 +13,10 @@ related: [arch-roi-align, feature-pyramid-networks, open-vocabulary-detection, e
 ---
 
 ## Fundamental
+
+Object detectors produce thousands of candidate boxes — far more than the number of actual objects. Two core operations decide which boxes to keep: **IoU** measures how much two boxes overlap (used for matching predictions to ground truth and for filtering duplicates), and **NMS** suppresses duplicate detections of the same object.
+
+**Intuition for NMS:** if two boxes both claim to detect the same object, keep the more confident one and discard anything that heavily overlaps it. Repeat until no two remaining boxes overlap above the threshold — one box per object.
 
 ### Intersection over Union (IoU)
 
@@ -81,4 +86,10 @@ During training, each ground truth box must be assigned to one or more anchor bo
 
 **Task-Aligned Learning (TAL, TOOD):** jointly consider classification score and IoU in the assignment: $t_i = s_i^\alpha \cdot u_i^\beta$ where $s_i$ is classification score and $u_i$ is IoU. High-quality matches have both high confidence and high overlap.
 
-*See also: [[arch-roi-align]] · [[feature-pyramid-networks]] · [[open-vocabulary-detection]] · [[evaluation-metrics-guide]]*
+## Links
+
+- [[feature-pyramid-networks]] — FPN generates candidate boxes at each pyramid level; IoU-based NMS is the post-processing step that deduplicates them
+- [[statistical-inference-mle]] — IoU is a similarity measure used as the assignment criterion in object detection; threshold choices mirror hypothesis testing cutoffs
+- [[arch-roi-align]] — ROI Align extracts features from boxes selected after NMS or matched by IoU threshold during training
+- [[open-vocabulary-detection]] — open-vocabulary detectors use generalized IoU and class-agnostic NMS; DETR-based models replace NMS with learned one-to-one matching
+- [[evaluation-metrics-guide]] — mAP is computed by integrating precision-recall at IoU thresholds 0.5:0.05:0.95; IoU is the foundation of COCO evaluation

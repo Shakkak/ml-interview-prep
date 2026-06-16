@@ -4,6 +4,7 @@ tags: [training, gradients, deep-learning, jacobians]
 aliases: [vanishing gradients, exploding gradients, Jacobian, gradient flow]
 difficulty: 2
 status: complete
+depends_on: [backpropagation, matrix-calculus, activation-sigmoid-tanh]
 related: [backpropagation, normalization-layers, attention-mechanism]
 ---
 
@@ -19,9 +20,13 @@ For a vector-to-vector function $y = f(x)$, the Jacobian is $J_{ij} = \frac{\par
 
 $$\frac{\partial L}{\partial x} = J^T \frac{\partial L}{\partial y}$$
 
+where $J = \partial y/\partial x \in \mathbb{R}^{m \times n}$ = Jacobian of $f$ (how each output $y_i$ changes with each input $x_j$), $J^T$ = transpose routes gradient from output space back to input space, $\partial L/\partial y$ = upstream gradient.
+
 In deep networks, the total gradient is a product of per-layer Jacobians:
 
 $$\frac{\partial L}{\partial x^{(0)}} = J_1^T J_2^T \cdots J_L^T \frac{\partial L}{\partial x^{(L)}}$$
+
+where $J_l = \partial x^{(l)}/\partial x^{(l-1)}$ = per-layer Jacobian, product $J_1^T \cdots J_L^T$ = total gradient propagation (vanishes/explodes when singular values of $J_l$ are consistently $<1$ or $>1$).
 
 This product is the mathematical root cause of vanishing and exploding gradients.
 
@@ -41,6 +46,8 @@ This product is the mathematical root cause of vanishing and exploding gradients
 **Gradient flow through softmax:** the Jacobian of softmax $y_i = e^{x_i}/\sum_j e^{x_j}$ is:
 $$\frac{\partial y_i}{\partial x_j} = y_i(\delta_{ij} - y_j), \quad J_{softmax} = \text{diag}(y) - yy^T$$
 
+where $\delta_{ij}$ = Kronecker delta (1 if $i=j$, 0 otherwise), $y_i(\delta_{ij}-y_j)$ = off-diagonal: $-y_iy_j$ (captures correlation between outputs), $J_\text{softmax} \in \mathbb{R}^{K \times K}$ = symmetric matrix with rank $K-1$.
+
 When composed with [[loss-cross-entropy|cross-entropy]] $L = -\sum_k t_k \log y_k$, the result simplifies beautifully: $\frac{\partial L}{\partial x_i} = y_i - t_i$. This is why [[activation-softmax|softmax]] + cross-entropy is the canonical output pairing — the gradient is prediction minus label.
 
 *Saturation warning:* when one logit dominates ($y \approx (1,0,\ldots,0)$), gradients for non-maximum classes are near zero. The model has "decided" and stops learning from those classes, contributing to overconfidence and poor calibration.
@@ -55,12 +62,17 @@ Backprop through a conv layer is itself a convolution — the same hardware-effi
 
 $$\frac{\partial L}{\partial x_i} = \frac{\gamma}{\sqrt{\sigma_B^2+\epsilon}}\left[\frac{\partial L}{\partial y_i} - \frac{1}{m}\sum_j \frac{\partial L}{\partial y_j} - \hat{x}_i \cdot \frac{1}{m}\sum_j \frac{\partial L}{\partial y_j}\hat{x}_j\right]$$
 
+where $\gamma$ = learned BN scale, $\sigma_B^2$ = batch variance, $m$ = batch size, $\hat{x}_i$ = normalized activation, three bracketed terms = gradients through $\hat{x}_i$, $\mu_B$ (mean), and $\sigma_B^2$ (variance) respectively.
+
 The three terms arise from differentiating through $\hat{x}_i$, $\mu_B$, and $\sigma_B^2$ respectively. The $1/\sqrt{\sigma_B^2+\epsilon}$ factor normalizes gradient scale — this is why BN keeps Jacobian singular values near 1.
 
 **Gradient clipping:**
 
 *Norm clipping (recommended):*
 $$\text{if } \|g\| > c: \quad g \leftarrow g \cdot \frac{c}{\|g\|}$$
+
+where $g$ = concatenated gradient vector over all parameters, $\|g\|$ = global L2 norm, $c$ = clipping threshold, $c/\|g\|$ = rescaling factor (brings gradient to norm $c$).
+
 Preserves gradient direction, only reduces magnitude. Standard in RNN and transformer training.
 
 *Value clipping:* $g_i \leftarrow \text{clamp}(g_i, -c, c)$. Simple but distorts direction when components clip unevenly — generally inferior.
@@ -71,6 +83,8 @@ torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
 **Backpropagation through time (BPTT) for RNNs:** unrolling $T$ steps gives:
 $$\frac{\partial L}{\partial h_0} = \prod_{t=1}^T \frac{\partial h_t}{\partial h_{t-1}} \cdot \frac{\partial L}{\partial h_T}, \quad \frac{\partial h_t}{\partial h_{t-1}} = W_{hh}^T \cdot \text{diag}(\sigma'(z_t))$$
+
+where $h_t$ = hidden state at step $t$, $W_{hh}$ = recurrent weight matrix, $\sigma'(z_t)$ = activation derivative at step $t$, product over $T$ terms = cause of vanishing/exploding gradients for long sequences.
 
 For $T = 100$ steps, this product causes catastrophic vanishing or exploding regardless of activation choice. This is the fundamental motivation for LSTM gating and transformer [[attention-mechanism|self-attention]].
 
@@ -95,4 +109,14 @@ For $T = 100$ steps, this product causes catastrophic vanishing or exploding reg
 
 ---
 
-*See also: [[backpropagation]] · [[normalization-layers]] · [[attention-mechanism]] · [[optimizer-adam]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[neural-tangent-kernel]] · [[rnn-lstm]]*
+## Links
+
+- [[backpropagation]] — prerequisite: basic chain rule and the forward/backward pass algorithm
+- [[matrix-calculus]] — Jacobians and the matrix chain rule are the mathematical engine of everything in this file
+- [[activation-sigmoid-tanh]] — sigmoid's $\sigma'(z) \leq 0.25$ is the root cause of vanishing gradients; this file quantifies the Jacobian consequence
+- [[normalization-layers]] — BN's three-term gradient keeps Jacobian singular values near 1, solving the vanishing/exploding problem
+- [[attention-mechanism]] — transformer gradient pathologies (residual norm growth, attention sinks) are analyzed here
+- [[optimizer-adam]] — $\mu$P derives initialization and LR jointly to keep gradient norms $O(1)$ regardless of width/depth
+- [[rnn-lstm]] — BPTT unrolls into a product of Jacobians; LSTM gates provide an additive gradient path that bypasses the chain
+- [[neural-tangent-kernel]] — infinite-width networks in the kernel regime have gradients governed by the NTK; finite networks deviate
+- [[loss-cross-entropy]] — softmax + cross-entropy gradient simplifies to $\hat{y} - y$; the Jacobian of softmax is derived here

@@ -5,6 +5,7 @@ aliases: [triplet loss, margin loss, metric learning loss, hard negatives, semi-
 difficulty: 2
 status: complete
 related: [contrastive-learning, loss-nt-xent, self-supervised-overview, word-embeddings, loss-cross-entropy]
+depends_on: [contrastive-learning, loss-nt-xent, backpropagation]
 ---
 
 # Triplet Loss and Contrastive Losses
@@ -52,6 +53,8 @@ Triplet loss with random triplets saturates quickly — most random negatives ar
 
 $$\mathcal{L} = y \cdot d(x_1, x_2)^2 + (1-y) \cdot \max(0, \alpha - d(x_1, x_2))^2$$
 
+where $y=1$ for same class pairs, $y=0$ for different class pairs, $d(x_1,x_2)$ = embedding distance, $\alpha$ = margin (dissimilar pairs must be pushed beyond this distance).
+
 Pulls similar pairs together, pushes dissimilar pairs beyond margin $\alpha$.
 
 **N-pair loss / Multi-similarity loss:** use all pairs in a batch rather than pre-selected triplets. The NT-Xent loss (see [[loss-nt-xent]]) used in SimCLR is a softmax-normalized form of this — treating one positive and $2(N-1)$ negatives simultaneously.
@@ -81,4 +84,10 @@ Softmax cross-entropy over class prototypes is closely related to metric learnin
 
 Larger batches → more diverse negatives → better mining → better representations. This motivates large-batch contrastive training (SimCLR uses batch sizes of 4096+).
 
-*See also: [[contrastive-learning]] · [[loss-nt-xent]] · [[self-supervised-overview]] · [[word-embeddings]]*
+## Links
+
+- [[contrastive-learning]] — triplet loss is pairwise contrastive learning: anchor, positive, negative must satisfy $d(a,p) + m < d(a,n)$; NT-Xent (InfoNCE) uses all in-batch negatives instead of explicit triplets
+- [[loss-nt-xent]] — NT-Xent is a multi-negative extension of triplet loss; at batch size $N$, each anchor has $2(N-1)$ negatives vs. one in triplet loss; more negatives = better signal
+- [[backpropagation]] — triplet loss has a combinatorial mining problem: valid triplets satisfying $d^+ < d^-$ don't contribute gradients; hard negative mining selects triplets near the margin
+- [[self-supervised-overview]] — triplet loss was the original metric learning objective for face recognition (FaceNet); it has been largely superseded by NT-Xent in SSL settings
+- [[word-embeddings]] — word2vec uses a softmax or noise-contrastive objective equivalent to triplet loss; the word embedding geometry reflects semantic relationships learned from co-occurrence statistics

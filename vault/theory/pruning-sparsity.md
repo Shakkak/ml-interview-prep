@@ -5,6 +5,7 @@ aliases: [weight pruning, network pruning, structured pruning, unstructured prun
 difficulty: 2
 status: complete
 related: [lora-quantization, knowledge-distillation, regularization-weight-decay, hessian-curvature, generalization-bounds]
+depends_on: [backpropagation, hessian-curvature, regularization-weight-decay]
 ---
 
 # Pruning and Network Sparsity
@@ -32,6 +33,8 @@ The simplest pruning criterion: remove weights with small absolute value.
 **Unstructured (weight) pruning:** zero out the smallest $k\%$ of weights globally:
 $$w_i = 0 \text{ if } |w_i| < \tau$$
 
+where $w_i$ = individual weight, $\tau$ = magnitude threshold chosen so that $k\%$ of weights fall below it.
+
 **Lottery Ticket Hypothesis:** Frankle & Carlin (2018) showed that dense networks contain small sparse subnetworks ("winning tickets") that can be trained from scratch to match the full network's accuracy. These tickets are found by:
 1. Train dense network
 2. Prune the smallest $p\%$ of weights
@@ -57,7 +60,7 @@ Structured pruning produces dense models with smaller dimensions — directly ac
 
 ### Pruning Criteria Beyond Magnitude
 
-**Gradient-based (Taylor expansion):** importance of weight $w_i$ ≈ change in loss if removed: $|\delta \mathcal{L}| \approx |g_i w_i|$ where $g_i = \partial \mathcal{L}/\partial w_i$.
+**Gradient-based (Taylor expansion):** importance of weight $w_i$ ≈ change in loss if removed: $|\delta \mathcal{L}| \approx |g_i w_i|$, where $g_i = \partial \mathcal{L}/\partial w_i$ = gradient of loss w.r.t. $w_i$ and the product $|g_i w_i|$ approximates the first-order loss change from zeroing $w_i$.
 
 **Second-order (OBD, OBS):** use Hessian diagonal to estimate importance: $\frac{w_i^2}{2[H^{-1}]_{ii}}$. More accurate but expensive.
 
@@ -90,4 +93,10 @@ Pruning and quantization (see [[lora-quantization]]) are complementary compressi
 
 Combined ("sparse quantization"), they can achieve 10–100× compression with minimal accuracy loss. SparseGPT applies second-order pruning to LLMs in a single forward pass without retraining.
 
-*See also: [[lora-quantization]] · [[knowledge-distillation]] · [[regularization-weight-decay]] · [[hessian-curvature]]*
+## Links
+
+- [[backpropagation]] — pruning during training uses gradient-based saliency scores; the OBD (Optimal Brain Damage) and OBS (Optimal Brain Surgeon) use second-order (Hessian) information to identify low-saliency weights
+- [[hessian-curvature]] — second-order pruning (OBD, SparseGPT) estimates the curvature-weighted importance of each weight: $\Delta L \approx \frac{1}{2}w_i^2 H_{ii}^{-1}$; flat curvature = safe to prune
+- [[regularization-weight-decay]] — L1 regularization promotes sparsity by driving low-importance weights to exactly zero; it is a differentiable approximation to the $\ell_0$ pruning objective
+- [[lora-quantization]] — pruning and LoRA are complementary: pruning removes weights, LoRA reduces the rank of remaining weight updates; SparseGPT combines both for LLM compression
+- [[knowledge-distillation]] — structured pruning (removing entire channels/heads) requires fine-tuning the pruned network to recover performance; distillation from the full network accelerates recovery

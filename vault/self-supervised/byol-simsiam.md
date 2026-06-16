@@ -5,6 +5,7 @@ aliases: [BYOL, SimSiam, Bootstrap Your Own Latent, self-distillation, non-contr
 difficulty: 2
 status: complete
 related: [contrastive-learning, dino-dinov2, self-supervised-overview, knowledge-distillation, normalization-layers]
+depends_on: [contrastive-learning, normalization-layers, backpropagation]
 ---
 
 # BYOL and SimSiam
@@ -32,6 +33,8 @@ Loss: minimize MSE between the online prediction and the target projection (both
 
 $$\mathcal{L} = \|\bar{q}_\theta(z_\theta) - \bar{z}'_\xi\|^2$$
 
+where $z_\theta$ = online network's projection of view 1, $z'_\xi$ = target network's projection of view 2, $\bar{\cdot}$ = $\ell_2$ normalization (divides by the vector's norm), $q_\theta$ = predictor (an MLP applied only on the online side), and $\xi, \theta$ = target and online network parameters respectively.
+
 The target network is a **momentum encoder** (EMA of online): $\xi \leftarrow \tau\xi + (1-\tau)\theta$, $\tau \approx 0.996$.
 
 **No negatives, no contrastive loss.** Two augmented views of the same image → online predicts target's representation.
@@ -58,6 +61,8 @@ Several mechanisms prevent collapse:
 - Stop gradient on the target branch
 
 $$\mathcal{L} = -\frac{1}{2}\left[\frac{p_1}{\|p_1\|} \cdot \text{sg}(z_2) + \frac{p_2}{\|p_2\|} \cdot \text{sg}(z_1)\right]$$
+
+where $p_1, p_2$ = predictor outputs for view 1 and view 2 (the predicted representations), $z_1, z_2$ = projector outputs (the representation targets), $\|p\|$ = $\ell_2$ norm (normalizes to unit sphere), and $\text{sg}(\cdot)$ = stop-gradient operator (detach from computation graph — blocks gradient flow).
 
 `sg()` = stop-gradient (detach). Without stop-gradient, collapse occurs immediately.
 
@@ -89,4 +94,11 @@ DINO (see [[dino-dinov2]]) combines insights from BYOL (momentum teacher) and co
 - Uses multi-crop + Sinkhorn normalization / centering instead of explicit negatives
 - Produces features with strong semantic localization properties
 
-*See also: [[contrastive-learning]] · [[dino-dinov2]] · [[self-supervised-overview]] · [[knowledge-distillation]] · [[normalization-layers]]*
+## Links
+
+- [[contrastive-learning]] — BYOL/SimSiam eliminate negative pairs; they prevent collapse using asymmetric architectures (EMA target / stop-gradient) rather than negatives
+- [[normalization-layers]] — batch normalization is a critical collapse-prevention mechanism in SimCLR; BYOL uses batch renorm to avoid implicit negative information leaking through batch statistics
+- [[backpropagation]] — SimSiam's stop-gradient on the target branch is a deliberate gradient blocking operation; gradients flow only through the online network
+- [[dino-dinov2]] — DINO also uses a self-distillation setup with an EMA teacher; it adds centering and sharpening to prevent collapse instead of batch norm
+- [[self-supervised-overview]] — BYOL and SimSiam are "negative-free" SSL methods; they show that contrastive signals are not necessary for learning good representations
+- [[knowledge-distillation]] — BYOL's EMA teacher is self-distillation: the online network learns to match the teacher's representations, which are its own past parameters

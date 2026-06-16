@@ -5,6 +5,7 @@ aliases: [hypothesis testing, p-value, t-test, confidence interval, null hypothe
 difficulty: 2
 status: complete
 related: [statistical-inference-mle, distributions-gaussian, model-calibration, bayesian-inference, fisher-information]
+depends_on: [statistical-inference-mle, distributions-gaussian, central-limit-theorem]
 ---
 
 # Hypothesis Testing and Statistical Inference
@@ -53,6 +54,8 @@ A tiny effect in a large dataset can have p = 0.001. Always report effect size a
 A 95% CI $[L, U]$ for the mean: "95% of intervals constructed this way across repeated experiments contain the true mean." For unknown $\sigma$:
 
 $$\bar{x} \pm t_{n-1,\, 0.025} \cdot \frac{s}{\sqrt{n}}$$
+
+where $\bar{x}$ = sample mean, $t_{n-1,\, 0.025}$ = the 97.5th percentile of the $t$-distribution with $n-1$ degrees of freedom, $s$ = sample standard deviation, and $n$ = sample size.
 
 **Correct interpretation:** the true mean is fixed; any specific interval either contains it or doesn't. The 95% is a property of the *procedure*, not of any specific interval.
 
@@ -132,6 +135,8 @@ Standard tests assume the sample size is fixed before looking at data. Running a
 
 $$\Lambda_n = \prod_{i=1}^n \frac{p_1(x_i)}{p_0(x_i)}$$
 
+where $p_1(x_i)$ = density of observation $x_i$ under $H_1$, $p_0(x_i)$ = density under $H_0$, $\Lambda_n$ = cumulative likelihood ratio after $n$ observations, and $A, B$ = lower and upper stopping boundaries (set by the desired $\alpha$ and $\beta$).
+
 Stop and reject $H_0$ if $\Lambda_n > B$, stop and accept if $\Lambda_n < A$, otherwise continue. This achieves the minimum expected sample size for given $(\alpha, \beta)$.
 
 **In practice (online A/B testing):** always-valid $p$-values (Johari et al., 2017, Optimizely) use the e-values framework — martingale-based statistics that remain valid under optional stopping. These are now standard in production A/B testing systems.
@@ -140,10 +145,17 @@ Stop and reject $H_0$ if $\Lambda_n > B$, stop and accept if $\Lambda_n < A$, ot
 
 $$\chi^2 = \sum_i \frac{(O_i - E_i)^2}{E_i}$$
 
-Under $H_0$: $\chi^2 \sim \chi^2_{k-1}$ for goodness-of-fit with $k$ categories. For an independence test in an $r \times c$ contingency table: d.f. $= (r-1)(c-1)$.
+where $O_i$ = observed count in category $i$, $E_i$ = expected count under $H_0$, and the sum is over all $k$ categories. Under $H_0$: $\chi^2 \sim \chi^2_{k-1}$ for goodness-of-fit with $k$ categories. For an independence test in an $r \times c$ contingency table: d.f. $= (r-1)(c-1)$.
 
 Requirement: expected counts $E_i \geq 5$ in each cell for the asymptotic approximation to hold. For small samples, use Fisher's exact test instead.
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[distributions-gaussian]] · [[bayesian-inference]] · [[fisher-information]] · [[model-calibration]]*
+## Links
+
+- [[statistical-inference-mle]] — the likelihood ratio test statistic ($-2\log\Lambda$) follows a $\chi^2$ distribution asymptotically; this justifies LRT-based hypothesis tests for MLEs
+- [[distributions-gaussian]] — z-tests and t-tests assume Gaussian sampling distributions of the test statistic; the CLT justifies this approximation for large $n$
+- [[central-limit-theorem]] — hypothesis tests for sample means rely on the CLT to approximate the null distribution; without CLT, only exact or bootstrap tests are valid
+- [[bayesian-inference]] — Bayesian alternatives: Bayes factors replace p-values; they compare marginal likelihoods and avoid the p-value threshold problem
+- [[fisher-information]] — Fisher's exact test and the score test are both derived from the Fisher information; the score statistic evaluates the gradient of the log-likelihood at the null
+- [[model-calibration]] — p-values are frequentist probabilities, not posterior probabilities; miscalibrated models that output overconfident predictions corrupt hypothesis tests based on model outputs

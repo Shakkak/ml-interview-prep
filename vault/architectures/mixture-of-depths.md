@@ -4,6 +4,7 @@ tags: [mixture-of-depths, mod, token-routing, adaptive-compute, conditional-comp
 aliases: [Mixture of Depths, MoD, token skipping, adaptive depth, conditional computation]
 difficulty: 2
 status: complete
+depends_on: [attention-mechanism, arch-residual-block, mixture-of-experts]
 related: [mixture-of-experts, attention-mechanism, autoregressive-models, arch-residual-block, flash-attention]
 ---
 
@@ -25,7 +26,7 @@ In a standard transformer, every token passes through every layer with equal com
 
 For each layer $l$, a learned router assigns a scalar score to each token and selects the top-$k$ tokens (by capacity fraction $C$, e.g., 12.5% of tokens per layer):
 
-1. Compute router scores: $r_t = w^\top x_t$ (scalar per token)
+1. Compute router scores: $r_t = w^\top x_t$ (scalar per token, where $w \in \mathbb{R}^d$ is a learned weight vector and $x_t \in \mathbb{R}^d$ is the token's current hidden state)
 2. Select top $\lfloor C \cdot T \rfloor$ tokens by score
 3. Selected tokens pass through the layer (attention + FFN)
 4. Skipped tokens bypass via residual connection: $x_t \leftarrow x_t$ (unchanged)
@@ -81,4 +82,10 @@ During autoregressive decoding: the router must decide whether the current token
 
 Both methods share the insight that uniform depth is wasteful. The difference: early exit exits the entire sequence at the same layer; MoD exits individual tokens independently.
 
-*See also: [[mixture-of-experts]] · [[attention-mechanism]] · [[arch-residual-block]] · [[autoregressive-models]]*
+## Links
+
+- [[attention-mechanism]] — MoD routes tokens to skip the attention sublayer; it learns to identify tokens that don't need full attention at that depth
+- [[arch-residual-block]] — MoD uses the residual connection to pass non-routed tokens through unchanged; the residual shortcut is essential for token skipping
+- [[mixture-of-experts]] — MoE selects which expert (FFN) to route a token to; MoD selects whether to compute anything at a given layer — orthogonal decisions
+- [[autoregressive-models]] — MoD reduces FLOPs during autoregressive generation by skipping computation for tokens that don't need it at each layer
+- [[flash-attention]] — MoD and Flash Attention are complementary: Flash reduces memory cost of attention, MoD reduces the number of tokens attending per layer

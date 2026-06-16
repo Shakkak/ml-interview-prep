@@ -5,6 +5,7 @@ aliases: [HMM, Baum-Welch, Viterbi algorithm, forward-backward algorithm]
 difficulty: 2
 status: complete
 related: [markov-chains, expectation-maximization, rnn-lstm, state-space-models, sampling-methods, distributions-overview]
+depends_on: [markov-chains, expectation-maximization, distributions-overview]
 ---
 
 # Hidden Markov Models
@@ -104,4 +105,11 @@ For Gaussian emissions: $\hat{\mu}_k = \frac{\sum_t \gamma_t(k) x_t}{\sum_t \gam
 
 **Factorial HMMs:** multiple independent hidden chains generate observations jointly — exponential state space, but inference is tractable via mean-field approximation.
 
-*See also: [[markov-chains]] · [[expectation-maximization]] · [[rnn-lstm]] · [[state-space-models]] · [[sampling-methods]]*
+## Links
+
+- [[markov-chains]] — HMMs extend Markov chains with a hidden state layer; the visible emissions depend on the hidden state, which follows a Markov transition
+- [[expectation-maximization]] — Baum-Welch algorithm is EM for HMMs; the E-step computes forward-backward probabilities, and the M-step updates transition and emission parameters
+- [[distributions-overview]] — HMM emissions can be any distribution (Gaussian, categorical, Poisson); the choice of emission model determines what signals the HMM can model
+- [[rnn-lstm]] — LSTMs generalised HMMs: the hidden state is a continuous high-dimensional vector updated by neural transitions, rather than a discrete finite set
+- [[state-space-models]] — linear Gaussian state-space models (Kalman filters) are the continuous-state analogue of HMMs; inference is exact via Kalman smoothing
+- [[sampling-methods]] — Viterbi decoding finds the most probable hidden state sequence; forward-backward computes marginal posteriors; both are dynamic programming, not MCMC

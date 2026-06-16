@@ -5,6 +5,7 @@ aliases: [stochastic depth, DropPath, layer dropout, survival probability]
 difficulty: 1
 status: complete
 related: [regularization-dropout, arch-residual-block, vit-training-recipe, normalization-layers, bias-variance-double-descent]
+depends_on: [regularization-dropout, arch-residual-block, backpropagation]
 ---
 
 # Stochastic Depth and DropPath
@@ -19,6 +20,8 @@ related: [regularization-dropout, arch-residual-block, vit-training-recipe, norm
 
 For a residual block with input $x$ and output $F(x)$:
 $$\tilde{H}(x) = \begin{cases} x + F(x) & \text{with probability } p_l \\ x & \text{with probability } 1 - p_l \end{cases}$$
+
+where $x$ = block input, $F(x)$ = residual transformation, $p_l$ = survival probability of layer $l$ (probability the block is active), $1-p_l$ = drop probability.
 
 When a block is dropped, the input passes through unchanged via the skip connection. The network effectively becomes shallower by a random number of layers each training step.
 
@@ -82,4 +85,10 @@ Both are necessary components of the strong ViT training recipe.
 | Works without skip | Yes | No (input would be zeros) |
 | Main use case | Dense layers, embeddings | Residual networks, transformers |
 
-*See also: [[regularization-dropout]] · [[arch-residual-block]] · [[vit-training-recipe]] · [[data-augmentation]]*
+## Links
+
+- [[regularization-dropout]] — stochastic depth is dropout applied at the layer level; instead of dropping individual neurons, entire residual blocks are dropped with probability $1-p_l$
+- [[arch-residual-block]] — stochastic depth requires the residual connection: when a block is dropped, only the skip connection $x$ passes through; this is only possible with residual networks
+- [[backpropagation]] — dropped blocks contribute no gradient; survival probability $p_l$ creates an implicit ensemble of networks of varying depth
+- [[vit-training-recipe]] — DeiT and DINOv2 use stochastic depth (DropPath) with rate 0.1–0.4; it is the dominant regularizer for training ViTs alongside Mixup/CutMix
+- [[data-augmentation]] — stochastic depth is an architectural augmentation (varies the effective network depth); it is complementary to input-level augmentation (Mixup, CutMix)

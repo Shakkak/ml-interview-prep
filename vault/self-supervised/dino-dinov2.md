@@ -5,6 +5,7 @@ aliases: [DINO, DINOv2, self-distillation, DINO ViT, DINOv2 backbone, register t
 difficulty: 2
 status: complete
 related: [vision-transformer, self-supervised-overview, contrastive-learning, knowledge-distillation, data-augmentation, clip]
+depends_on: [vision-transformer, contrastive-learning, knowledge-distillation]
 ---
 
 # DINO and DINOv2 — Self-Distillation for Visual Representations
@@ -148,4 +149,12 @@ At sufficient scale, DINOv2-ViT-G/14 with a frozen backbone + linear head achiev
 
 ---
 
-*See also: [[vision-transformer]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[knowledge-distillation]] · [[data-augmentation]] · [[clip]] · [[attention-mechanism]] · [[arch-positional-encoding]]*
+## Links
+
+- [[vision-transformer]] — DINO and DINOv2 use ViT as the backbone; DINO's self-attention maps produce sharp semantic segmentation without any segmentation labels
+- [[contrastive-learning]] — DINO avoids explicit negatives by using centering and sharpening; DINOv2 adds iBOT (masked patch token prediction) alongside the self-distillation objective
+- [[knowledge-distillation]] — DINO is self-distillation: the student network learns to match the EMA teacher's class token output; this is pseudo-labeling from your own network's predictions
+- [[data-augmentation]] — DINO's multi-crop augmentation creates one global view and multiple local views; the student processes local crops and must predict the teacher's global view representation
+- [[clip]] — DINOv2 produces better dense prediction features than CLIP; CLIP excels at zero-shot classification while DINOv2 excels at segmentation and depth estimation
+- [[attention-mechanism]] — DINO's attention heads develop semantic segmentation spontaneously; the CLS token attends to semantically coherent regions without explicit supervision
+- [[arch-positional-encoding]] — DINOv2 registers tokens (special non-semantic tokens) reduce artifacts in attention maps caused by high-norm outlier tokens at specific positions

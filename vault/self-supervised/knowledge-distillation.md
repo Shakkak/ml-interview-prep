@@ -5,6 +5,7 @@ aliases: [knowledge distillation, teacher student, soft targets, KD]
 difficulty: 2
 status: complete
 related: [normalization-layers, backpropagation, loss-cross-entropy, lora-quantization, self-supervised-overview]
+depends_on: [backpropagation, loss-cross-entropy, normalization-layers]
 ---
 
 # Knowledge Distillation & Teacher-Student Learning
@@ -52,17 +53,23 @@ At $\tau=4$: $z/\tau = [1.0, 0.25, 0.125]$, $p^T_\tau = [0.486, 0.297, 0.217]$. 
 
 $$\mathcal{L}_{hint} = \| r(F^S) - F^T \|_F^2$$
 
+where $F^S$ = student's intermediate feature map, $F^T$ = teacher's intermediate feature map, $r(\cdot)$ = a thin regressor (e.g., a 1×1 conv) that projects student features to the teacher's spatial/channel dimensions, and $\|\cdot\|_F$ = Frobenius norm.
+
 Allows the teacher to be deeper than the student — the student learns to match internal representations, not just outputs.
 
 **Attention Transfer (Zagoruyko & Komodakis, 2017):** match spatial attention maps derived from intermediate features:
 
 $$A^T = \text{normalize}\!\left(\sum_c |F^T_c|^2\right), \quad \mathcal{L}_{AT} = \| A^T - A^S \|_2^2$$
 
+where $c$ = channel index, $F^T_c$ = teacher feature map at channel $c$, $\sum_c |F^T_c|^2$ = spatial sum of squared activations across channels (spatial importance map), $\text{normalize}$ = $\ell_2$ normalization to unit norm, and $A^S$ = the corresponding student attention map.
+
 Forces the student to look at the same spatial locations as the teacher.
 
 **Relation-based distillation:** match relationships between samples rather than individual features:
 
 $$\mathcal{L}_{RKD} = \sum_{(i,j)} l\left(d(z_i^S, z_j^S),\, d(z_i^T, z_j^T)\right)$$
+
+where $(i,j)$ = pairs of training examples, $z_i^S, z_j^S$ = student embeddings for examples $i$ and $j$, $z_i^T, z_j^T$ = teacher embeddings, $d(\cdot,\cdot)$ = pairwise distance (e.g., Euclidean or angular), and $l(\cdot,\cdot)$ = loss comparing student and teacher distances (e.g., Huber loss).
 
 Captures structural properties of the embedding space rather than absolute positions. Particularly useful when student and teacher have different architectures (different embedding dimensions).
 
@@ -124,4 +131,11 @@ This transfers the structure of the teacher's representation space (not just ind
 
 ---
 
-*See also: [[lora-quantization]] · [[loss-cross-entropy]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[loss-kl-divergence]]*
+## Links
+
+- [[backpropagation]] — distillation trains the student by backpropagating through the soft-target cross-entropy; the temperature-scaled teacher logits carry gradient signal about dark knowledge
+- [[loss-cross-entropy]] — the distillation loss is a weighted sum of hard-label cross-entropy and soft-target cross-entropy (teacher logits at temperature $T$); the soft loss dominates for large $T$
+- [[normalization-layers]] — batch/layer normalization patterns differ between teacher and student; the student must re-learn appropriate normalization statistics for its own architecture
+- [[lora-quantization]] — LoRA and distillation are complementary compression techniques; distillation compresses capacity, LoRA reduces trainable parameters; both are used in LLM deployment
+- [[self-supervised-overview]] — self-distillation (BYOL, DINO) is a form of knowledge distillation where teacher and student are the same network at different training steps
+- [[loss-kl-divergence]] — minimizing KL divergence between teacher and student output distributions is equivalent to soft-label cross-entropy; KL formulation makes the connection to information theory explicit

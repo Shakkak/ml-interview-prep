@@ -3,6 +3,7 @@ title: "Biodiversity and Ecology Machine Learning"
 tags: [biodiversity-ml, species-distribution-modelling, maxent, plant-traits, phenology, long-tail, gbif, inaturalist, bioclip, fine-grained-recognition]
 aliases: [Ecology ML, SDM, Species Distribution Modelling, Biodiversity Informatics ML]
 status: complete
+depends_on: [clip, earth-observation-fundamentals, statistical-inference-mle]
 ---
 
 This file covers machine learning methods for biodiversity and ecology — from species distribution modelling to plant trait prediction, phenology monitoring, and fine-grained species recognition. Written to be self-contained for someone coming from ML without ecology background.
@@ -313,6 +314,13 @@ Fine-grained recognition distinguishes between visually similar subcategories (e
 
 ---
 
-## See Also
+## Links
 
-[[earth-observation-fundamentals]], [[satellite-imagery-preprocessing]], [[vlm-architectures]], [[open-vocabulary-detection]], [[vlm-explainability]], [[clip]], [[remote-sensing-foundation-models]]
+- [[clip]] — BioCLIP adapts CLIP to fine-grained species classification; the contrastive pretraining on scientific name-image pairs aligns visual and taxonomic representations
+- [[earth-observation-fundamentals]] — biodiversity monitoring increasingly uses satellite EO data; species distribution models (SDMs) are being coupled with temporal remote sensing time series
+- [[statistical-inference-mle]] — MaxEnt (Maximum Entropy) species distribution modeling is equivalent to MLE in an exponential family model; GBIF presence-only data requires presence-background sampling
+- [[satellite-imagery-preprocessing]] — multi-spectral and temporal satellite data are inputs to EO-based biodiversity models; band normalization and cloud masking are preprocessing prerequisites
+- [[vlm-architectures]] — VLMs like GeoChat are used for biodiversity monitoring; they combine visual encoders with language models for multimodal ecological question answering
+- [[open-vocabulary-detection]] — open-vocabulary detection enables zero-shot species detection without training on every species; CLIP embeddings provide the text-image alignment
+- [[vlm-explainability]] — biodiversity applications require explainability for scientific trust; Grad-CAM and attention rollout show which image regions drive species predictions
+- [[remote-sensing-foundation-models]] — EO foundation models pretrained on satellite data provide stronger representations for biodiversity tasks than ImageNet-pretrained models

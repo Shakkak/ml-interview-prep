@@ -4,6 +4,7 @@ tags: [sparse-attention, longformer, bigbird, local-attention, efficient-transfo
 aliases: [sparse attention, local attention, strided attention, BigBird, Longformer, block sparse attention]
 difficulty: 2
 status: complete
+depends_on: [attention-mechanism, flash-attention]
 related: [attention-mechanism, flash-attention, arch-kv-cache, arch-positional-encoding, state-space-models]
 ---
 
@@ -19,6 +20,8 @@ Standard self-attention computes all $N^2$ pairwise similarities between $N$ tok
 - $N = 4096$: $16M$ attention weights
 - $N = 16384$: $268M$ attention weights  
 - $N = 100000$: practically infeasible with dense attention
+
+**Intuition:** most tokens only need local context — "the" doesn't need to attend to a token 10,000 positions away. Sparse attention keeps the long-range connections that matter (via global tokens or strided patterns) and drops the local pairs that are redundant, cutting quadratic cost to near-linear.
 
 **Sparse attention** restricts which token pairs attend to each other, reducing complexity from $O(N^2)$ to $O(N \cdot k)$ where $k \ll N$ is the average attention span.
 
@@ -94,4 +97,10 @@ Rather than fixed patterns, **let the model learn** which pairs to attend to:
 
 Sparse attention is preferable when exact attention is needed on a subset of positions (retrieval, reasoning). SSMs and linear attention are better for streaming/unlimited context without retrieval.
 
-*See also: [[attention-mechanism]] · [[flash-attention]] · [[state-space-models]] · [[arch-kv-cache]]*
+## Links
+
+- [[attention-mechanism]] — sparse attention restricts the full $O(N^2)$ attention to a subset of positions; the attention computation is otherwise identical
+- [[flash-attention]] — Flash Attention computes full attention IO-efficiently; sparse attention reduces the number of pairs attended to; both target long-sequence scalability
+- [[state-space-models]] — SSMs (Mamba) are the leading alternative to sparse attention for long sequences; they achieve linear complexity via recurrent state rather than local windows
+- [[arch-kv-cache]] — sparse attention patterns (local windows, strided) reduce the effective KV cache entries attended at each step during inference
+- [[arch-positional-encoding]] — sparse attention patterns like sliding window require relative position encodings; absolute encodings don't capture distance in local windows well

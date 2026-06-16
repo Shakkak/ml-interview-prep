@@ -4,6 +4,7 @@ tags: [visualization, statistics, data-analysis, plots, charts, tsne, umap, cali
 aliases: [charts, plots, visualization guide, chart selection, Q-Q plot, reliability diagram, drift detection]
 difficulty: 1
 status: complete
+depends_on: [distributions-overview, statistical-inference-mle]
 related: [statistical-inference-mle, distributions-overview, evaluation-metrics-guide, model-calibration]
 ---
 
@@ -124,7 +125,8 @@ ks_stat, p_val = ks_2samp(train[feature], prod[feature])
 
 **Population Stability Index (PSI):** industry-standard metric for monitoring drift:
 $$\text{PSI} = \sum_b (A_b - E_b)\ln(A_b/E_b)$$
-where $A_b$ = actual (production) fraction in bin $b$, $E_b$ = expected (training) fraction. PSI < 0.1: stable; 0.1–0.25: slight drift, monitor; > 0.25: significant shift, retrain.
+
+where $b$ = index over histogram bins (typically 10–20 equal-width bins over the feature range), $A_b$ = fraction of production (actual) observations falling in bin $b$, $E_b$ = fraction of training (expected) observations in bin $b$, and the $\ln(A_b/E_b)$ term is a KL-divergence-like penalty that measures the log-ratio of densities (the full sum is a symmetric KL divergence between the two histograms). PSI < 0.1: stable; 0.1–0.25: slight drift, monitor; > 0.25: significant shift, retrain.
 
 ### Calibration Visualization
 
@@ -149,4 +151,12 @@ Color by target class to see separability. Look for: (1) clear linear separation
 
 ---
 
-*See also: [[evaluation-metrics-guide]] · [[statistical-inference-mle]] · [[distributions-overview]] · [[model-calibration]] · [[distributions-gaussian]] · [[hypothesis-testing]] · [[eigenvalues-pca]]*
+## Links
+
+- [[distributions-overview]] — plot selection starts with the variable type and distribution shape; histograms reveal skew, box plots show outliers, Q-Q plots test distributional fit
+- [[statistical-inference-mle]] — error bars and confidence intervals require understanding sampling distributions; MLE provides the point estimate, Fisher information the uncertainty
+- [[evaluation-metrics-guide]] — confusion matrices, ROC curves, and calibration plots are the primary model evaluation visualizations
+- [[model-calibration]] — reliability diagrams (calibration plots) visualize whether predicted probabilities match observed frequencies; they are the standard calibration visualization
+- [[distributions-gaussian]] — Q-Q plots compare empirical quantiles against Gaussian quantiles; deviations reveal heavy tails or skew
+- [[hypothesis-testing]] — $p$-value visualization, volcano plots, and forest plots for A/B testing results require understanding hypothesis test assumptions
+- [[eigenvalues-pca]] — t-SNE and UMAP visualization of high-dimensional embeddings often follow a PCA pre-reduction step to speed up the neighborhood computations

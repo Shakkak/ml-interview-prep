@@ -4,6 +4,7 @@ tags: [linear-algebra, pca, dimensionality-reduction, math, spectral-theorem]
 aliases: [eigenvalues, eigenvectors, PCA, principal component analysis, spectral theorem, power iteration]
 difficulty: 2
 status: complete
+depends_on: [linear-algebra-fundamentals, matrix-calculus]
 related: [linear-algebra-fundamentals, math-svd, matrix-calculus, lagrangian-optimization, distributions-gaussian, feature-preprocessing]
 ---
 
@@ -18,6 +19,8 @@ related: [linear-algebra-fundamentals, math-svd, matrix-calculus, lagrangian-opt
 A vector $v \neq 0$ is an **eigenvector** of a square matrix $A \in \mathbb{R}^{n\times n}$ with **eigenvalue** $\lambda$ if:
 
 $$Av = \lambda v$$
+
+where $A \in \mathbb{R}^{n \times n}$ = the square matrix (e.g., a covariance matrix), $v \in \mathbb{R}^n$ = the eigenvector (a non-zero direction that is not rotated by $A$, only stretched), and $\lambda \in \mathbb{R}$ = the corresponding eigenvalue (the stretch factor — positive means same direction, negative means flipped, zero means collapsed to zero).
 
 Geometrically: $A$ maps $v$ to a scalar multiple of itself — $v$ is a fixed direction under the transformation, stretched or compressed by factor $\lambda$. All other vectors rotate when multiplied by $A$.
 
@@ -117,4 +120,12 @@ As $\sigma^2 \to 0$: probabilistic PCA recovers standard PCA exactly. As $\sigma
 
 ---
 
-*See also: [[math-svd]] · [[linear-algebra-fundamentals]] · [[lagrangian-optimization]] · [[matrix-calculus]] · [[feature-preprocessing]] · [[kernel-methods]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — eigenvalues and eigenvectors are properties of square matrices; they rely on the foundation of linear maps and basis transformations
+- [[matrix-calculus]] — PCA's principal components are found by computing the gradient of variance and setting it to zero; eigendecomposition is the closed-form solution
+- [[math-svd]] — SVD generalizes eigendecomposition to non-square matrices; $A = U\Sigma V^\top$ with singular values = square roots of eigenvalues of $A^\top A$
+- [[lagrangian-optimization]] — PCA's constrained variance-maximization problem is solved via Lagrange multipliers; the Lagrangian gives the eigenvalue equation directly
+- [[distributions-gaussian]] — PCA finds the axes of maximum variance in a Gaussian; the covariance matrix's eigenvectors are the principal components
+- [[kernel-methods]] — kernel PCA replaces the $d \times d$ covariance matrix with the $n \times n$ kernel matrix, enabling nonlinear dimensionality reduction
+- [[feature-preprocessing]] — PCA is a standard preprocessing step to reduce collinearity; features should be standardized before applying PCA

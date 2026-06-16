@@ -5,6 +5,7 @@ aliases: [spectral bias, frequency principle, NTK, neural tangent kernel]
 difficulty: 3
 status: complete
 related: [fourier-transform, bias-variance-double-descent, attention-mechanism, arch-positional-encoding]
+depends_on: [fourier-transform, neural-tangent-kernel, backpropagation]
 ---
 
 # Spectral Bias in Neural Networks
@@ -53,6 +54,8 @@ In the infinite-width limit, $K$ is constant during training. The dynamics becom
 
 $$\epsilon_k(t) = \epsilon_k(0)\, e^{-\lambda_k t}$$
 
+where $\epsilon_k(t)$ = error component in the direction of NTK eigenfunction $\phi_k$ at training step $t$, $\epsilon_k(0)$ = initial error in that direction, $\lambda_k$ = NTK eigenvalue for eigenfunction $\phi_k$ (governs decay speed).
+
 **Key fact:** the NTK of deep networks has higher eigenvalues for low-frequency eigenfunctions and lower eigenvalues for high-frequency ones. Therefore:
 - Low frequency: high $\lambda_k$ → fast decay → learned first ✓
 - High frequency: low $\lambda_k$ → slow decay → learned last ✓
@@ -94,6 +97,8 @@ For tasks that require high-frequency representation (neural radiance fields, ne
 
 $$\gamma(x) = [\cos(2\pi B x), \sin(2\pi B x)]^\top, \quad B \in \mathbb{R}^{m\times d} \sim \mathcal{N}(0, \sigma^2)$$
 
+where $B$ = random frequency matrix ($m$ frequencies, each $d$-dimensional), $m$ = number of random Fourier features, $\sigma$ = bandwidth controlling the frequency range represented (larger $\sigma$ → higher frequencies).
+
 The standard deviation $\sigma$ controls which frequencies are represented. This preprocessing lifts the spectral bias by providing explicit high-frequency basis functions — the network only needs to learn the coefficients, not discover the frequencies.
 
 **NeRF (Mildenhall et al., 2020):** without positional encoding, the MLP produces blurry reconstructions. With the sinusoidal encoding at 10 frequency octaves, it reproduces sharp color and geometry. The encoding is precisely overcoming spectral bias to enable high-frequency scene representation.
@@ -113,4 +118,11 @@ This also explains why **learned positional embeddings** (as in BERT) can underp
 
 ---
 
-*See also: [[fourier-transform]] · [[bias-variance-double-descent]] · [[attention-mechanism]] · [[arch-positional-encoding]] · [[neural-tangent-kernel]] · [[kernel-methods]]*
+## Links
+
+- [[fourier-transform]] — spectral bias is defined in terms of Fourier frequency components; networks learn low-frequency functions (large spatial scales) before high-frequency ones (fine details)
+- [[neural-tangent-kernel]] — the NTK eigenvalues determine the learning speed for each frequency; low-frequency eigenfunctions (large eigenvalues) are learned first, explaining spectral bias
+- [[backpropagation]] — spectral bias emerges from gradient descent dynamics, not architecture; the gradient flow preferentially aligns with low-frequency eigenspaces of the NTK
+- [[bias-variance-double-descent]] — spectral bias is a form of implicit regularization: networks converge to minimum-norm solutions biased toward low-frequency functions
+- [[attention-mechanism]] — transformers with RoPE/sinusoidal encodings are less affected by spectral bias; position encodings inject specific frequencies into the network from the start
+- [[arch-positional-encoding]] — Fourier positional encodings (NeRF's positional encoding) explicitly inject high-frequency inputs to overcome spectral bias for reconstruction tasks

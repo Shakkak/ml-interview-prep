@@ -4,6 +4,7 @@ tags: [lagrangian, kkt-conditions, constrained-optimization, svm, duality, conve
 aliases: [Lagrange multipliers, KKT conditions, Karush-Kuhn-Tucker, constrained optimization, Lagrangian, primal-dual, SVM dual]
 difficulty: 3
 status: complete
+depends_on: [matrix-calculus, math-convexity-jensen]
 related: [math-convexity-jensen, kernel-methods, matrix-calculus, fisher-information, regularization-weight-decay]
 ---
 
@@ -17,6 +18,8 @@ Most ML objectives are unconstrained (minimize $\mathcal{L}(\theta)$ over all $\
 
 **General constrained form:**
 $$\min_x f(x) \quad \text{s.t.} \quad h_j(x) = 0 \text{ for } j=1,\ldots,p, \quad g_i(x) \leq 0 \text{ for } i=1,\ldots,m$$
+
+where $x \in \mathbb{R}^n$ is the decision variable (e.g., model parameters), $f(x)$ is the objective to minimize (e.g., loss), $h_j(x) = 0$ are equality constraints (e.g., $\|w\|^2 = 1$), and $g_i(x) \leq 0$ are inequality constraints (e.g., $-w \leq 0$ meaning $w \geq 0$).
 
 ### Equality Constraints: Lagrange Multipliers
 
@@ -45,11 +48,17 @@ For the general problem, the **KKT conditions** are necessary for optimality (an
 **1. Stationarity:**
 $$\nabla f(x^*) + \sum_i \mu_i \nabla g_i(x^*) + \sum_j \lambda_j \nabla h_j(x^*) = 0$$
 
+where $\mu_i \geq 0$ = Lagrange multipliers for inequality constraints $g_i$ (also called KKT multipliers), and $\lambda_j$ = Lagrange multipliers for equality constraints $h_j$ (can be any sign). Stationarity says the gradient of the objective is canceled by the gradients of the active constraints.
+
 **2. Primal feasibility:**
 $$g_i(x^*) \leq 0, \quad h_j(x^*) = 0$$
 
+All constraints are satisfied at the optimal point $x^*$.
+
 **3. Dual feasibility:**
 $$\mu_i \geq 0$$
+
+Inequality multipliers are non-negative (ensures the constraint can only "push" against the feasible region, not "pull").
 
 **4. Complementary slackness:**
 $$\mu_i g_i(x^*) = 0 \text{ for all } i$$
@@ -72,11 +81,17 @@ $$\min_{w, b} \frac{1}{2}\|w\|^2 \quad \text{s.t.} \quad y_i(w^\top x_i + b) \ge
 Equivalently $g_i(w,b) = 1 - y_i(w^\top x_i + b) \leq 0$. Lagrangian with $\alpha_i \geq 0$:
 $$\mathcal{L}(w, b, \alpha) = \frac{1}{2}\|w\|^2 - \sum_i \alpha_i [y_i(w^\top x_i + b) - 1]$$
 
+where $w \in \mathbb{R}^d$ = weight vector (decision boundary normal), $b$ = bias, $\alpha_i \geq 0$ = Lagrange multipliers for the margin constraints, $y_i \in \{-1, +1\}$ = class labels, $x_i$ = training points.
+
 Stationarity ($\nabla_w \mathcal{L} = 0$, $\nabla_b \mathcal{L} = 0$):
 $$w = \sum_i \alpha_i y_i x_i, \qquad \sum_i \alpha_i y_i = 0$$
 
+where $w = \sum_i \alpha_i y_i x_i$ says the optimal weight vector is a linear combination of the training points (weighted by their dual variables $\alpha_i$).
+
 Substituting $w$ back into $\mathcal{L}$ and simplifying:
 $$d(\alpha) = \sum_i \alpha_i - \frac{1}{2}\sum_i \sum_j \alpha_i \alpha_j y_i y_j \,x_i^\top x_j$$
+
+where $d(\alpha)$ is the dual objective (depends only on the dual variables $\alpha_i$ and the inner products $x_i^\top x_j$ between training examples, not on $w$ directly — enabling the [[kernel-methods|kernel trick]]).
 
 **Dual problem:**
 $$\max_\alpha \sum_i \alpha_i - \frac{1}{2}\sum_i \sum_j \alpha_i \alpha_j y_i y_j \,x_i^\top x_j \quad \text{s.t.} \quad \alpha_i \geq 0,\;\sum_i \alpha_i y_i = 0$$
@@ -111,6 +126,8 @@ When the primal problem is too large to solve directly, the **Alternating Direct
 
 $$\min_{x,z} f(x) + g(z) \quad \text{s.t.} \quad Ax + Bz = c$$
 
+where $x$ and $z$ = split decision variables (e.g., local model parameters on different nodes), $f$ and $g$ = separable objective functions (each depending on only one variable), $A$, $B$ = constraint matrices, $c$ = constraint target vector, and the linear constraint $Ax + Bz = c$ couples the two variables.
+
 Augmented Lagrangian: $\mathcal{L}_\rho(x,z,y) = f(x) + g(z) + y^\top(Ax+Bz-c) + \frac{\rho}{2}\|Ax+Bz-c\|^2$.
 
 ADMM alternates:
@@ -130,4 +147,11 @@ This gives a practical **optimality certificate**: after running any optimizatio
 
 ---
 
-*See also: [[math-convexity-jensen]] · [[kernel-methods]] · [[matrix-calculus]] · [[regularization-weight-decay]] · [[eigenvalues-pca]]*
+## Links
+
+- [[matrix-calculus]] — KKT conditions require computing gradients of the Lagrangian; the stationarity condition is $\nabla_x \mathcal{L} = 0$
+- [[math-convexity-jensen]] — strong duality (primal = dual) holds when the problem is convex; Jensen's inequality is used in the proof of convex duality
+- [[kernel-methods]] — the SVM dual is derived by applying Lagrange multipliers to the margin-maximization problem; kernelization happens in the dual objective
+- [[regularization-weight-decay]] — L2 regularization can be derived as a Lagrangian relaxation of a norm constraint; the regularization strength $\lambda$ is the Lagrange multiplier
+- [[eigenvalues-pca]] — PCA's variance-maximization under unit-norm constraint is solved via Lagrange multipliers; the solution is the eigenvector equation
+- [[fisher-information]] — the natural gradient is derived by minimizing loss subject to a KL constraint; the Lagrange multiplier leads to $F^{-1}$ preconditioning

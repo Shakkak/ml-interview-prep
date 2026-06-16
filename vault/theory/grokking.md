@@ -5,6 +5,7 @@ aliases: [grokking, delayed generalization, memorization then generalization]
 difficulty: 2
 status: complete
 related: [bias-variance-double-descent, regularization-weight-decay, generalization-bounds, emergent-abilities, spectral-bias]
+depends_on: [bias-variance-double-descent, regularization-weight-decay, generalization-bounds]
 ---
 
 # Grokking
@@ -81,4 +82,10 @@ Grokking suggests that **very long training** on fixed data may reveal generaliz
 
 **Practical takeaway:** early stopping based on validation loss may cut off grokking. For tasks with structured outputs, training longer (past apparent convergence) with weight decay may discover generalizing solutions.
 
-*See also: [[bias-variance-double-descent]] · [[generalization-bounds]] · [[emergent-abilities]] · [[regularization-weight-decay]] · [[spectral-bias]]*
+## Links
+
+- [[bias-variance-double-descent]] — grokking is a second-phase generalization phenomenon; the model first memorizes (low training error, high test error) then undergoes a phase transition to generalization
+- [[regularization-weight-decay]] — weight decay is the primary driver of grokking: without it, models memorize and stay there; weight decay slowly penalizes the memorizing solution until a generalizing one is found
+- [[generalization-bounds]] — grokking challenges uniform convergence bounds (which predict generalization at interpolation); it demonstrates that implicit regularization dynamics matter beyond parameter count
+- [[emergent-abilities]] — grokking and emergence share the "phase transition" structure; both may be artifacts of threshold evaluation metrics rather than true discontinuities
+- [[spectral-bias]] — grokking is accompanied by a shift in the model's frequency spectrum; networks first learn high-frequency (memorizing) solutions, then transition to low-frequency (generalizing) ones

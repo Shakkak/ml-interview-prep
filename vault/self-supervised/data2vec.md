@@ -5,6 +5,7 @@ aliases: [data2vec, unified self-supervised learning, latent target prediction]
 difficulty: 2
 status: complete
 related: [masked-autoencoders, bert-mlm, byol-simsiam, self-supervised-overview, vision-transformer]
+depends_on: [masked-autoencoders, bert-mlm, byol-simsiam]
 ---
 
 # data2vec
@@ -84,4 +85,10 @@ Predicting latent representations instead of raw inputs encourages the student t
 
 This makes data2vec features competitive with both contrastive (DINO) and reconstruction-based (MAE) approaches.
 
-*See also: [[masked-autoencoders]] · [[bert-mlm]] · [[byol-simsiam]] · [[self-supervised-overview]] · [[vision-transformer]]*
+## Links
+
+- [[masked-autoencoders]] — MAE predicts raw pixel values of masked patches; data2vec predicts latent teacher representations instead, which are smoother and semantically richer targets
+- [[bert-mlm]] — BERT predicts discrete tokens for masked positions; data2vec predicts continuous latent vectors — this makes it applicable to audio and vision, not just text
+- [[byol-simsiam]] — data2vec uses the same EMA teacher as BYOL; the difference is that data2vec applies masking to the student (like MAE) rather than augmented views
+- [[self-supervised-overview]] — data2vec unifies SSL across modalities with one architecture; the teacher creates targets from contextualized representations rather than raw signals
+- [[vision-transformer]] — data2vec uses a ViT backbone; the teacher is a top-$k$ layer average of the ViT, not the final layer — this provides richer contextualized targets

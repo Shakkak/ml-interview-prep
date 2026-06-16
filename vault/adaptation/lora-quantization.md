@@ -4,6 +4,7 @@ tags: [fine-tuning, lora, quantization, llm, efficiency]
 aliases: [LoRA, QLoRA, low-rank adaptation, NF4, PEFT]
 difficulty: 2
 status: complete
+depends_on: [math-svd, backpropagation, linear-algebra-fundamentals]
 related: [attention-mechanism, backpropagation, rlhf]
 ---
 
@@ -14,6 +15,8 @@ related: [attention-mechanism, backpropagation, rlhf]
 ## Fundamental
 
 Full fine-tuning a GPT-3 scale model (~175B parameters) requires storing weights + gradients + Adam moments: roughly 2.8 TB in FP32. Even a 7B model needs ~112 GB. The goal is to adapt the model to a new task with a fraction of this cost.
+
+**Intuition behind both techniques:** LoRA says "you don't need to change all weights — fine-tuning updates live in a low-dimensional subspace, so parameterize only that subspace." Quantization says "you don't need full floating-point precision for weights that are already trained — store them in lower precision and dequantize on-the-fly." Together (QLoRA), they make billion-parameter fine-tuning fit on a single GPU.
 
 **Why quantize:** memory for model weights scales with precision:
 - FP32: 4 bytes/param → 7B model = 28 GB
@@ -36,7 +39,7 @@ Full fine-tuning a GPT-3 scale model (~175B parameters) requires storing weights
 
 ### Why Weight Updates Are Low-Rank
 
-Empirical finding (Aghajanyan et al., 2020): **weight changes during fine-tuning have low intrinsic dimensionality** (see [[math-svd]] — stable rank of gradient matrices is small). Pre-trained models already encode rich features; fine-tuning on a downstream task requires only a small "correction" in a low-dimensional subspace. Training GPT-3 with random projection matrices: 90% of fine-tuning performance is recoverable with rank ≤ 64.
+Empirical finding (Aghajanyan et al., 2020): **weight changes during fine-tuning have low intrinsic dimensionality** — meaning the gradient updates, despite living in a very high-dimensional space ($d \times k$ parameter space), effectively move along a much smaller number of independent directions. The "intrinsic dimension" of a learning problem is the minimum number of parameters needed in a random subspace to reach a given fraction of full-performance; for most NLP fine-tuning tasks this is surprisingly small ($\leq 200$). (See [[math-svd]] — stable rank of gradient matrices is small.) Pre-trained models already encode rich features; fine-tuning on a downstream task requires only a small "correction" in a low-dimensional subspace. Training GPT-3 with random projection matrices: 90% of fine-tuning performance is recoverable with rank ≤ 64.
 
 ### LoRA: Low-Rank Adaptation
 
@@ -44,7 +47,11 @@ For a weight matrix $W_0 \in \mathbb{R}^{d \times k}$, decompose the update:
 
 $$\Delta W = B A, \quad B \in \mathbb{R}^{d \times r},\, A \in \mathbb{R}^{r \times k}, \quad r \ll \min(d, k)$$
 
+where $\Delta W$ is the weight update (the change to the frozen pretrained weight $W_0$), $d$ and $k$ are the input and output dimensions of the original weight matrix, $B$ is a $d \times r$ matrix and $A$ is a $r \times k$ matrix, and $r$ is the rank (much smaller than $d$ or $k$, e.g., $r=8$ while $d=k=4096$).
+
 Modified forward pass: $h = W_0 x + \frac{\alpha}{r} B A x$
+
+where $h$ is the output, $x$ is the input, $\alpha$ is a scaling hyperparameter (often set equal to $r$, making $\alpha/r = 1$; tuning $\alpha$ allows adjusting the effective learning rate for adapters without changing $r$).
 
 - $W_0$ is **frozen** — never updated; only $A$ and $B$ are trained
 - Initialization: $A \sim \mathcal{N}(0, \sigma^2)$, $B = 0$ → $\Delta W = 0$ at start (preserves pretrained behavior)
@@ -61,6 +68,13 @@ Modified forward pass: $h = W_0 x + \frac{\alpha}{r} B A x$
 Map a range $[\min, \max]$ to integer values $[0, 2^b - 1]$:
 
 $$\hat{x} = \text{round}\left(\frac{x - \min}{\max - \min} \cdot (2^b - 1)\right)$$
+
+where:
+- $x$ — the original floating-point weight value
+- $\min, \max$ — the minimum and maximum values in the weight block (defines the quantization range)
+- $b$ — number of bits (e.g., $b=8$ for INT8 gives values in $[0, 255]$; $b=4$ gives $[0, 15]$)
+- $(2^b - 1)$ — the maximum integer representable in $b$ bits
+- $\hat{x}$ — the quantized integer value; dequantization is the inverse: $x \approx \hat{x} \cdot \frac{\max - \min}{2^b - 1} + \min$
 
 **Problem:** neural weights follow approximately [[distributions-gaussian|Gaussian distributions]]. Uniform bins waste resolution on the tails and have too little resolution near zero where most weights cluster.
 
@@ -120,4 +134,12 @@ Fits on a single A100 80GB. Without QLoRA: 130+ GB in FP16.
 
 ---
 
-*See also: [[attention-mechanism]] · [[rlhf]] · [[backpropagation]] · [[math-svd]] · [[linear-algebra-fundamentals]] · [[optimizer-adam]] · [[distributions-gaussian]]*
+## Links
+
+- [[math-svd]] — LoRA's weight update $\Delta W = BA$ is a rank-$r$ factorization; SVD provides the theoretical justification that low-rank approximations capture most weight change
+- [[backpropagation]] — only $A$ and $B$ receive gradients during LoRA fine-tuning; the frozen $W_0$ requires no backward pass memory
+- [[linear-algebra-fundamentals]] — LoRA merges $W = W_0 + BA$ at inference; quantization bins float weights into discrete integer representations
+- [[attention-mechanism]] — LoRA is commonly applied to the $Q$, $K$, $V$, and output projection matrices of transformer attention layers
+- [[rlhf]] — QLoRA enables RLHF fine-tuning of 70B+ models on consumer hardware by combining 4-bit quantization with LoRA
+- [[optimizer-adam]] — LoRA's low-rank matrices are optimized with Adam; the optimizer states are only $r$-dimensional, not $d$-dimensional
+- [[distributions-gaussian]] — LoRA's $A$ matrix is initialized from $\mathcal{N}(0, \sigma^2)$; $B$ is initialized to zero so $\Delta W = 0$ at training start

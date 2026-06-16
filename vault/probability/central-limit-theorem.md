@@ -5,6 +5,7 @@ aliases: [CLT, law of large numbers, LLN, convergence in distribution]
 difficulty: 2
 status: complete
 related: [distributions-gaussian, statistical-inference-mle, bootstrap, hypothesis-testing, bayesian-inference, fisher-information]
+depends_on: [distributions-overview, distributions-gaussian]
 ---
 
 # Central Limit Theorem & Law of Large Numbers
@@ -130,4 +131,11 @@ When $\sigma^2 = \infty$ (e.g., Pareto distribution with exponent $\alpha \leq 2
 
 ---
 
-*See also: [[distributions-gaussian]] · [[statistical-inference-mle]] · [[bootstrap]] · [[hypothesis-testing]] · [[fisher-information]] · [[bayesian-inference]]*
+## Links
+
+- [[distributions-overview]] — the CLT explains why so many quantities in nature follow a bell-shaped distribution: they are sums of many small independent contributions
+- [[distributions-gaussian]] — the CLT's limiting distribution is $\mathcal{N}(\mu, \sigma^2/n)$; the Gaussian is the unique attractor for sums of iid finite-variance variables
+- [[statistical-inference-mle]] — the MLE is asymptotically normal by the CLT applied to the score function; this justifies Wald confidence intervals for MLE estimates
+- [[bootstrap]] — the bootstrap approximates sampling distributions when CLT assumptions fail (heavy tails, small $n$, complex estimators)
+- [[hypothesis-testing]] — z-tests and t-tests rely on the CLT to justify normal/t approximations for the distribution of sample means
+- [[fisher-information]] — the asymptotic variance of the MLE is $1/I(\theta)$ (Cramér-Rao); this bound comes from the CLT applied to the score function

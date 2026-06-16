@@ -5,6 +5,7 @@ aliases: [large batch, batch size, linear scaling rule, warmup, sharp minima, fl
 difficulty: 2
 status: complete
 related: [optimizer-adam, optimizer-sgd-momentum, optimizer-lr-schedules, regularization-dropout, normalization-layers]
+depends_on: [optimizer-sgd-momentum, optimizer-adam, normalization-layers]
 ---
 
 # Large-Batch Training
@@ -23,11 +24,17 @@ Gradient variance: $\text{Var}(\hat{g}) = \sigma^2_\text{true} / B$ — doubling
 **Linear Scaling Rule** (Goyal et al., 2017): when increasing batch size by $k$, scale the learning rate by $k$:
 $$\eta_\text{new} = k \cdot \eta_\text{base}$$
 
+where $k$ = batch size multiplier, $\eta_\text{base}$ = learning rate at reference batch size, $\eta_\text{new}$ = scaled learning rate for $k\times$ larger batch.
+
 *Why it works:* [[optimizer-sgd-momentum|SGD]] update on $B$ examples is $\theta \leftarrow \theta - \eta \hat{g}_B$. Summing $k$ such updates approximates one update on $kB$ examples with learning rate $k\eta$:
 $$\theta \leftarrow \theta - k\eta \cdot \frac{1}{k}\sum_{i=1}^k \hat{g}_{B_i} \approx \theta - k\eta \cdot g_\text{true}$$
 
+where $\hat{g}_{B_i}$ = gradient estimate on mini-batch $B_i$, average $\frac{1}{k}\sum \hat{g}_{B_i}$ = gradient on $kB$ examples, $k\eta$ = scaled learning rate.
+
 **[[optimizer-lr-schedules|Learning rate warmup]]:** at the start of training, weights are random and gradients are large and noisy. Linearly increase LR from 0 to target over the first $T_\text{warmup}$ steps:
 $$\eta(t) = \frac{t}{T_\text{warmup}} \cdot \eta_\text{target} \quad \text{for } t \leq T_\text{warmup}$$
+
+where $t$ = current step, $T_\text{warmup}$ = warmup duration, $\eta_\text{target}$ = full (scaled) learning rate after warmup.
 
 Warmup is more critical at large batches because the scaled LR is higher and more dangerous early. Also important for [[optimizer-adam|Adam]], whose second-moment estimate $v_t$ is unreliable for the first $\sim 50$ steps.
 
@@ -51,12 +58,18 @@ Typical generalization gap: large-batch (4k–32k) ImageNet top-1 accuracy is 1�
 
 *LARS (Layer-wise Adaptive Rate Scaling):* different layers have very different gradient magnitudes. LARS adapts the learning rate per layer:
 $$\eta_\ell = \eta \cdot \frac{\|\theta_\ell\|}{\|\nabla_\ell L\|}$$
+
+where $\eta$ = global learning rate, $\|\theta_\ell\|$ = L2 norm of layer $\ell$ weights, $\|\nabla_\ell L\|$ = L2 norm of gradient for layer $\ell$, ratio = local trust ratio (keeps update/weight magnitude consistent).
+
 This keeps the ratio of update to weight magnitude consistent across layers, enabling stable training at batch sizes 32k+.
 
 *LAMB (Layer-wise Adaptive Moments):* LARS + Adam-style second-moment normalization. Used to train [[bert-mlm|BERT]] with batch sizes up to 65536 (You et al., 2020), reducing BERT pre-training from 3 days to 76 minutes.
 
 *Sharpness-Aware Minimization (SAM):* instead of minimizing $L(\theta)$, minimize the worst-case loss in a neighborhood:
 $$L_\text{SAM}(\theta) = \max_{\|\epsilon\| \leq \rho} L(\theta + \epsilon)$$
+
+where $\epsilon$ = parameter perturbation, $\rho > 0$ = neighborhood radius, inner $\max$ = worst-case loss in ball of radius $\rho$ (measures sharpness), $\theta$ = current parameters.
+
 The inner maximization finds the sharpest perturbation; the outer minimization flattens it. Requires two forward passes per step but significantly improves generalization for large batches.
 
 ---
@@ -85,4 +98,10 @@ where $C$ is the gradient covariance matrix and $W$ is Brownian motion. The nois
 
 ---
 
-*See also: [[optimizer-sgd-momentum]] · [[optimizer-adam]] · [[optimizer-lr-schedules]] · [[normalization-layers]] · [[bert-mlm]]*
+## Links
+
+- [[optimizer-sgd-momentum]] — the linear scaling rule states that when batch size increases $k$×, learning rate should increase $k$×; this preserves the expected gradient magnitude per update
+- [[optimizer-adam]] — Adam's adaptive learning rates reduce the need for manual LR scaling with batch size; the second-moment estimate absorbs some of the gradient noise from smaller batches
+- [[normalization-layers]] — batch norm variance decreases as batch size increases (less noise); layer/group norm are batch-size invariant, making them preferable for large-batch training
+- [[optimizer-lr-schedules]] — large-batch training requires a warmup period (linearly increase LR from 0 to target over first $k$ steps) to avoid instability from large initial gradient steps
+- [[bert-mlm]] — BERT used batch size 256 with learning rate warmup; GPT-3 used batch size 3.2M tokens with linear LR warmup — both follow the linear scaling rule

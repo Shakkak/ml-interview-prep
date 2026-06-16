@@ -5,6 +5,7 @@ aliases: [Lookahead optimizer, slow weights, fast weights, k-step lookahead]
 difficulty: 1
 status: complete
 related: [optimizer-adam, optimizer-sgd-momentum, optimizer-lr-schedules, loss-landscape, large-batch-training]
+depends_on: [optimizer-adam, optimizer-sgd-momentum, loss-landscape]
 ---
 
 # Lookahead Optimizer
@@ -70,4 +71,9 @@ Lookahead can be viewed as approximate **online averaging** of the fast optimize
 
 For non-convex settings: the fast weights explore a ball around the slow weights; the slow update selects the "center of gravity" of the explored region, which tends to be in flatter parts of the loss landscape.
 
-*See also: [[optimizer-adam]] · [[optimizer-lr-schedules]] · [[loss-landscape]] · [[optimizer-sgd-momentum]]*
+## Links
+
+- [[optimizer-adam]] — Lookahead wraps any inner optimizer (usually Adam or SGD); the fast weights are Adam's parameter updates, the slow weights are the "true" parameter estimate
+- [[optimizer-sgd-momentum]] — Lookahead + SGD with momentum is the RAdam/Ranger recipe; the slow-weight averaging smooths out the noisy fast-weight trajectory
+- [[loss-landscape]] — Lookahead's slow update moves toward the "center of gravity" of recent fast-weight snapshots; this tends toward flatter, wider regions of the loss landscape
+- [[optimizer-lr-schedules]] — Lookahead's synchronization period $k$ acts like an adaptive learning rate; the effective update size per slow step = fast LR × $k$ × fast learning rate

@@ -4,6 +4,7 @@ tags: [categorical-encoding, one-hot, target-encoding, embeddings, feature-engin
 aliases: [one-hot encoding, ordinal encoding, target encoding, categorical features, entity embeddings]
 difficulty: 1
 status: complete
+depends_on: [feature-preprocessing, statistical-inference-mle]
 related: [feature-preprocessing, gradient-boosting, logistic-regression, word-embeddings, data-leakage]
 ---
 
@@ -105,4 +106,11 @@ Collisions (two different categories mapped to the same bucket) are accepted as 
 | Entity embedding | Very high | None | Via extracted features | Via extracted features |
 | Hashing | Any | None | Via features | Yes |
 
-*See also: [[feature-preprocessing]] · [[gradient-boosting]] · [[word-embeddings]] · [[data-leakage]]*
+## Links
+
+- [[feature-preprocessing]] — categorical encoding is a preprocessing step; it must be fit on training data only and applied to test data to avoid data leakage
+- [[statistical-inference-mle]] — target encoding estimates the conditional mean $E[y|x=c]$ via MLE of the class-conditional model; Bayesian smoothing regularizes sparse categories
+- [[gradient-boosting]] — tree-based models (XGBoost, LightGBM) can handle ordinal-encoded integers natively; one-hot encoding is not needed and increases dimensionality
+- [[logistic-regression]] — logistic regression requires numerical inputs; one-hot encoding makes categorical features usable in linear models
+- [[word-embeddings]] — entity embeddings for categorical features are the learned analogue of word embeddings; they learn dense representations from co-occurrence patterns
+- [[data-leakage]] — target encoding leaks label information if computed on training+test jointly; K-fold cross-encoding is the standard fix

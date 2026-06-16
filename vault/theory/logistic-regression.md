@@ -4,6 +4,7 @@ tags: [statistics, classification, inference, linear-models]
 aliases: [logistic regression, log-odds, odds ratio, sigmoid regression]
 difficulty: 1
 status: complete
+depends_on: [statistical-inference-mle, activation-sigmoid-tanh, loss-cross-entropy]
 related: [statistical-inference-mle, activation-sigmoid-tanh, loss-cross-entropy, regularization-weight-decay, kernel-methods]
 ---
 
@@ -72,6 +73,8 @@ With $\eta=0.1$: $w_1 \leftarrow 0.05$, $w_2 \leftarrow -0.05$. Feature 1 gets p
 **Multinomial ([[activation-softmax|softmax]]) extension.** For $K > 2$ classes:
 $$P(y=k|x) = \frac{e^{w_k^\top x + b_k}}{\sum_{j=1}^K e^{w_j^\top x + b_j}}$$
 
+where $K$ = number of classes, $k$ = the class whose probability we're computing, $w_k \in \mathbb{R}^d$ = weight vector for class $k$ (one per class), $b_k$ = bias for class $k$, and the denominator $\sum_{j=1}^K e^{w_j^\top x + b_j}$ normalizes the probabilities to sum to 1 (the partition function / normalizing constant).
+
 The softmax is the multi-class generalization of the sigmoid. Loss: categorical cross-entropy. The $K$-class model has $K-1$ identifiable parameters (one class is the reference).
 
 **Non-linear decision boundaries:** add polynomial features ($x_1^2, x_1 x_2, \ldots$) before logistic regression, or use a [[kernel-methods|kernel]] (kernelized logistic regression). Quadratic features give elliptical decision boundaries; RBF kernel gives arbitrary boundaries.
@@ -93,7 +96,7 @@ The softmax is the multi-class generalization of the sigmoid. Loss: categorical 
 ### Connection to Exponential Family and GLMs
 
 Logistic regression is a **Generalized Linear Model (GLM)** with Bernoulli distribution and logit link function. In the GLM framework, all linear models (linear regression, Poisson regression, logistic regression) are unified:
-1. Response distribution is in the exponential family: $p(y|\eta) = h(y)\exp(\eta y - A(\eta))$
+1. Response distribution is in the exponential family: $p(y|\eta) = h(y)\exp(\eta y - A(\eta))$, where $\eta$ = natural parameter, $A(\eta)$ = log-partition function (normalizer), $h(y)$ = base measure
 2. Natural parameter $\eta = w^\top x + b$ (linear predictor)
 3. Mean function $\mu = A'(\eta)$ relates prediction to distribution mean
 
@@ -119,4 +122,13 @@ Modern use: **linear probing** (train logistic regression on frozen neural netwo
 
 ---
 
-*See also: [[activation-sigmoid-tanh]] · [[loss-cross-entropy]] · [[regularization-weight-decay]] · [[statistical-inference-mle]] · [[kernel-methods]] · [[activation-softmax]] · [[fisher-information]] · [[contrastive-learning]]*
+## Links
+
+- [[statistical-inference-mle]] — maximizing the Bernoulli log-likelihood gives the logistic regression objective; MLE theory provides asymptotic guarantees
+- [[activation-sigmoid-tanh]] — sigmoid is not an arbitrary output layer; it is forced by the assumption that log-odds are linear in features
+- [[loss-cross-entropy]] — logistic regression MLE = binary cross-entropy minimization; the gradient simplifies to prediction minus label
+- [[regularization-weight-decay]] — L2 (ridge) prevents perfect separation and corresponds to a Gaussian prior on weights
+- [[kernel-methods]] — kernelized logistic regression replaces the linear decision boundary with arbitrary nonlinear boundaries
+- [[activation-softmax]] — softmax is the multi-class extension of sigmoid; multinomial logistic regression
+- [[fisher-information]] — logistic regression MLE achieves the Cramér-Rao bound; Fisher information governs asymptotic variance
+- [[contrastive-learning]] — linear probing trains a logistic regression head on frozen SSL embeddings to evaluate representation quality

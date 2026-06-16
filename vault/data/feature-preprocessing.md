@@ -4,6 +4,7 @@ tags: [preprocessing, feature-engineering, normalization, scaling, log-transform
 aliases: [feature preprocessing, log transform, feature scaling, standardization, normalization, Box-Cox, target encoding]
 difficulty: 1
 status: complete
+depends_on: [linear-algebra-fundamentals, distributions-overview]
 related: [linear-algebra-fundamentals, distributions-overview, distributions-gaussian, statistical-inference-mle]
 ---
 
@@ -43,7 +44,7 @@ Generalization of the log transform to a family parametrized by $\lambda$:
 
 $$\tilde{x} = \begin{cases} (x^\lambda - 1)/\lambda & \lambda \neq 0 \\ \log x & \lambda = 0 \end{cases}$$
 
-Find $\lambda$ that makes $\tilde{x}$ most Gaussian by [[statistical-inference-mle|MLE]] on training data. The log transform is the $\lambda = 0$ special case. Box-Cox requires $x > 0$; Yeo-Johnson extends it to negative values.
+where $x > 0$ = the original feature value (Box-Cox requires strictly positive input), $\lambda$ = the power parameter (found by MLE to maximize the likelihood that the transformed values are Gaussian; $\lambda = 0$ recovers log, $\lambda = 1$ is identity, $\lambda = 0.5$ is square-root), and $\tilde{x}$ = the transformed value. Find $\lambda$ that makes $\tilde{x}$ most Gaussian by [[statistical-inference-mle|MLE]] on training data. The log transform is the $\lambda = 0$ special case. Box-Cox requires $x > 0$; Yeo-Johnson extends it to negative values.
 
 ### Why Scaling Helps Gradient Descent
 
@@ -111,4 +112,11 @@ Salary prediction, house price prediction, and reaction time modeling all fit th
 
 ---
 
-*See also: [[linear-algebra-fundamentals]] · [[distributions-gaussian]] · [[statistical-inference-mle]] · [[distributions-overview]] · [[eigenvalues-pca]] · [[cross-validation]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — standardization projects features to a common scale; PCA whitening uses eigendecomposition to decorrelate and normalize simultaneously
+- [[distributions-overview]] — the choice of transformation (log, Box-Cox, Yeo-Johnson) depends on the feature's distribution; log is for right-skewed, power transforms for arbitrary skew
+- [[distributions-gaussian]] — standardization assumes approximately Gaussian features; robust scaling (median/IQR) is better for heavy-tailed distributions
+- [[statistical-inference-mle]] — target encoding computes the conditional mean via MLE; Bayesian smoothing regularizes sparse categories toward the global mean
+- [[eigenvalues-pca]] — PCA whitening is a preprocessing step that standardizes features while decorrelating them using the covariance matrix's eigendecomposition
+- [[cross-validation]] — preprocessing fitted on training folds must be re-applied (not re-fitted) on test folds to prevent data leakage

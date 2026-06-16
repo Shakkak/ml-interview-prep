@@ -1,278 +1,147 @@
 ---
 title: "Vision-Language Model Architectures"
 tags: [vlm, llava, flamingo, instructblip, multimodal, vision-language, dense-prediction, visual-instruction-tuning]
-aliases: [VLM Architectures, Large Vision-Language Models, Multimodal LLMs]
+aliases: [VLM Architectures, Large Vision-Language Models, Multimodal LLMs, LLaVA, Flamingo, BLIP-2, InstructBLIP, Q-Former]
+difficulty: 3
 status: complete
+depends_on: [vision-transformer, clip, attention-mechanism]
+related: [open-vocabulary-detection, lora-quantization, activation-gelu-swish, cross-attention]
 ---
 
-Vision-Language Models (VLMs) combine a visual encoder with a large language model (LLM) to answer questions about images, describe scenes, and reason across modalities. This file covers the architecture families from first principles, including how they work, what makes them different, and how they apply to domain-specific tasks like ecology.
+# Vision-Language Model Architectures
 
-## 1. The Common Blueprint
+---
+
+## Fundamental
+
+**The problem:** a language model can reason about text but cannot see images; a vision encoder can extract image features but cannot generate text. Vision-Language Models (VLMs) bridge these two worlds so the system can answer questions about images, describe scenes, and reason across modalities.
+
+**Intuition:** the core challenge is the *bridge* — visual patch tokens live in a different embedding space than text tokens. If you can map visual tokens into the LLM's token space, the LLM's existing language reasoning works on them unchanged. The question is how much expressiveness the bridge needs.
 
 Every modern VLM shares three components:
 
 ```
 Image
   ↓
-[Visual Encoder]     ← extracts image features (ViT, CNN, CLIP encoder)
+[Visual Encoder]     ← extracts image features (ViT, CLIP encoder)
   ↓
-[Bridge / Connector] ← maps visual tokens to language model's embedding space
+[Bridge / Connector] ← maps visual tokens to LLM's embedding space
   ↓
 [Language Model]     ← generates text autoregressively
   ↓
 Text output
 ```
 
-The key architectural challenge is the *bridge*: visual tokens live in a different embedding space than text tokens. The bridge aligns them.
+### LLaVA: Minimal Bridge
 
-### 1.1 The Visual Encoder
+**LLaVA (Liu et al., 2023)** uses the simplest possible bridge — a single linear projection:
 
-Almost universally a **[[vision-transformer|Vision Transformer (ViT)]]** pretrained with contrastive learning (usually [[clip|CLIP]] or similar). Common choices:
+```
+Image → CLIP ViT-L encoder → Z_v ∈ ℝ^{N×D_v}
+  → Linear W ∈ ℝ^{D_v × D_l} → H_v ∈ ℝ^{N×D_l}
+  → Concatenate with text tokens → LLaMA decoder → answer
+```
 
-| Model | Visual Encoder | Resolution |
-|-------|---------------|------------|
-| LLaVA | CLIP ViT-L/14 | 224 px or 336 px |
-| LLaVA-1.5 | CLIP ViT-L/14@336 | 336 px (higher res) |
-| Flamingo | NFNet (EfficientNet variant) | 320 px |
-| InstructBLIP | CLIP or EVA-CLIP | 224 px |
-| BLIP-2 | CLIP ViT-G/14 | 224 px |
+where $Z_v$ = visual patch tokens output by CLIP (e.g., $256 \times 1024$), $W$ = the only new parameter, $D_l$ = LLM embedding dimension (e.g., 4096), and $H_v$ = projected visual tokens now in the LLM's embedding space.
 
-The visual encoder outputs a sequence of patch tokens: for a 224-px image with 14×14 patches, we get 256 patch tokens, each a 1024-dimensional vector.
+**Why it works:** CLIP already aligned image patches with language concepts during pretraining. The linear projection just needs to rescale the space — a surprisingly small job. LLaVA-1.5 upgrades to a 2-layer MLP with [[activation-gelu-swish|GELU]] and higher resolution (336px), adding ~4 points on benchmarks.
 
-### 1.2 The Language Model Backbone
-
-LLaVA uses LLaMA (7B or 13B parameters). Flamingo uses Chinchilla. InstructBLIP uses Vicuna or T5. The LLM is often frozen during initial training and only the bridge + maybe some LLM layers are updated.
+**Training data insight:** LLaVA uses GPT-4 to generate 150K instruction-following (image, question, answer) examples from existing image captions — no human annotation. Synthetic instruction data is what enables open-ended question answering.
 
 ---
 
-## 2. LLaVA: Large Language and Vision Assistant
+## Intermediate
 
-**Paper**: "Visual Instruction Tuning" (Liu et al., 2023)
+### Flamingo: Few-Shot with Gated Cross-Attention
 
-### 2.1 Architecture
+**Flamingo (Alayrac et al., 2022, DeepMind)** targets few-shot learning — given a handful of image-text examples, answer questions about a new image.
 
-LLaVA uses the **simplest possible bridge**: a single linear projection layer.
-
-```
-Image (H×W pixels)
-    ↓ CLIP ViT-L encoder
-Visual tokens: Z_v ∈ ℝ^{N×D_v}   (e.g., 256 × 1024)
-    ↓ Linear projection W ∈ ℝ^{D_v × D_l}
-Projected tokens: H_v ∈ ℝ^{N×D_l}  (now in LLM's embedding space)
-    ↓ Concatenate with text tokens
-[H_v ; H_q] → LLaMA decoder → generates answer
-```
-
-The projection matrix W is the only new parameter added — everything else is pretrained.
-
-**Intuition**: the visual encoder knows how to describe images (via CLIP training). The LLM knows how to reason in language. The projection layer just needs to learn the "translation" between the two embedding spaces. This is surprisingly effective.
-
-### 2.2 Training Data
-
-LLaVA's key insight is using GPT-4 to generate *instruction-following training data* from image captions:
-
-1. Start with (image, caption) pairs from CC3M
-2. Ask GPT-4: "Given this image caption, write a detailed instruction/answer conversation"
-3. Result: 150K instruction-following examples without human annotation
-
-This synthetic instruction data is what enables LLaVA to answer open-ended questions, despite never seeing those specific questions at training time.
-
-### 2.3 LLaVA-1.5 Improvements
-
-LLaVA-1.5 (2023) made two key changes:
-1. **MLP connector instead of linear**: a two-layer MLP with [[activation-gelu-swish|GELU]] activation. Adds mild non-linearity; empirically helps ~4 points on benchmarks.
-2. **Higher resolution**: use 336×336 px instead of 224×224 px, providing more visual detail.
-3. **Better instruction data**: ShareGPT4V — richer, more detailed captions generated by GPT-4V.
-
----
-
-## 3. Flamingo: Few-Shot Vision-Language Learning
-
-**Paper**: "Flamingo: a Visual Language Model for Few-Shot Learning" (Alayrac et al., 2022, DeepMind)
-
-### 3.1 Design Philosophy
-
-Flamingo is designed for **few-shot learning**: given a handful of image-text examples, answer questions about a new image. Its architecture reflects this.
-
-### 3.2 The Perceiver Resampler
-
-The visual encoder (NFNet) outputs a variable-length feature grid. Before feeding to the LLM, Flamingo uses a **Perceiver Resampler**: a [[attention-mechanism|cross-attention]] module that maps the variable-length visual features to a fixed set of 64 learned "query" tokens.
+**Perceiver Resampler:** the visual encoder outputs variable-length patch tokens (e.g., 400 tokens for different image sizes). Flamingo maps these to a fixed 64 learned query tokens via [[cross-attention|cross-attention]]:
 
 ```
-Visual features (variable length, e.g., 20×20 = 400 tokens)
-    ↓ Cross-attention with 64 learnable queries
-64 fixed visual tokens → concatenated with text tokens
+Visual features (variable length) → Cross-attention with 64 learned queries → 64 fixed visual tokens
 ```
 
-This is important for handling different image sizes without changing the LLM architecture.
+**Gated cross-attention layers:** inserted at fixed intervals in the frozen LLM. Text tokens attend to visual tokens, with the output scaled by a $\tanh$ gate initialized to zero — so at training start, Flamingo outputs exactly what the frozen LLM would. The gate opens gradually, enabling stable fine-tuning.
 
-### 3.3 Gated Cross-Attention Layers
+**Interleaved image-text:** Flamingo processes arbitrary sequences of images and text — the same architecture handles image captioning, VQA, and few-shot visual reasoning with the same weights.
 
-Flamingo inserts **gated cross-attention layers** at fixed intervals in the frozen LLM:
+### BLIP-2 and Q-Former: Learned Query Extraction
 
-```
-Frozen LLM layer (text self-attention)
-    ↓
-Gated cross-attention: text tokens attend to visual tokens
-    ↓ (output scaled by tanh gate, initialized to 0)
-Next frozen LLM layer
-```
-
-The gate is initialized to zero so that at the start of training, Flamingo outputs exactly what the frozen LLM would output. Training gradually opens the gate. This allows stable fine-tuning of a frozen pretrained LLM.
-
-### 3.4 Interleaved Image-Text
-
-Flamingo supports arbitrary sequences of images and text:
-
-```
-"<image1> This is a photo of a forest. <image2> This is a grassland. 
-What is the main difference between the two ecosystems?"
-```
-
-Each image token block is processed independently by the visual encoder and resampler, then the cross-attention layers attend to the most recent image.
-
----
-
-## 4. BLIP-2 and Q-Former
-
-**Paper**: "BLIP-2: Bootstrapping Language-Image Pre-training" (Li et al., 2023)
-
-### 4.1 The Q-Former Bridge
-
-BLIP-2 introduced the **Q-Former** — a learned cross-attention module that is far more powerful than LLaVA's linear projection.
+**BLIP-2 (Li et al., 2023)** introduces the Q-Former — a more powerful bridge than LLaVA's linear projection:
 
 ```
 Image → Frozen CLIP encoder → visual features F_v
          ↑
 Q-Former: 32 learnable query tokens
-- Self-attention among queries
-- Cross-attention: queries attend to F_v
-- Text self-attention (for language-conditioned querying)
+  - Self-attention among queries
+  - Cross-attention: queries attend to F_v
+  - Text self-attention (for language-conditioned querying)
          ↓
 32 query tokens → linear projection → LLM input
 ```
 
-The Q-Former extracts the most task-relevant information from the image into just 32 tokens. This compression is efficient but can lose fine-grained spatial details.
+The Q-Former compresses $N$ patch tokens into just 32 tokens, extracting the most task-relevant information. Efficient, but can lose fine-grained spatial detail needed for localization tasks.
 
-### 4.2 Two-Stage Training
+**Two-stage training:** Stage 1 trains the Q-Former against the frozen visual encoder (ITC, ITM, ITG objectives). Stage 2 plugs the Q-Former into a frozen LLM and trains the whole bridge on language modeling. The visual encoder and LLM are never co-trained.
 
-**Stage 1** (Image-language pretraining, LLM frozen):
-- Train Q-Former with frozen visual encoder on image-text pairs
-- Three objectives simultaneously: ITC, ITM, ITG
-
-**Stage 2** (Generative pretraining, full frozen visual encoder + Q-Former + frozen LLM):
-- Only Q-Former + linear projection updated
-- Language modeling loss on text conditioned on image features
+**InstructBLIP** extends BLIP-2 by feeding the instruction text into the Q-Former during fine-tuning — so the visual features extracted are instruction-conditioned. "What color is the flower?" elicits different features from the same image than "What species of plant is this?"
 
 ---
 
-## 5. InstructBLIP
+## Advanced
 
-**Paper**: "InstructBLIP: Towards General Visual-Language Models with Instruction Tuning" (Dai et al., 2023)
+### VLMs for Dense Prediction
 
-Takes BLIP-2 and applies instruction tuning to 26 diverse vision-language datasets (reformatted as instruction-response pairs). Key innovation: the instruction text is also fed into the Q-Former during fine-tuning, so the visual features extracted are instruction-conditioned.
+Standard VLMs pool spatial information into patch tokens (16×16 pixels per token at 224px). Dense prediction (segmentation, depth, detection) needs per-pixel outputs — a fundamental mismatch.
 
-```
-Q-Former input: [learnable queries] + [instruction tokens]
-→ cross-attention with image features conditioned on the instruction
-→ task-specific visual features
-```
+**Approaches:**
+1. **Prompt-and-parse:** ask the VLM to output bounding box coordinates as text tokens. Works for simple detection; fails for pixel-level segmentation.
+2. **High-resolution tiling:** LLaVA-HR encodes the image in overlapping tiles at 448–672px, providing more spatial tokens.
+3. **Hybrid architecture:** use a dense backbone (FPN, U-Net) for spatial features + VLM for semantic reasoning. Used in PixelLM, LISA.
+4. **SAM + VLM pipeline:** SAM generates masks → VLM classifies each mask. Best for semantic segmentation without re-training.
 
-This makes InstructBLIP's visual extraction adaptive to the downstream question, unlike BLIP-2 which extracts fixed visual features.
+### Adapting VLMs to Domain-Specific Imagery
 
----
+Overhead imagery (drone, satellite) differs from natural photos: no color in SAR, non-RGB channels in multispectral, top-down perspective, and much smaller objects.
 
-## 6. Comparison Summary
+| Adaptation | Cost | Risk | When to use |
+|---|---|---|---|
+| Zero-shot (frozen CLIP) | None | Poor fine-grained accuracy | Coarse categories |
+| Fine-tune bridge only | Low | Limited capacity | <10K images |
+| [[lora-quantization\|LoRA]] on visual encoder + LLM | Medium | Slight forgetting | 10K–100K images |
+| Full fine-tuning | High | Catastrophic forgetting | >100K images + data mixing |
 
-| Model | Bridge | Visual Tokens | Few-Shot? | Training Params | Key Strength |
-|-------|--------|--------------|-----------|-----------------|-------------|
-| LLaVA | Linear projection | 256 | No | Bridge only | Simple, effective |
-| LLaVA-1.5 | 2-layer MLP | 576 (higher res) | No | Bridge only | State-of-art simple VLM |
-| Flamingo | Perceiver Resampler + cross-attn | 64 | Yes | Cross-attn layers | Few-shot, interleaved |
-| BLIP-2 | Q-Former | 32 | No | Q-Former | Efficient, strong zero-shot |
-| InstructBLIP | Q-Former (instruction-conditioned) | 32 | No | Q-Former | Instruction-following |
+**Key warning:** full fine-tuning of a CLIP encoder on domain-specific data rapidly degrades zero-shot generalization. If you need both domain accuracy and zero-shot capability, fine-tune only the projection or use LoRA adapters — keep the visual encoder frozen unless your dataset is very large.
 
-**Key insight**: LLaVA trades theoretical elegance for engineering simplicity and achieves competitive results. The Q-Former (BLIP-2/InstructBLIP) is more powerful but more complex. Flamingo is the right choice when few-shot adaptation matters.
+### LLaVA-1.5 Forward Pass (Step by Step)
 
----
+Input: 336×336 image + text question.
 
-## 7. VLMs for Dense Prediction
+1. Split into 14×14 patches of 24×24 pixels → 576 patches; each → 1024-dim CLIP token
+2. Apply 2-layer MLP (1024 → 4096, GELU, 4096 → 4096) → 576 × 4096 visual tokens
+3. Concatenate: `[BOS] + [576 visual tokens] + [text tokens]`
+4. LLaMA causal self-attention over the full sequence — text tokens attend to visual tokens via the unified token sequence (no separate cross-attention needed)
+5. Autoregressive decoding of answer
 
-Standard VLMs generate free-form text. Dense prediction tasks (segmentation, depth estimation, detection) require per-pixel outputs. This is a fundamental architectural mismatch.
+Visual tokens occupy 576 of a 4096-token context window — a significant fraction. This is why higher-resolution VLMs face a context length problem.
 
-### 7.1 Why Dense Prediction is Hard for VLMs
-
-VLMs pool spatial information into patch tokens. For 224-px images with 14×14 patches, each token represents 16×16 pixels — coarse spatial resolution. Generating pixel-level outputs requires recovering spatial details that were lost in the patch aggregation.
-
-### 7.2 Approaches
-
-**1. Prompt-and-parse**: ask the VLM to generate bounding box coordinates or polygon vertices as text tokens. "Output a bounding box: [x1, y1, x2, y2]". Works for simple detection but not for dense segmentation.
-
-**2. Add a spatial head**: freeze the VLM backbone; attach a lightweight segmentation head (e.g., a linear decoder applied to patch tokens). Only works if patch tokens retain enough spatial information.
-
-**3. High-resolution patch encoding**: LLaVA-HR, InternVL — encode the image at high resolution (448–672 px) with overlapping tiles. More spatial tokens = better dense prediction.
-
-**4. Hybrid architecture**: use a dense backbone (FPN, UNet) for spatial features + VLM for semantic reasoning. Feed dense features as visual tokens to VLM. Used in models like PixelLM, LISA.
-
-**5. SAM + VLM**: use SAM for mask generation (it's a strong segmenter), use VLM to assign labels to SAM masks. Combines best of both worlds for semantic segmentation.
-
-### 7.3 Application in Ecology
-
-For species mapping from drone imagery:
-- **Detection level**: Grounding DINO takes text prompt "individual plant" → bounding boxes
-- **Segmentation level**: SAM refines boxes into instance masks
-- **Classification level**: CLIP embedding of each crop → species label from text gallery
-- **Trait prediction**: VLM answering questions about the cropped plant image
+| Model | Bridge | Visual Tokens | Strength |
+|-------|--------|:---:|------|
+| LLaVA | Linear projection | 256 | Simple, effective |
+| LLaVA-1.5 | 2-layer MLP | 576 | State-of-art simple VLM |
+| Flamingo | Perceiver + cross-attn | 64 | Few-shot, interleaved |
+| BLIP-2 | Q-Former | 32 | Efficient, strong zero-shot |
+| InstructBLIP | Q-Former (instruction-conditioned) | 32 | Task-adaptive visual features |
 
 ---
 
-## 8. Adapting VLMs to Domain-Specific Imagery
+## Links
 
-Satellite imagery, drone imagery, and ecological photos differ substantially from natural images:
-- SAR images have no colour; only grayscale texture
-- Multispectral imagery has non-RGB channels
-- Overhead perspective (drone/satellite) vs. eye-level (natural images)
-- Objects are much smaller relative to image size (individual plants in a satellite image)
-
-### 8.1 Zero-Shot Transfer
-
-CLIP already handles overhead imagery reasonably well — it was trained on diverse internet images including some aerial shots. Works for coarse categories (forest, grassland, urban). Fails on fine-grained species recognition.
-
-### 8.2 Fine-Tuning the Projection Layer
-
-Cheapest adaptation: keep CLIP frozen; fine-tune only the bridge (linear projection or Q-Former) on domain data. Preserves CLIP's generalization. Works well when training data is limited (100–10,000 images).
-
-### 8.3 LoRA Fine-Tuning
-
-Apply LoRA to the visual encoder and/or LLM. See [[lora-quantization]]. Low-rank updates preserve pretrained representations while adapting to domain. ~10M parameters vs. ~7B for full fine-tuning.
-
-### 8.4 Full Fine-Tuning on Domain Data
-
-Best performance when you have large labelled datasets (>100K images). Risk: catastrophic forgetting of pretrained generalization. Mitigate with data mixing (domain data + general VQA data).
-
----
-
-## 9. Forward Pass of LLaVA-1.5 — Step by Step
-
-Input: an image and a text question, e.g., "What is the dominant vegetation type in this image?"
-
-1. **Tokenize text**: convert question to token IDs → embed to D_l=4096-dim vectors
-2. **Encode image**: pass 336×336 RGB image through CLIP ViT-L/14@336
-   - Split into 14×14 patches of 24×24 pixels → 576 patches
-   - Each patch → 1024-dim token (after transformer layers)
-   - Output: 576 × 1024 visual tokens
-3. **Project**: apply MLP (1024 → 4096, GELU, 4096 → 4096) to each of 576 tokens
-   - Result: 576 × 4096 projected visual tokens (in LLM embedding space)
-4. **Concatenate**: [special token] + [576 visual tokens] + [text tokens]
-5. **LLaMA forward pass**: causal self-attention over the full sequence
-   - Visual tokens act as "context" — text tokens can attend to them
-   - No cross-attention layer needed: everything is in the same sequence
-6. **Generate**: autoregressive decoding of answer tokens
-
-Total visual tokens for LLaVA-1.5: 576. This occupies a significant fraction of the 4096-token context window.
-
----
-
-## See Also
-
-[[clip]], [[blip]], [[open-vocabulary-detection]], [[remote-sensing-foundation-models]], [[vlm-explainability]], [[biodiversity-ml]], [[lora-quantization]], [[vision-transformer]], [[attention-mechanism]], [[activation-gelu-swish]]
+- [[vision-transformer]] — the image encoder in most VLMs is a pretrained ViT (CLIP ViT-L); patch tokens are extracted and fed to the LLM
+- [[clip]] — CLIP-pretrained image encoders are the standard VLM visual backbone; CLIP's shared image-text space enables zero-shot classification
+- [[attention-mechanism]] — cross-attention VLMs (Flamingo) inject image features via cross-attention layers inserted into the frozen LLM
+- [[cross-attention]] — Flamingo's Perceiver Resampler and BLIP-2's Q-Former both use cross-attention to map variable-length visual features to fixed-length query tokens
+- [[open-vocabulary-detection]] — VLMs extended to spatial tasks combine the VLM semantic reasoning with detection-specific localization heads
+- [[lora-quantization]] — VLMs are fine-tuned efficiently with LoRA; QLoRA enables training 13B–34B VLMs on single consumer GPUs
+- [[activation-gelu-swish]] — the FFN sublayers inside both the ViT encoder and LLM decoder use GELU or SiLU; LLaVA-1.5's MLP bridge also uses GELU

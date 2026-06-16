@@ -4,6 +4,7 @@ tags: [probability, distributions, statistics, gaussian]
 aliases: [normal distribution, Gaussian, bell curve, multivariate Gaussian]
 difficulty: 2
 status: complete
+depends_on: [distributions-overview]
 related: [distributions-overview, maximum-entropy-principle, bayesian-inference, math-svd]
 ---
 
@@ -18,6 +19,8 @@ The **Gaussian (normal) distribution** is the most important distribution in sta
 ### Univariate Gaussian
 
 $$p(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+
+where $\mu$ = mean (center of the bell curve), $\sigma^2$ = variance (controls the width; larger $\sigma^2$ = wider/flatter curve), $\sigma$ = standard deviation (same units as $x$), $\sqrt{2\pi\sigma^2}$ = normalizing constant (ensures the density integrates to 1), and $(x-\mu)^2/(2\sigma^2)$ = squared distance from the mean in units of variance (the exponent is always negative, making values near $\mu$ most probable).
 
 - Mean: $\mu$, Variance: $\sigma^2$, Standard deviation: $\sigma$
 - Entropy: $\frac{1}{2}\ln(2\pi e\sigma^2)$ nats
@@ -75,6 +78,8 @@ where $\frac{1}{\sigma^{*2}} = \frac{1}{\sigma_1^2} + \frac{1}{\sigma_2^2}$ and 
 
 $$p(x) = \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left(-\frac{1}{2}(x-\mu)^\top\Sigma^{-1}(x-\mu)\right)$$
 
+where $d$ = number of dimensions, $(2\pi)^{d/2}|\Sigma|^{1/2}$ = normalizing constant (scales with the volume of the distribution), $|\Sigma|$ = determinant of the covariance matrix (proportional to the "volume" of the ellipsoid), $\Sigma^{-1}$ = precision matrix (inverse covariance), and $(x-\mu)^\top\Sigma^{-1}(x-\mu)$ = squared [[#Mahalanobis Distance|Mahalanobis distance]] from $x$ to $\mu$ (a scalar).
+
 - $\mu \in \mathbb{R}^d$: mean vector
 - $\Sigma \in \mathbb{R}^{d \times d}$: positive semi-definite covariance matrix (see [[linear-algebra-fundamentals]] for Cholesky sampling: $x = \mu + Lz$, $z \sim \mathcal{N}(0,I)$, $\Sigma = LL^\top$)
 - Entropy: $\frac{1}{2}\ln\left((2\pi e)^d |\Sigma|\right)$
@@ -96,6 +101,8 @@ $$p(x) = \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left(-\frac{1}{2}(x-\mu)^\to
 ### Mahalanobis Distance
 
 $$D_M(x) = \sqrt{(x-\mu)^\top \Sigma^{-1}(x-\mu)}$$
+
+where $x \in \mathbb{R}^d$ = the point to measure, $\mu \in \mathbb{R}^d$ = distribution mean, $\Sigma^{-1}$ = precision matrix (inverse covariance — it stretches/rotates the distance so correlated dimensions are treated together), and $D_M(x)$ = Mahalanobis distance (a single non-negative scalar measuring distance in units of standard deviation, accounting for correlations).
 
 Measures how far $x$ is from $\mu$ in units of the distribution's spread, accounting for correlations. **Example:** $\mu = [0,0]$, $\Sigma = \text{diag}(4, 1)$, $x = [2, 1]$. Euclidean: $\sqrt{5} \approx 2.24$. Mahalanobis: $\sqrt{1 + 1} = \sqrt{2} \approx 1.41$. The point is 1 standard deviation in each direction — Mahalanobis correctly shows this is moderate; Euclidean over-penalizes the low-variance axis.
 
@@ -153,4 +160,12 @@ For $d \geq 3$, the MLE $\hat{\mu} = \bar{x}$ is inadmissible — the James-Stei
 
 ---
 
-*See also: [[distributions-overview]] · [[maximum-entropy-principle]] · [[bayesian-inference]] · [[math-svd]] · [[linear-algebra-fundamentals]] · [[variational-autoencoders]] · [[lora-quantization]]*
+## Links
+
+- [[distributions-overview]] — broader taxonomy of which distributions arise in which problems; the Gaussian is one entry
+- [[maximum-entropy-principle]] — the Gaussian is the unique maximum-entropy distribution given fixed mean and variance
+- [[bayesian-inference]] — Gaussian prior × Gaussian likelihood gives a Gaussian posterior (conjugacy); precision adds
+- [[linear-algebra-fundamentals]] — Cholesky factorization $\Sigma = LL^\top$ is required to sample from multivariate Gaussians
+- [[math-svd]] — SVD of the data matrix yields the principal axes of the covariance ellipsoid (PCA)
+- [[variational-autoencoders]] — VAE latent space is a diagonal Gaussian; the KL penalty uses the closed-form here
+- [[lora-quantization]] — Gaussian noise models appear in quantization error and weight perturbation analysis

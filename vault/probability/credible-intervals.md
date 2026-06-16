@@ -5,6 +5,7 @@ aliases: [credible interval, HPD interval, highest posterior density, Bayesian c
 difficulty: 1
 status: complete
 related: [bayesian-inference, hypothesis-testing, bootstrap, statistical-inference-mle, distributions-gaussian]
+depends_on: [bayesian-inference, statistical-inference-mle, distributions-gaussian]
 ---
 
 # Credible Intervals and Confidence Intervals
@@ -68,4 +69,10 @@ The extra $+1$ captures future sampling variability.
 $$p(x_\text{new} | x_{1:n}) = \int p(x_\text{new} | \theta) p(\theta | x_{1:n}) d\theta$$
 The credible interval on this predictive distribution naturally captures all sources of uncertainty.
 
-*See also: [[bayesian-inference]] · [[hypothesis-testing]] · [[bootstrap]] · [[statistical-inference-mle]]*
+## Links
+
+- [[bayesian-inference]] — credible intervals are posterior summaries; the 95% credible interval is the set of parameter values with posterior probability ≥ 0.95
+- [[statistical-inference-mle]] — frequentist confidence intervals are built from the MLE sampling distribution; the confidence interval does NOT say the true value lies inside with 95% probability
+- [[distributions-gaussian]] — for normal likelihoods with normal priors, the posterior is Gaussian; credible intervals reduce to $\hat{\mu} \pm z_{\alpha/2}\hat{\sigma}$
+- [[hypothesis-testing]] — Bayesian hypothesis testing uses the posterior probability that the parameter exceeds a threshold, rather than a p-value under the null
+- [[bootstrap]] — bootstrap CIs approximate the frequentist sampling distribution without normality assumptions; they are the non-parametric alternative to closed-form CIs

@@ -5,6 +5,7 @@ aliases: [BERT, masked language modeling, MLM, NSP, next sentence prediction, bi
 difficulty: 2
 status: complete
 related: [attention-mechanism, self-supervised-overview, contrastive-learning, rlhf, lora-quantization, arch-positional-encoding]
+depends_on: [attention-mechanism, loss-cross-entropy, arch-positional-encoding]
 ---
 
 # BERT and Masked Language Modeling
@@ -28,6 +29,8 @@ Before BERT (Devlin et al., 2019), language [[self-supervised-overview|pretraini
 
 **Loss:** [[loss-cross-entropy|cross-entropy]] over the 15% masked positions only:
 $$\mathcal{L}_{\text{MLM}} = -\sum_{i \in \text{masked}} \log P(x_i \mid \tilde{x}; \theta)$$
+
+where $x_i$ = the original token at masked position $i$, $\tilde{x}$ = the corrupted input sequence (with some tokens replaced by `[MASK]`, random tokens, or left unchanged), and $\theta$ = model parameters. The sum is over only the 15% selected positions, not all tokens.
 
 **Architecture:** BERT is a standard Transformer encoder (no decoder). Every token attends to every other token — no causal mask. Special tokens: `[CLS]` at position 0 (classification tasks), `[SEP]` to separate sentences.
 
@@ -98,4 +101,12 @@ where $\tilde{P}_{i|j}$ encodes the relative position of $j$ from $i$. This sepa
 
 ---
 
-*See also: [[attention-mechanism]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[rlhf]] · [[lora-quantization]] · [[arch-positional-encoding]] · [[loss-cross-entropy]] · [[knowledge-distillation]]*
+## Links
+
+- [[attention-mechanism]] — BERT uses bidirectional self-attention: every token attends to all others simultaneously; this is the key difference from autoregressive (causal) transformers
+- [[loss-cross-entropy]] — MLM is trained with cross-entropy on the 15% masked tokens; NSP uses binary cross-entropy on the sentence-pair classification head
+- [[arch-positional-encoding]] — BERT uses learned absolute position embeddings; without them the transformer is permutation-invariant and cannot model word order
+- [[self-supervised-overview]] — BERT pioneered masked-prediction SSL for NLP; the masking strategy (15% tokens, 80% [MASK] / 10% random / 10% original) reduces train-test mismatch
+- [[contrastive-learning]] — BERT is a reconstruction-based SSL method, not contrastive; it predicts masked tokens rather than contrasting positive/negative pairs
+- [[rlhf]] — RLHF fine-tunes autoregressive models (not BERT); BERT-style bidirectional encoders are used as reward models in RLHF pipelines
+- [[knowledge-distillation]] — DistilBERT distills BERT into a 40% smaller model with 97% of performance; the soft labels from BERT's logits are the distillation targets

@@ -4,6 +4,7 @@ tags: [information-geometry, fisher-metric, natural-gradient, riemannian, statis
 aliases: [statistical manifold, Fisher-Rao metric, natural gradient geometry, Amari geometry]
 difficulty: 3
 status: complete
+depends_on: [fisher-information, statistical-inference-mle, matrix-calculus]
 related: [fisher-information, exponential-family, variational-inference, statistical-inference-mle, matrix-calculus]
 ---
 
@@ -22,6 +23,8 @@ Ordinary calculus measures distances in Euclidean space. When your objects are p
 For a parametric family $\{p_\theta : \theta \in \Theta \subseteq \mathbb{R}^k\}$, the **Fisher information matrix** defines a Riemannian metric on $\Theta$:
 
 $$g_{ij}(\theta) = \mathbb{E}_{p_\theta}\left[\frac{\partial \log p_\theta}{\partial \theta_i} \frac{\partial \log p_\theta}{\partial \theta_j}\right]$$
+
+where $\theta = (\theta_1, \ldots, \theta_k)$ = the parameter vector, $\theta_i, \theta_j$ = the $i$-th and $j$-th components, $\frac{\partial \log p_\theta}{\partial \theta_i}$ = the score function (how the log-density changes with $\theta_i$), and $g_{ij}$ = the $(i,j)$-th entry of the Fisher information matrix (the metric tensor — specifies how "distances" are computed in parameter space).
 
 This metric captures the local geometry of the distribution family — how quickly distributions change as parameters change.
 
@@ -64,9 +67,11 @@ Natural gradient updates for exponential families reduce to Newton's method in n
 
 Information geometry reveals that the KL divergence is not symmetric, and the asymmetry has geometric meaning:
 
-- **$e$-connection** ($\alpha = +1$): exponential family mixture geodesics; forward KL
-- **$m$-connection** ($\alpha = -1$): moment-matching geodesics; reverse KL
-- At $\alpha = 0$: Riemannian (Levi-Civita) connection
+Amari's **$\alpha$-family of connections** parameterizes a continuous family of ways to "differentiate" on the statistical manifold ($\alpha \in [-1, 1]$):
+
+- **$e$-connection** ($\alpha = +1$): geodesics correspond to exponential family mixtures; minimizing forward KL $\text{KL}(q \| p)$
+- **$m$-connection** ($\alpha = -1$): geodesics correspond to moment-matching paths; minimizing reverse KL $\text{KL}(p \| q)$
+- **$\alpha = 0$**: Riemannian (Levi-Civita) connection (symmetric, metric-compatible)
 
 **Pythagorean theorem for KL:** for exponential families, the KL divergence satisfies an orthogonality relation analogous to the Pythagorean theorem — the $m$-projection (moment-matching) and $e$-projection (KL minimization) are "dual" projections that satisfy $\text{KL}(p\|r) = \text{KL}(p\|q) + \text{KL}(q\|r)$ when $q$ is the $e$-projection of $p$ onto an $m$-flat subspace containing $r$.
 
@@ -78,4 +83,10 @@ Information geometry reveals that the KL divergence is not symmetric, and the as
 
 **Variational inference:** ELBO maximization can be viewed as a natural gradient step in the space of variational distributions.
 
-*See also: [[fisher-information]] · [[exponential-family]] · [[variational-inference]] · [[matrix-calculus]]*
+## Links
+
+- [[fisher-information]] — the Fisher information matrix is the Riemannian metric on the statistical manifold; information geometry gives geometric meaning to the Fisher matrix
+- [[statistical-inference-mle]] — the MLE is the point on the statistical manifold closest to the empirical distribution under the KL divergence geometry
+- [[matrix-calculus]] — geodesics on the statistical manifold require differential geometry (covariant derivatives, Christoffel symbols) built on top of matrix calculus
+- [[exponential-family]] — exponential family distributions form a flat manifold in both the $e$-connection and $m$-connection; this duality underlies EM algorithm geometry
+- [[variational-inference]] — VI is projection onto a sub-manifold of tractable distributions; different divergences (KL, $\alpha$-divergence) give different projection criteria

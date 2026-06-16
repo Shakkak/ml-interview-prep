@@ -5,6 +5,7 @@ aliases: [harmonic mean, geometric mean, arithmetic mean, AM-GM-HM]
 difficulty: 1
 status: complete
 related: [evaluation-metrics-guide, loss-dice, math-convexity-jensen]
+depends_on: [math-convexity-jensen]
 ---
 
 # Arithmetic, Geometric, and Harmonic Means
@@ -105,4 +106,9 @@ is robust to dependence structure among tests, unlike Fisher's method which assu
 
 ---
 
-*See also: [[evaluation-metrics-guide]] · [[loss-dice]] · [[math-convexity-jensen]] · [[hypothesis-testing]]*
+## Links
+
+- [[math-convexity-jensen]] — the AM-GM inequality is a special case of Jensen's inequality: $\log$ is concave, so $\frac{1}{n}\sum \log x_i \leq \log(\frac{1}{n}\sum x_i)$, i.e., $GM \leq AM$
+- [[evaluation-metrics-guide]] — the harmonic mean underlies the F1 score: $F1 = 2/(1/P + 1/R)$; harmonic mean penalizes imbalances between precision and recall more than arithmetic mean
+- [[loss-dice]] — Dice coefficient is equivalent to the F1 score, which uses harmonic mean; understanding mean types clarifies why Dice is preferred for imbalanced segmentation
+- [[hypothesis-testing]] — test statistics often involve comparing sample means; the choice of mean (arithmetic vs. geometric) affects the test's sensitivity to outliers

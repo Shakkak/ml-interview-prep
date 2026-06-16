@@ -5,6 +5,7 @@ aliases: [lottery ticket hypothesis, winning ticket, sparse subnetwork, IMP, ite
 difficulty: 2
 status: complete
 related: [pruning-sparsity, bias-variance-double-descent, regularization-weight-decay, initialization, generalization-bounds]
+depends_on: [pruning-sparsity, initialization, generalization-bounds]
 ---
 
 # Lottery Ticket Hypothesis
@@ -76,4 +77,10 @@ LTH connects to several theoretical questions:
 - No practical speedup during training (the lottery is only found after training)
 - At very large scale (GPT-3 class), LTH has not been systematically verified
 
-*See also: [[pruning-sparsity]] · [[initialization]] · [[bias-variance-double-descent]] · [[generalization-bounds]]*
+## Links
+
+- [[pruning-sparsity]] — the lottery ticket is found by iterative magnitude pruning (IMP): train → prune lowest-magnitude weights → reset to original init → repeat; the surviving subnetwork is the ticket
+- [[initialization]] — the winning ticket must be reset to its original initialization (not zero); re-initializing to random weights destroys the winning lottery ticket
+- [[generalization-bounds]] — the lottery ticket hypothesis suggests that generalization is concentrated in sparse subnetworks; this challenges parameter-count-based complexity measures
+- [[bias-variance-double-descent]] — the lottery ticket exists from initialization but only becomes visible after training; the sparse subnetwork has lower effective complexity and often generalizes better
+- [[regularization-weight-decay]] — weight decay is implicit magnitude regularization: it drives low-importance weights toward zero, making them easier to prune without performance loss

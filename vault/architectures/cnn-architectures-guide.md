@@ -4,6 +4,7 @@ tags: [cnn, deep-learning, architectures, resnet, efficientnet, vgg, mobilenet, 
 aliases: [ResNet, EfficientNet, VGG, MobileNet, ConvNeXt, bottleneck, AlexNet, GoogLeNet]
 difficulty: 3
 status: complete
+depends_on: [arch-residual-block, convolution-math, backpropagation]
 related: [arch-residual-block, arch-bottleneck-1x1, arch-depthwise-separable, feature-pyramid-networks, normalization-layers, squeeze-excitation]
 ---
 
@@ -13,7 +14,7 @@ related: [arch-residual-block, arch-bottleneck-1x1, arch-depthwise-separable, fe
 
 ## Fundamental
 
-This is a reference guide to the key CNN building blocks — how to compute parameter counts, FLOPs, and receptive fields. These numbers come up constantly when reasoning about model size, efficiency tradeoffs, and why certain architectural choices (stride, kernel size, depth) were made.
+**What this covers:** CNN architecture design decisions don't happen arbitrarily — every choice of kernel size, depth, width, and normalization was motivated by a measurable problem. This guide explains what each major architecture changed, why it improved things, and the underlying math (parameter counts, FLOPs, receptive fields) that makes the reasoning precise.
 
 A 2D convolution of input $x \in \mathbb{R}^{C_{in} \times H \times W}$ with kernel $w \in \mathbb{R}^{C_{out} \times C_{in} \times K \times K}$ produces:
 - **Parameters:** $C_{out} \times C_{in} \times K^2 + C_{out}$
@@ -23,6 +24,8 @@ A 2D convolution of input $x \in \mathbb{R}^{C_{in} \times H \times W}$ with ker
 **Receptive field** grows with every layer. For a network of layers with kernel sizes $k_i$ and strides $s_j$:
 
 $$\text{RF}_n = 1 + \sum_{i=1}^{n}(k_i - 1)\prod_{j=1}^{i-1}s_j$$
+
+where $n$ = number of layers, $k_i$ = kernel size at layer $i$ (e.g., 3 for a $3 \times 3$ conv), $s_j$ = stride at layer $j$ (1 = no downsampling, 2 = halves resolution), and $\text{RF}_n$ = number of input pixels that influence a single output pixel after $n$ layers. The product $\prod_{j=1}^{i-1} s_j$ is the cumulative downsampling factor before layer $i$, which multiplies each layer's contribution to the RF.
 
 Early strides multiply the RF of all subsequent layers. A stride-2 layer in layer 1 doubles the effective coverage of every downstream layer — this is why stem layers use aggressive strides without wasting much information.
 
@@ -58,7 +61,7 @@ Gradient analysis makes this precise. With a residual connection, the gradient o
 
 $$\frac{\partial L}{\partial x_l} = \frac{\partial L}{\partial x_L}\left(1 + \sum_{i=l}^{L-1}\frac{\partial F_i}{\partial x_l}\right)$$
 
-The $+1$ term guarantees gradient reaches $x_l$ directly, regardless of how small the $F_i$ terms become.
+where $L$ = loss, $x_l$ = activation at early layer $l$, $x_L$ = activation at final layer $L$, and $F_i$ = the residual branch at block $i$ (the non-shortcut path). The $+1$ term guarantees gradient reaches $x_l$ directly via the skip connection, regardless of how small the $F_i$ terms become.
 
 **Bottleneck block (ResNet-50/101/152):** 1×1 → 3×3 → 1×1. Reduces channels by 4× before the expensive 3×3, then expands back. A 256-channel bottleneck costs 70K FLOPs/position vs 1.18M for a plain 3×3 block — 17× cheaper.
 
@@ -130,4 +133,16 @@ ConvNeXt demonstrated that the right comparison is not CNN vs. transformer but r
 
 ---
 
-*See also: [[arch-residual-block]] · [[arch-bottleneck-1x1]] · [[arch-depthwise-separable]] · [[squeeze-excitation]] · [[feature-pyramid-networks]] · [[vision-transformer]] · [[normalization-layers]] · [[activation-relu-variants]] · [[regularization-dropout]] · [[activation-gelu-swish]] · [[self-supervised-overview]]*
+## Links
+
+- [[arch-residual-block]] — residual connections are the key innovation that enabled training networks deeper than ~20 layers; ResNet is built from stacked residual blocks
+- [[convolution-math]] — CNN architectures are built from convolution operations; understanding kernel size, stride, and dilation is essential for interpreting each design choice
+- [[backpropagation]] — gradient flow through deep CNNs requires both residual connections and careful initialization; the history of CNN architectures is partly a history of solving gradient issues
+- [[arch-bottleneck-1x1]] — $1\times 1$ convolutions reduce channel depth in bottleneck blocks, cutting FLOPs in ResNet-50+ by $\sim 4\times$ vs ResNet-34
+- [[arch-depthwise-separable]] — MobileNet and EfficientNet replace standard convolutions with depthwise-separable ones; the same architectural guide but optimized for mobile inference
+- [[feature-pyramid-networks]] — FPN adds multi-scale feature aggregation on top of backbone CNNs; it is part of almost every modern detection/segmentation model
+- [[vision-transformer]] — ViTs challenge CNN inductive biases; CNNs still win in low-data regimes while ViTs win at scale
+- [[normalization-layers]] — BN between conv and activation is the standard recipe; LayerNorm variants appear in ConvNeXt (inspired by ViT training stability)
+- [[squeeze-excitation]] — SE blocks add channel-wise attention to CNNs by learning to reweight feature map channels based on global average pooling
+- [[regularization-dropout]] — dropout in CNNs is applied after fully-connected layers or as DropPath in residual blocks
+- [[self-supervised-overview]] — DINO and MAE pretrain ViTs; for CNNs, contrastive pretraining (SimCLR, MoCo) provides strong transferable representations

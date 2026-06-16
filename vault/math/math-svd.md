@@ -4,6 +4,7 @@ tags: [linear-algebra, math, dimensionality-reduction, low-rank, svd]
 aliases: [SVD, singular value decomposition, low-rank approximation, stable rank, Eckart-Young]
 difficulty: 2
 status: complete
+depends_on: [linear-algebra-fundamentals, eigenvalues-pca]
 related: [lora-quantization, math-convexity-jensen, backpropagation-advanced, eigenvalues-pca, linear-algebra-fundamentals]
 ---
 
@@ -53,6 +54,8 @@ $$A = \begin{bmatrix}1/\sqrt{2} & -1/\sqrt{2}\\1/\sqrt{2} & 1/\sqrt{2}\end{bmatr
 The best rank-$k$ approximation of $A$ in [[linear-algebra-fundamentals|Frobenius norm]] is:
 
 $$A_k = \sum_{i=1}^k \sigma_i u_i v_i^\top = U_k \Sigma_k V_k^\top$$
+
+where $\sigma_i$ = the $i$-th singular value (ordered $\sigma_1 \geq \sigma_2 \geq \cdots \geq 0$), $u_i \in \mathbb{R}^m$ = $i$-th left singular vector (column of $U$), $v_i \in \mathbb{R}^n$ = $i$-th right singular vector (column of $V$), and $U_k, \Sigma_k, V_k$ = the truncated versions keeping only the top-$k$ components.
 
 **Eckart-Young-Mirsky theorem (1936):** for any rank-$k$ matrix $B$:
 $$\|A - A_k\|_F \leq \|A - B\|_F, \qquad \|A - A_k\|_2 \leq \|A - B\|_2$$
@@ -125,4 +128,10 @@ Convergence rate for the top singular vector: $O((\sigma_2/\sigma_1)^t)$ — exp
 
 ---
 
-*See also: [[eigenvalues-pca]] · [[linear-algebra-fundamentals]] · [[lora-quantization]] · [[backpropagation-advanced]] · [[bert-mlm]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — SVD decomposes any matrix into rotations and a scaling; it extends eigendecomposition to non-square matrices
+- [[eigenvalues-pca]] — singular values are the square roots of eigenvalues of $A^\top A$; truncated SVD and PCA give identical results on centered data
+- [[lora-quantization]] — LoRA's low-rank weight update $\Delta W = BA$ is a rank-$r$ SVD approximation; the spectral norm bounds the update's magnitude
+- [[backpropagation-advanced]] — gradient clipping uses the spectral norm (largest singular value) as the Jacobian norm; the pseudoinverse $A^+$ appears in minimum-norm solutions
+- [[bert-mlm]] — SVD is used in ALBERT's parameter sharing and in word embedding factorization to reduce model size

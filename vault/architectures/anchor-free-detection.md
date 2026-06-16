@@ -4,6 +4,7 @@ tags: [anchor-free, fcos, centernet, detection, object-detection]
 aliases: [anchor-free detection, FCOS, CenterNet, DETR, anchor-based vs anchor-free]
 difficulty: 2
 status: complete
+depends_on: [feature-pyramid-networks, convolution-math]
 related: [feature-pyramid-networks, arch-roi-align, iou-nms, open-vocabulary-detection, attention-mechanism]
 ---
 
@@ -12,6 +13,10 @@ related: [feature-pyramid-networks, arch-roi-align, iou-nms, open-vocabulary-det
 ---
 
 ## Fundamental
+
+**The problem:** object detection requires predicting bounding boxes. The dominant approach (Faster R-CNN, YOLO) tiles the image with thousands of pre-defined "anchor" boxes at multiple scales and aspect ratios, then predicts offsets from anchors to ground truths. This works, but anchors are a hand-engineered prior: their sizes, ratios, and strides must be tuned per dataset, and the vast majority of anchors are just background noise (extreme class imbalance).
+
+**Intuition behind anchor-free:** if you trust the backbone features enough, why not just predict box edges directly from each feature map pixel? Instead of "which anchor here is closest to this object," ask "what are the distances from this pixel to the object's four edges?" This removes the anchor hyperparameter entirely.
 
 ### Anchor-Based vs Anchor-Free
 
@@ -64,7 +69,7 @@ Centerness $\approx 1$ at the box center, $\approx 0$ at corners. Multiplying cl
 1. CNN backbone + transformer encoder processes the image into features
 2. A fixed set of $N = 100$ **object queries** (learnable embeddings) attend over image features via cross-attention
 3. Each query independently predicts one (class, box) or "no object"
-4. **Bipartite matching loss:** at training, use the Hungarian algorithm to optimally match predictions to ground truths (1-to-1), then apply class + box loss only on matched pairs
+4. **Bipartite matching loss:** at training, use the Hungarian algorithm to optimally match predictions to ground truths (1-to-1), then apply class + box loss only on matched pairs. The **Hungarian algorithm** solves the assignment problem: given $N$ predictions and $M$ ground truths, find the minimum-cost 1-to-1 matching (one prediction per ground truth, allowing unmatched predictions to be marked "no object"). It runs in $O(N^3)$ — tractable for $N = 100$ but not for thousands of anchors.
 
 DETR removes all hand-engineered components (anchors, NMS, region proposals). But it trains slowly (convergence requires 500 epochs vs ~12 for Faster R-CNN) because the attention must learn to specialize each query to a spatial region.
 
@@ -80,4 +85,11 @@ DETR removes all hand-engineered components (anchors, NMS, region proposals). Bu
 | Small objects | Good with small anchors | FPN handles | Weak |
 | Dense scenes | Can struggle | FCOS centerness helps | Set limit ($N$) |
 
-*See also: [[feature-pyramid-networks]] · [[iou-nms]] · [[arch-roi-align]] · [[open-vocabulary-detection]] · [[attention-mechanism]]*
+## Links
+
+- [[feature-pyramid-networks]] — anchor-free detectors use FPN features at each scale; different pyramid levels handle different object size ranges
+- [[convolution-math]] — the per-pixel prediction heads are $1\times 1$ convolutions applied to each FPN level
+- [[iou-nms]] — anchor-free detectors still post-process predictions with NMS to remove duplicates; IoU thresholds determine suppression
+- [[arch-roi-align]] — transformer-based detectors (DETR) use ROI-like cross-attention to extract features from the backbone; anchor-free methods bypass explicit ROI extraction
+- [[open-vocabulary-detection]] — anchor-free heads adapt naturally to open-vocabulary settings; DINO-style detectors use anchor-free predictions with text-conditional classification
+- [[attention-mechanism]] — DETR replaces the anchor + NMS pipeline entirely with cross-attention between object queries and image features

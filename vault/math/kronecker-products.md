@@ -5,6 +5,7 @@ aliases: [Kronecker product, Kronecker factorization, vec operator, mixed-produc
 difficulty: 2
 status: complete
 related: [linear-algebra-fundamentals, matrix-calculus, math-svd, information-geometry, second-order-optimization]
+depends_on: [linear-algebra-fundamentals, matrix-calculus, math-svd]
 ---
 
 # Kronecker Products
@@ -35,7 +36,9 @@ The most useful identity:
 
 $$(A \otimes B)(C \otimes D) = (AC) \otimes (BD)$$
 
-whenever the dimensions are compatible. This means matrix multiplications can be factored across Kronecker structure — crucial for efficient computation.
+where $A \in \mathbb{R}^{m \times n}$, $B \in \mathbb{R}^{p \times q}$, $C \in \mathbb{R}^{n \times k}$, $D \in \mathbb{R}^{q \times r}$ — dimensions chosen so $AC$ and $BD$ are valid multiplications, making $(A \otimes B)(C \otimes D) \in \mathbb{R}^{mp \times kr}$.
+
+Whenever the dimensions are compatible, matrix multiplications can be factored across Kronecker structure — crucial for efficient computation.
 
 ---
 
@@ -81,4 +84,10 @@ Kronecker products define structured weight matrices that are compact yet expres
 
 **LoRA connection:** LoRA decomposes $\Delta W = AB$ (rank-$r$ factorization). For multiple layers, stacking these factorizations approximates a Kronecker structure in the parameter update space.
 
-*See also: [[linear-algebra-fundamentals]] · [[matrix-calculus]] · [[second-order-optimization]] · [[information-geometry]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — the Kronecker product $A \otimes B$ is defined in terms of matrix blocks; the vec operator and trace are linear algebra primitives used throughout
+- [[matrix-calculus]] — the vec trick $\text{vec}(AXB) = (B^\top \otimes A)\text{vec}(X)$ converts matrix calculus identities into vectorized form
+- [[math-svd]] — the Kronecker product of two matrices has singular values equal to all products $\sigma_i(A)\sigma_j(B)$; this enables efficient eigendecomposition of Kronecker-factored matrices
+- [[information-geometry]] — K-FAC approximates the Fisher information matrix as a Kronecker product of per-layer factors; this makes natural gradient updates tractable
+- [[second-order-optimization]] — K-FAC (Kronecker-Factored Approximate Curvature) uses Kronecker products to approximate the inverse Fisher, enabling practical second-order optimization

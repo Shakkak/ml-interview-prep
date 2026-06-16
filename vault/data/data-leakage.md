@@ -4,6 +4,7 @@ tags: [data-leakage, target-leakage, temporal-leakage, train-test-contamination,
 aliases: [data leakage, target leakage, temporal leakage, train-test contamination, feature leakage]
 difficulty: 1
 status: complete
+depends_on: [cross-validation, feature-preprocessing]
 related: [cross-validation, feature-preprocessing, bias-variance-double-descent, evaluation-metrics-guide, overfitting]
 ---
 
@@ -82,4 +83,10 @@ Data leakage is increasingly concerning for LLM benchmarks:
 
 **Mitigation:** use time-based splits (release date of benchmark vs training cutoff), use private evaluation sets, or use LLM-generated benchmarks with controlled creation date.
 
-*See also: [[cross-validation]] · [[feature-preprocessing]] · [[evaluation-metrics-guide]] · [[bias-variance-double-descent]]*
+## Links
+
+- [[cross-validation]] — all preprocessing steps (scaling, encoding, imputation) must be fit inside the CV loop on each training fold to prevent leakage
+- [[feature-preprocessing]] — preprocessing is the most common site of leakage: fitting a scaler or imputer on the full dataset before splitting contaminates the test set
+- [[evaluation-metrics-guide]] — leakage makes evaluation metrics unrealistically optimistic; detecting leakage requires comparing in-distribution vs. out-of-distribution performance gaps
+- [[bias-variance-double-descent]] — leakage reduces apparent test error without reducing true generalization error; it masks the bias-variance tradeoff by providing invalid test signal
+- [[categorical-encoding]] — target encoding is the highest-risk categorical encoding for leakage; it requires careful K-fold implementation

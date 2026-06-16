@@ -4,6 +4,7 @@ tags: [gradient-boosting, xgboost, lightgbm, boosting, ensemble, trees]
 aliases: [gradient boosted trees, GBM, gradient boosted machines, XGBoost, LightGBM, CatBoost]
 difficulty: 2
 status: complete
+depends_on: [decision-trees, optimizer-sgd-momentum, loss-mse]
 related: [decision-trees, ensemble-methods, loss-mse, loss-cross-entropy, regularization-weight-decay, bias-variance-double-descent]
 ---
 
@@ -32,6 +33,8 @@ This is **gradient descent in function space** — residuals are the negative gr
 Friedman (2001) generalized this to arbitrary differentiable loss $\mathcal{L}$: fit each $h_m$ to the **negative gradient** of the loss:
 
 $$r_i^{(m)} = -\left[\frac{\partial \mathcal{L}(y_i, F(\mathbf{x}_i))}{\partial F(\mathbf{x}_i)}\right]_{F = F_{m-1}}$$
+
+where $r_i^{(m)}$ = the pseudo-residual for training example $i$ at step $m$ (the direction to fit the next tree), $\mathcal{L}(y_i, F(\mathbf{x}_i))$ = the loss function evaluated at the true label $y_i$ and current prediction $F(\mathbf{x}_i)$, and $\partial \mathcal{L}/\partial F(\mathbf{x}_i)$ = derivative of the loss with respect to the current prediction (evaluated at $F = F_{m-1}$, the ensemble so far).
 
 For MSE: $r_i = y_i - F_{m-1}(\mathbf{x}_i)$ (actual residuals).
 For log-loss: $r_i = y_i - p_i$ where $p_i$ is the predicted probability (residuals in probability space).
@@ -67,10 +70,12 @@ where $g_i = \partial \mathcal{L}/\partial \hat{y}_i$ (gradient) and $h_i = \par
 
 $$w_j^* = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}$$
 
+where $I_j$ = set of training examples assigned to leaf $j$, $g_i = \partial \mathcal{L}/\partial \hat{y}_i$ = first-order gradient (how much to push the prediction), $h_i = \partial^2 \mathcal{L}/\partial \hat{y}_i^2$ = second-order gradient/Hessian (curvature of the loss), and $\lambda$ = L2 regularization on leaf weights.
+
 **Optimal split gain:**
 $$\text{Gain} = \frac{1}{2}\left[\frac{(\sum_{i \in L} g_i)^2}{\sum_{i \in L} h_i + \lambda} + \frac{(\sum_{i \in R} g_i)^2}{\sum_{i \in R} h_i + \lambda} - \frac{(\sum_i g_i)^2}{\sum_i h_i + \lambda}\right] - \gamma$$
 
-where $\lambda$ regularizes leaf weights and $\gamma$ is the minimum gain to make a split. **XGBoost learns faster per tree** because it uses curvature information.
+where $L$ and $R$ = examples going to the left and right child after a split, $\lambda$ = leaf weight regularization, and $\gamma$ = minimum gain required to make a split (tree complexity penalty). Positive Gain means the split is worth making. **XGBoost learns faster per tree** because it uses curvature information.
 
 **Regularization in XGBoost:** $\Omega(f) = \gamma T + \frac{\lambda}{2}\sum_j w_j^2$ penalizes the number of leaves $T$ and leaf weight magnitude. This built-in regularization allows XGBoost to use deeper trees without overfitting.
 
@@ -124,4 +129,12 @@ Empirically, gradient boosting (usually XGBoost or LightGBM) wins on tabular dat
 
 ---
 
-*See also: [[decision-trees]] · [[ensemble-methods]] · [[bias-variance-double-descent]] · [[regularization-weight-decay]] · [[loss-mse]] · [[loss-cross-entropy]]*
+## Links
+
+- [[decision-trees]] — gradient boosting uses decision trees as weak learners; shallow trees (depth 3–6) are the ideal base learner because they are high-bias, low-variance
+- [[optimizer-sgd-momentum]] — gradient boosting performs gradient descent in function space; each new tree is the functional analogue of one gradient step
+- [[loss-mse]] — for MSE loss the negative gradient is the residual $y_i - F(x_i)$; gradient boosting with MSE is equivalent to fitting trees to residuals
+- [[ensemble-methods]] — gradient boosting is a sequential (boosting) ensemble strategy; contrast with bagging (parallel, variance reduction) and stacking
+- [[bias-variance-double-descent]] — shallow trees in boosting have high bias and low variance; the ensemble's sequential bias reduction explains why boosting works
+- [[regularization-weight-decay]] — XGBoost adds L1 and L2 regularization on leaf weights to the tree-splitting criterion, directly penalizing model complexity
+- [[loss-cross-entropy]] — for classification, gradient boosting uses the cross-entropy loss; the negative gradient is the difference between predicted probability and label

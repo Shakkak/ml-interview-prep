@@ -4,6 +4,7 @@ tags: [flow-matching, continuous-normalizing-flows, ode, rectified-flow, stochas
 aliases: [flow matching, continuous normalizing flows, CNF, rectified flow, stochastic interpolants, FM]
 difficulty: 3
 status: complete
+depends_on: [normalizing-flows, diffusion-models, distributions-gaussian]
 related: [normalizing-flows, diffusion-models, variational-autoencoders, sampling-methods, change-of-variables]
 ---
 
@@ -29,13 +30,13 @@ The vector field $v_\theta: \mathbb{R}^d \times [0,1] \to \mathbb{R}^d$ is param
 
 $$\mathcal{L}_\text{FM} = \mathbb{E}_{t, p_t(x)}\!\left[\|v_\theta(x, t) - u_t(x)\|^2\right]$$
 
-where $u_t(x)$ is a target vector field that generates the marginal flow $p_t$ (the interpolant distribution at time $t$). The loss avoids computing the trace of the Jacobian entirely — just MSE on the vector field.
+where $t \in [0,1]$ = continuous time variable, $p_t(x)$ = marginal distribution of the flow at time $t$ (interpolates from $p_0$ to $p_1$), $v_\theta(x, t) \in \mathbb{R}^d$ = the network's predicted vector field (direction and speed to move $x$ at time $t$), and $u_t(x)$ = the target vector field that generates $p_t$ (the interpolant distribution at time $t$). The loss avoids computing the trace of the Jacobian entirely — just MSE on the vector field.
 
 **Key insight:** instead of optimizing the marginal vector field directly (hard), condition on individual sample pairs $(x_0, x_1)$ from $p_0 \times p_1$ and regress on the **conditional** vector field (easy):
 
 $$\mathcal{L}_\text{CFM} = \mathbb{E}_{t, x_0, x_1}\!\left[\|v_\theta(x_t, t) - (x_1 - x_0)\|^2\right]$$
 
-with linear interpolant $x_t = (1-t)x_0 + t x_1$ and target vector $u_t(x_t | x_0, x_1) = x_1 - x_0$ (constant velocity from source to target).
+where $x_0 \sim p_0$ = source noise sample, $x_1 \sim p_1$ = target data sample, $x_t = (1-t)x_0 + tx_1$ = linear interpolant between the pair at time $t$, and $(x_1 - x_0)$ = constant velocity target (the direction the model should predict to move from $x_0$ to $x_1$ in one unit of time).
 
 ---
 
@@ -86,4 +87,10 @@ Flow matching (under various names) has rapidly replaced diffusion in state-of-t
 - **Meta Voicebox:** uses flow matching for audio generation
 - **SiT (Scalable Interpolant Transformers):** ViT-based flow matching for image generation
 
-*See also: [[normalizing-flows]] · [[diffusion-models]] · [[sampling-methods]] · [[change-of-variables]]*
+## Links
+
+- [[normalizing-flows]] — normalizing flows use discrete bijective transformations; flow matching learns continuous vector fields that generate the same transport
+- [[diffusion-models]] — diffusion models add and then remove noise along a fixed Markov process; flow matching learns a direct straight-line transport (rectified flow) that is faster at inference
+- [[distributions-gaussian]] — the source distribution for flow matching is typically $\mathcal{N}(0,I)$; the learned vector field transports it to the data distribution
+- [[sampling-methods]] — flow matching samples by integrating the learned ODE from $t=0$ to $t=1$; fewer integration steps = faster inference, trading accuracy for speed
+- [[change-of-variables]] — the change-of-variables formula for continuous-time flows involves the instantaneous change-of-variables via the trace of the Jacobian

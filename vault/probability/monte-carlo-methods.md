@@ -4,6 +4,7 @@ tags: [monte-carlo, mcmc, variance-reduction, integration, stochastic-estimation
 aliases: [Monte Carlo integration, MCMC, Markov chain Monte Carlo, variance reduction, control variates]
 difficulty: 2
 status: complete
+depends_on: [distributions-overview, statistical-inference-mle]
 related: [sampling-methods, importance-sampling, distributions-overview, bayesian-inference, variational-inference]
 ---
 
@@ -68,7 +69,7 @@ When we can evaluate $p(x)$ up to a normalizing constant but cannot sample direc
 
 **MCMC diagnostics:**
 - $\hat{R}$ (R-hat): compares between-chain and within-chain variance; $\hat{R} > 1.1$ signals non-convergence
-- Effective sample size (ESS): accounts for autocorrelation; ESS $= N / (1 + 2\sum_k \rho_k)$
+- Effective sample size (ESS): accounts for autocorrelation; ESS $= N / (1 + 2\sum_k \rho_k)$ where $N$ = raw number of MCMC samples and $\rho_k$ = autocorrelation at lag $k$ (how correlated sample $t$ is with sample $t+k$)
 - Trace plots: visual check for stationarity
 
 ### Monte Carlo in Deep Learning
@@ -77,4 +78,11 @@ When we can evaluate $p(x)$ up to a normalizing constant but cannot sample direc
 
 **Dropout as MC sampling:** at test time, running multiple stochastic forward passes with dropout gives an approximate Bayesian posterior (MC Dropout, Gal & Ghahramani 2016) — uncertainty estimation for free.
 
-*See also: [[sampling-methods]] · [[importance-sampling]] · [[bayesian-inference]] · [[variational-inference]] · [[distributions-overview]]*
+## Links
+
+- [[distributions-overview]] — Monte Carlo integration requires drawing samples from a distribution; the choice of proposal determines efficiency
+- [[statistical-inference-mle]] — MC estimates replace analytical integrals in MLE and MAP computations for complex latent-variable models
+- [[bayesian-inference]] — MCMC computes Bayesian posterior expectations that are otherwise analytically intractable
+- [[sampling-methods]] — Metropolis-Hastings, Gibbs, and HMC are the specific algorithms that generate the Markov chain samples
+- [[importance-sampling]] — variance reduction technique: reweight samples from an easy proposal to estimate expectations under a difficult target
+- [[variational-inference]] — VI avoids Monte Carlo by optimizing a parametric approximation; MC and VI are complementary integration strategies

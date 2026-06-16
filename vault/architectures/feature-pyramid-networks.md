@@ -4,6 +4,7 @@ tags: [object-detection, fpn, multi-scale, cnn, segmentation]
 aliases: [FPN, feature pyramid, top-down pathway, anchor assignment]
 difficulty: 3
 status: complete
+depends_on: [cnn-architectures-guide, arch-residual-block, arch-bottleneck-1x1]
 related: [cnn-architectures-guide, evaluation-metrics-guide, backpropagation-advanced]
 ---
 
@@ -14,6 +15,8 @@ related: [cnn-architectures-guide, evaluation-metrics-guide, backpropagation-adv
 ## Fundamental
 
 Objects appear at dramatically different scales — the same person can occupy 400×200 pixels (nearby) or 20×10 pixels (distant). Standard CNN feature maps at a single scale cannot detect both: a 7×7 feature map (stride 32) has resolution too low to detect small objects.
+
+**Intuition:** a CNN backbone naturally produces a pyramid of features — early layers have fine spatial detail (edges, textures) but little semantic understanding; late layers have rich semantics (object identity) but low resolution. FPN connects these levels: deep semantic information flows top-down into shallow high-resolution maps, so each pyramid level gets both spatial precision and semantic depth simultaneously.
 
 **FPN** (Lin et al., 2017) uses the existing feature hierarchy inside a CNN backbone and adds top-down connections to combine deep (semantic) features with shallow (high-resolution) features — producing a multi-scale pyramid at essentially no extra cost.
 
@@ -48,6 +51,8 @@ C5:  25×25, 2048ch (stride 32)  ← coarse spatial, high semantic
 **Top-down pathway:** start from the coarsest level, progressively merge with finer levels:
 
 $$P_l = \text{Conv}_{3\times3}\!\left(\text{Upsample}_{\times2}(P_{l+1}) + \text{Conv}_{1\times1}(C_l)\right)$$
+
+where $P_l$ = the output feature map at pyramid level $l$ (higher $l$ = coarser, more semantic), $C_l$ = the backbone feature map at level $l$ (e.g., C2 = stride 4, C5 = stride 32), $\text{Upsample}_{\times 2}$ = 2× nearest-neighbor upsampling to match the resolution of $C_l$, and $\text{Conv}_{1\times1}(C_l)$ = lateral connection that projects $C_l$ to 256 channels.
 
 1×1 convs project all backbone levels to 256 channels (lateral connections).
 2× nearest-neighbor upsample brings the coarser level to the finer resolution.
@@ -91,7 +96,7 @@ Standard FPN: only top-down pathway. BiFPN adds:
 
 $$P_l^{out} = \frac{w_1 P_l + w_2\,\text{Resize}(P_{l-1}^{out}) + w_3\,\text{Resize}(P_{l+1}^{out})}{w_1 + w_2 + w_3 + \epsilon}$$
 
-Weights $w_i \geq 0$ are learned; the normalization keeps them as a convex combination. Bidirectional flow allows both semantic-to-spatial (top-down) and detail-to-semantic (bottom-up) information propagation. EfficientDet uses BiFPN stacked 3–7× for state-of-the-art detection efficiency.
+where $P_l^{out}$ = the BiFPN output at level $l$, $w_1, w_2, w_3 \geq 0$ = learned scalar weights (one per input path), $P_{l-1}^{out}$ and $P_{l+1}^{out}$ = outputs from the adjacent finer and coarser levels, $\text{Resize}$ = upsampling or downsampling to match the resolution of level $l$, and $\epsilon$ = small constant (e.g., $0.0001$) preventing division by zero when weights are all near zero. Weights $w_i \geq 0$ are learned; the normalization keeps them as a convex combination. Bidirectional flow allows both semantic-to-spatial (top-down) and detail-to-semantic (bottom-up) information propagation. EfficientDet uses BiFPN stacked 3–7× for state-of-the-art detection efficiency.
 
 ### FPN vs U-Net vs ASPP
 
@@ -106,4 +111,12 @@ All three solve multi-scale representation but differ in mechanism:
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[dilated-convolution]] · [[unet]] · [[arch-roi-align]] · [[arch-residual-block]] · [[loss-focal]]*
+## Links
+
+- [[cnn-architectures-guide]] — FPN is added on top of a backbone CNN; the choice of backbone (ResNet, EfficientNet) determines feature quality at each pyramid level
+- [[arch-residual-block]] — FPN's top-down pathway connects to the backbone's residual blocks via lateral $1\times 1$ connections
+- [[arch-bottleneck-1x1]] — lateral connections in FPN use $1\times 1$ convolutions to align channel depths before element-wise addition with the top-down feature
+- [[dilated-convolution]] — ASPP (used in DeepLab) is an alternative to FPN for multi-scale feature aggregation using parallel dilated convolutions
+- [[unet]] — U-Net's skip connections serve the same purpose as FPN's lateral connections: merging fine spatial detail with semantically rich deep features
+- [[arch-roi-align]] — ROI Align extracts region features from FPN levels; the pyramid level is chosen by $k = k_0 + \log_2(\sqrt{wh}/224)$
+- [[loss-focal]] — Focal Loss was introduced alongside RetinaNet with FPN; it addresses class imbalance in the dense single-stage detection setting

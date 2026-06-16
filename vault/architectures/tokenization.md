@@ -4,6 +4,7 @@ tags: [tokenization, bpe, wordpiece, sentencepiece, subword, vocabulary]
 aliases: [BPE, byte pair encoding, WordPiece, SentencePiece, subword tokenization, tokenizer]
 difficulty: 1
 status: complete
+depends_on: [word-embeddings, distributions-overview]
 related: [autoregressive-models, bert-mlm, word-embeddings, arch-positional-encoding, instruction-tuning, attention-mechanism]
 ---
 
@@ -115,4 +116,12 @@ Tokenization is done **offline** before training:
 
 ---
 
-*See also: [[autoregressive-models]] · [[bert-mlm]] · [[word-embeddings]] · [[arch-positional-encoding]] · [[attention-mechanism]] · [[instruction-tuning]]*
+## Links
+
+- [[word-embeddings]] — tokenization determines what gets embedded; each token ID indexes a row in the embedding matrix
+- [[distributions-overview]] — BPE and WordPiece operate on frequency distributions over character pairs; the merge criterion is the count of co-occurrences
+- [[autoregressive-models]] — tokenization is the interface between raw text and the model; vocabulary size and tokenization quality directly affect model efficiency
+- [[bert-mlm]] — BERT uses WordPiece tokenization; BERT's vocabulary of 30k tokens was the standard before SentencePiece dominated
+- [[arch-positional-encoding]] — positions are assigned at the token level after tokenization; different tokenizers produce different sequence lengths for the same text
+- [[attention-mechanism]] — transformer input length (and thus attention cost) is determined by the tokenizer; a larger vocabulary produces shorter sequences
+- [[instruction-tuning]] — chat templates wrap instruction/response pairs with special tokens like `[INST]` and `[/INST]`; these tokens must be in the tokenizer vocabulary

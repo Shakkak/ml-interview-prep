@@ -4,6 +4,7 @@ tags: [squeeze-excitation, channel-attention, se-block, efficientnet, recalibrat
 aliases: [SE block, Squeeze-and-Excitation, channel attention, SENet, recalibration, CBAM]
 difficulty: 2
 status: complete
+depends_on: [arch-residual-block, attention-mechanism]
 related: [arch-residual-block, cnn-architectures-guide, arch-bottleneck-1x1, attention-mechanism, normalization-layers]
 ---
 
@@ -111,4 +112,11 @@ From a representation learning perspective, SE blocks implement **dynamic, input
 
 ---
 
-*See also: [[arch-residual-block]] · [[cnn-architectures-guide]] · [[attention-mechanism]] · [[normalization-layers]] · [[arch-depthwise-separable]]*
+## Links
+
+- [[arch-residual-block]] — SE blocks are inserted inside residual blocks; the channel recalibration is applied to the output of the $3\times 3$ conv before the residual add
+- [[attention-mechanism]] — SE blocks are channel-wise soft attention; they learn which feature maps to emphasize given global context, analogous to learned feature reweighting
+- [[cnn-architectures-guide]] — SENet won ImageNet 2017; SE blocks are now standard in EfficientNet and MobileNetV3
+- [[arch-bottleneck-1x1]] — the excitation path uses two $1\times 1$ FC-equivalent layers with a bottleneck ratio $r$ to learn compact channel recalibration vectors
+- [[normalization-layers]] — SE blocks learn channel-wise rescaling at the feature level; batch normalization also rescales channels but uses statistics, not learned attention
+- [[arch-depthwise-separable]] — MobileNetV3 combines SE blocks with depthwise separable convolutions; the SE block adds channel attention at minimal parameter cost

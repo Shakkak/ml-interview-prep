@@ -4,6 +4,7 @@ tags: [diffusion-guidance, cfg, classifier-free-guidance, negative-prompting, sc
 aliases: [classifier-free guidance, CFG, classifier guidance, negative prompting, guidance scale]
 difficulty: 2
 status: complete
+depends_on: [diffusion-models, bayesian-inference]
 related: [diffusion-models, variational-autoencoders, contrastive-learning, loss-kl-divergence, clip]
 ---
 
@@ -22,6 +23,8 @@ Diffusion models learn $p(x)$ (unconditional). For useful generation we want $p(
 **Dhariwal & Nichol (2021)** showed that a pre-trained classifier $p_\phi(c | x_t)$ (trained on noisy images at each noise level $t$) can guide diffusion sampling:
 
 $$\tilde{\epsilon}_\theta(x_t, c) = \epsilon_\theta(x_t) - \sqrt{1 - \bar{\alpha}_t} \cdot \gamma \nabla_{x_t} \log p_\phi(c | x_t)$$
+
+where $\epsilon_\theta(x_t)$ = unconditional noise prediction (no class label), $\bar\alpha_t = \prod_{s=1}^t (1-\beta_s)$ = cumulative signal retention at step $t$ (defined in [[diffusion-models]]), $\gamma \geq 0$ = guidance scale (how strongly to follow the class), $\nabla_{x_t} \log p_\phi(c | x_t)$ = gradient of the log-classifier w.r.t. the current noisy image $x_t$ (points in the direction that increases the probability of class $c$), and $\tilde{\epsilon}$ = the guided noise estimate used for the reverse step.
 
 The gradient of the log-classifier pushes the denoised sample toward the class $c$. Scale $\gamma$ controls guidance strength — larger $\gamma$ = more class-consistent but less diverse.
 
@@ -43,7 +46,7 @@ At sampling, extrapolate away from the unconditional prediction:
 
 $$\tilde{\epsilon}_\theta(x_t, c) = \epsilon_\theta(x_t, \varnothing) + w \cdot (\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t, \varnothing))$$
 
-where $w \geq 1$ is the **guidance scale**. This is equivalent to sampling from $p(x|c)^{1+w} / p(x)^w$ — a sharpened conditional distribution.
+where $\epsilon_\theta(x_t, c)$ = noise prediction conditioned on prompt $c$, $\epsilon_\theta(x_t, \varnothing)$ = unconditional noise prediction (null/empty condition), and $w \geq 1$ = the **guidance scale** (how strongly to follow the condition). This is equivalent to sampling from $p(x|c)^{1+w} / p(x)^w$ — a sharpened conditional distribution.
 
 **Effect of guidance scale $w$:**
 - $w = 0$: unconditional generation
@@ -85,4 +88,10 @@ High guidance scale $w$ increases **Fréchet Inception Distance (FID)** on diver
 
 CFG extends naturally to video diffusion (condition = text + first frame, null = text only), 3D generation (SDS — Score Distillation Sampling in DreamFusion uses CFG guidance to optimize a NeRF), and audio generation (AudioLDM, MusicGen).
 
-*See also: [[diffusion-models]] · [[clip]] · [[variational-autoencoders]] · [[contrastive-learning]]*
+## Links
+
+- [[diffusion-models]] — guidance modifies the diffusion reverse process; classifier-free guidance scales the difference between conditional and unconditional noise predictions
+- [[bayesian-inference]] — classifier-free guidance is implicit Bayesian conditioning: scaling the score function is equivalent to raising the posterior temperature
+- [[clip]] — CLIP embeddings are the text condition in Stable Diffusion; CFG scale controls how strongly the generated image follows the CLIP text embedding
+- [[variational-autoencoders]] — latent diffusion models (Stable Diffusion) run the diffusion process in VAE latent space; guidance operates in that latent space
+- [[contrastive-learning]] — CLIP's contrastive pretraining creates the text-image alignment that makes text-to-image guidance possible

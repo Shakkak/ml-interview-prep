@@ -4,6 +4,7 @@ tags: [outlier-detection, anomaly-detection, isolation-forest, lof, statistical-
 aliases: [outlier detection, anomaly detection, novelty detection, IQR method, isolation forest, LOF]
 difficulty: 1
 status: complete
+depends_on: [distributions-overview, statistical-inference-mle]
 related: [anomaly-detection, feature-preprocessing, distributions-overview, clustering, hypothesis-testing]
 ---
 
@@ -26,12 +27,12 @@ related: [anomaly-detection, feature-preprocessing, distributions-overview, clus
 **Z-score:** standardize values and threshold by standard deviations from the mean:
 $$z_i = \frac{x_i - \mu}{\sigma}, \quad \text{outlier if } |z_i| > 3$$
 
-Assumes Gaussian distribution. Sensitive to the outliers themselves (they inflate $\mu$ and $\sigma$).
+where $x_i$ = the observed value, $\mu$ = sample mean, $\sigma$ = sample standard deviation, and $z_i$ = number of standard deviations from the mean. Assumes Gaussian distribution. Sensitive to the outliers themselves (they inflate $\mu$ and $\sigma$).
 
 **Modified Z-score (robust):** use median and MAD (Median Absolute Deviation):
 $$M_i = \frac{0.6745(x_i - \tilde{x})}{\text{MAD}}, \quad \text{MAD} = \text{median}(|x_i - \tilde{x}|)$$
 
-Threshold: $|M_i| > 3.5$. MAD is robust to outliers, making this method self-consistent.
+where $\tilde{x}$ = sample median, $\text{MAD}$ = Median Absolute Deviation (the median of absolute deviations from the median — a robust spread measure that ignores outlier inflation), and $0.6745$ = a scaling constant so that $M_i \approx z_i$ for Gaussian data (since $\text{MAD} \approx 0.6745\sigma$ for a Gaussian). Threshold: $|M_i| > 3.5$. MAD is robust to outliers, making this method self-consistent.
 
 **IQR method:** outlier if $x < Q_1 - 1.5 \cdot \text{IQR}$ or $x > Q_3 + 1.5 \cdot \text{IQR}$ (Tukey's fences). Box plots visualize this. Multiplier 3.0 for "far outliers."
 
@@ -49,7 +50,7 @@ Threshold: $|M_i| > 3.5$. MAD is robust to outliers, making this method self-con
 3. Repeat recursively until each point is isolated (in its own leaf) or a depth limit is reached
 4. **Anomaly score:** mean depth across many random trees; outliers have short isolation paths
 
-Score: $s(x) = 2^{-E[h(x)] / c(n)}$ where $h(x)$ is the tree depth, $c(n)$ is the expected depth for a random point. Scores near 1 = outlier; near 0.5 = normal.
+Score: $s(x) = 2^{-E[h(x)] / c(n)}$ where $h(x)$ = isolation depth of point $x$ in a single random tree (number of splits needed to isolate it), $E[h(x)]$ = expected depth averaged across all trees in the forest, $c(n) = 2\ln(n-1) + 0.5772 - 2(n-1)/n$ = expected depth of an unsuccessful binary search tree of size $n$ (the normalization constant ensuring scores are in $(0, 1)$), and $n$ = number of training points. Scores near 1 = outlier (short isolation path); near 0.5 = normal (average depth); near 0 = certain inlier.
 
 **Properties:**
 - Linear $O(n \log n)$ complexity
@@ -91,4 +92,11 @@ Outlier detectors produce **scores**, not binary labels. Setting the threshold r
 
 **Operational consideration:** in fraud detection, the cost of a false negative (missed fraud) is far higher than a false positive (blocked legitimate transaction). Set threshold based on the cost matrix, not accuracy.
 
-*See also: [[anomaly-detection]] · [[clustering]] · [[feature-preprocessing]] · [[hypothesis-testing]]*
+## Links
+
+- [[distributions-overview]] — statistical outlier detection (IQR, Z-score) assumes a known distribution; the thresholds derive from quantiles of that distribution
+- [[statistical-inference-mle]] — parametric outlier detection fits a distribution via MLE and flags examples with low log-likelihood; the threshold is a chi-squared quantile
+- [[anomaly-detection]] — anomaly detection is the generative/probabilistic counterpart; outlier detection covers simpler rule-based and proximity-based methods
+- [[clustering]] — LOF (Local Outlier Factor) measures density relative to neighbors; it is a clustering-proximity method without an explicit generative model
+- [[feature-preprocessing]] — outlier detection is sensitive to feature scale; standardize before computing distance-based scores (LOF, k-NN distance)
+- [[hypothesis-testing]] — Grubbs test and Dixon Q-test formalize outlier detection as hypothesis tests with $p$-values; they require distributional assumptions

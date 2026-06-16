@@ -5,6 +5,7 @@ aliases: [copula, Gaussian copula, Archimedean copula, Sklar's theorem, tail dep
 difficulty: 2
 status: complete
 related: [distributions-overview, distributions-gaussian, monte-carlo-methods, bayesian-inference, change-of-variables]
+depends_on: [distributions-overview, distributions-gaussian, change-of-variables]
 ---
 
 # Copulas
@@ -83,6 +84,8 @@ High-dimensional copulas are hard to parameterize. **Vine (pair-copula) construc
 
 $$f(x_1, \ldots, x_d) = \prod_{k=1}^{d-1}\prod_{e \in \mathcal{E}_k} c_{j(e),k(e)|D(e)}$$
 
+where $\mathcal{E}_k$ = set of edges in tree $k$ of the vine structure, $e$ = an edge connecting two nodes, $j(e)$ and $k(e)$ = the two variable indices linked by edge $e$, $D(e)$ = the conditioning set of variables (the "separator set" shared by the two nodes $j(e)$ and $k(e)$), and $c_{j(e),k(e)|D(e)}$ = the bivariate copula density for variables $j(e)$ and $k(e)$ given $D(e)$.
+
 where each term is a bivariate copula density conditioning on a set $D(e)$. The vine structure (C-vine, D-vine, R-vine) specifies which pairs to model at each level. Allows flexible high-dimensional modeling by decomposing into tractable 2D pieces.
 
 ### Applications in ML
@@ -93,4 +96,10 @@ where each term is a bivariate copula density conditioning on a set $D(e)$. The 
 
 **Multi-task learning:** copulas model task correlations when tasks have different output distributions.
 
-*See also: [[distributions-overview]] · [[monte-carlo-methods]] · [[change-of-variables]] · [[bayesian-inference]]*
+## Links
+
+- [[distributions-overview]] — Sklar's theorem says every joint distribution can be decomposed into marginals + a copula; copulas separate the dependence structure from individual marginal choices
+- [[distributions-gaussian]] — the Gaussian copula models linear correlation; it underestimated tail dependence in the 2008 financial crisis because it assumes joint Gaussianity in the tails
+- [[change-of-variables]] — copulas are defined on $[0,1]^d$ via the probability integral transform $U_i = F_i(X_i)$; transforming to uniform marginals uses the CDF change-of-variables
+- [[monte-carlo-methods]] — copulas are sampled via conditional inversion; Archimedean copulas have a closed-form sampling algorithm using Laplace transforms
+- [[bayesian-inference]] — copulas are used as prior models for multi-task correlation in Bayesian models; they allow flexible dependence without specifying a full multivariate likelihood

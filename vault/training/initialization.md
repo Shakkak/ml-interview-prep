@@ -4,6 +4,7 @@ tags: [training, initialization, variance, deep-learning]
 aliases: [Xavier initialization, He initialization, Glorot, Kaiming, weight init]
 difficulty: 2
 status: complete
+depends_on: [backpropagation, activation-relu-variants, linear-algebra-fundamentals]
 related: [backpropagation, backpropagation-advanced, normalization-layers, activation-relu-variants, activation-sigmoid-tanh, activation-gelu-swish, optimizer-adam, regularization-weight-decay]
 ---
 
@@ -31,11 +32,15 @@ For a single linear layer $y = Wx$ with no activation, where $W \in \mathbb{R}^{
 
 $$\text{Var}(y_i) = \text{Var}\!\left(\sum_j W_{ij} x_j\right) = n_{in} \cdot \text{Var}(W_{ij}) \cdot \text{Var}(x_j)$$
 
+where $n_{in}$ = number of input neurons (fan-in), $W_{ij}$ = weight connecting input $j$ to output $i$, $x_j$ = input value at neuron $j$, and the equality $n_{in} \cdot \text{Var}(W) \cdot \text{Var}(x)$ follows because the sum of $n_{in}$ independent terms each with variance $\text{Var}(W)\cdot\text{Var}(x)$ has total variance $n_{in} \cdot \text{Var}(W)\cdot\text{Var}(x)$.
+
 assuming $W_{ij}$ and $x_j$ are i.i.d. and zero-mean, $\text{Cov}(W_{ij}, x_j) = 0$.
 
 For variance preservation ($\text{Var}(y) = \text{Var}(x)$), we need:
 
 $$\text{Var}(W_{ij}) = \frac{1}{n_{in}}$$
+
+where $n_{in}$ = fan-in (number of input connections to each neuron), $1/n_{in}$ = variance that keeps output variance = input variance for a linear layer with zero-mean inputs.
 
 This is the **LeCun initialization** — optimal for linear activations. In practice, initialize $W_{ij} \sim \mathcal{N}(0, 1/n_{in})$ or $\text{Uniform}(-\sqrt{3/n_{in}}, \sqrt{3/n_{in}})$.
 
@@ -54,6 +59,8 @@ These two requirements are incompatible when $n_{in} \neq n_{out}$. The Xavier c
 
 $$\text{Var}(W_{ij}) = \frac{2}{n_{in} + n_{out}}$$
 
+where $n_{in}$ = number of input neurons (fan-in) and $n_{out}$ = number of output neurons (fan-out). The factor 2 comes from averaging the forward ($1/n_{in}$) and backward ($1/n_{out}$) preservation requirements; the harmonic mean $2/(n_{in}+n_{out})$ is their compromise.
+
 **In practice:**
 - Normal: $W \sim \mathcal{N}\!\left(0, \sqrt{\frac{2}{n_{in} + n_{out}}}\right)$
 - Uniform: $W \sim \text{Uniform}\!\left(-\sqrt{\frac{6}{n_{in} + n_{out}}}, \sqrt{\frac{6}{n_{in} + n_{out}}}\right)$
@@ -66,9 +73,13 @@ ReLU zeroes half its inputs — this halves the variance at each layer. The forw
 
 $$\text{Var}(y_i) = n_{in} \cdot \text{Var}(W_{ij}) \cdot \text{Var}(x_j) \cdot \underbrace{\mathbb{E}[\mathbf{1}[z_j > 0]]}_{\approx 1/2}$$
 
+where $\mathbb{E}[\mathbf{1}[z_j > 0]] \approx 1/2$ = probability that a pre-activation is positive (ReLU active), which halves the effective variance contribution from each unit.
+
 To compensate for the factor of $1/2$:
 
 $$\text{Var}(W_{ij}) = \frac{2}{n_{in}}$$
+
+where factor 2 compensates for ReLU zeroing half the units on average, $n_{in}$ = fan-in.
 
 This is **He initialization** (He et al., 2015), also called Kaiming init:
 
@@ -121,6 +132,8 @@ For a model with $L$ transformer layers, the residual stream accumulates $2L$ su
 
 $$\text{std} = \frac{0.02}{\sqrt{2L}}$$
 
+where $L$ = number of transformer layers, $2L$ = number of residual contributions (attention + FFN per layer), $0.02$ = baseline std matching the embedding initialization.
+
 This ensures the sum of $2L$ independent contributions has std $\approx 0.02$, matching the embedding layer's std and maintaining consistent activation scale throughout the network at initialization.
 
 **Maximal Update Parameterization ($\mu$P, Yang et al., 2022):** addresses initialization and learning rate jointly. $\mu$P derives initialization and LR scales as a function of width $d$ and depth $L$ such that:
@@ -138,4 +151,12 @@ With BatchNorm, the actual activation scale is reset to $(0, 1)$ after each laye
 
 ---
 
-*See also: [[backpropagation-advanced]] · [[normalization-layers]] · [[activation-relu-variants]] · [[activation-gelu-swish]] · [[regularization-weight-decay]]*
+## Links
+
+- [[backpropagation]] — initialization determines the starting gradient magnitudes that backprop multiplies through every layer
+- [[activation-relu-variants]] — He initialization compensates for ReLU zeroing half its inputs; each activation requires different variance
+- [[linear-algebra-fundamentals]] — variance analysis uses linearity of expectation and independence of weights; QR factorization gives orthogonal init
+- [[backpropagation-advanced]] — vanishing/exploding gradient analysis through Jacobian products motivates the variance target
+- [[normalization-layers]] — BatchNorm relaxes initialization sensitivity; zero-gamma trick stabilizes very deep ResNets
+- [[activation-gelu-swish]] — GELU/Swish are smooth so Xavier-style analysis applies (unlike ReLU's hard zero)
+- [[regularization-weight-decay]] — initialization scale and weight decay interact; large initial weights + large decay can collapse representations

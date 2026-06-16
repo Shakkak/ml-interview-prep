@@ -5,6 +5,7 @@ aliases: [anomaly detection, out-of-distribution detection, novelty detection, o
 difficulty: 2
 status: complete
 related: [self-supervised-overview, contrastive-learning, distributions-gaussian, evaluation-metrics-guide]
+depends_on: [distributions-gaussian, statistical-inference-mle, evaluation-metrics-guide]
 ---
 
 # Anomaly Detection
@@ -25,7 +26,7 @@ Given a dataset of **normal** examples, detect when a new example is abnormal. K
 
 **Method 1 — Reconstruction-based:** train an autoencoder or U-Net on normal data only. Assumption: the model learns to reconstruct normal patterns well; anomalies reconstruct poorly.
 
-Anomaly score: $s(x) = \|x - \hat{x}\|_2^2$ (reconstruction error). Flag $x$ as anomalous if $s(x) > \tau$.
+Anomaly score: $s(x) = \|x - \hat{x}\|_2^2$ (reconstruction error). Flag $x$ as anomalous if $s(x) > \tau$, where $x$ = input, $\hat{x}$ = reconstructed output, $\tau$ = detection threshold chosen on a validation set.
 
 Variants: [[variational-autoencoders|VAE]] uses ELBO as anomaly score ($-\log p(x)$ under the model). PatchWise computes reconstruction error per spatial patch, producing a localization map.
 
@@ -36,6 +37,8 @@ Weakness: very expressive decoders can sometimes reconstruct anomalies well — 
 Deep SVDD trains a neural network to map normal data into a compact sphere centered at a fixed point $c$:
 
 $$\mathcal{L} = \frac{1}{n}\sum_i \|f(x_i) - c\|^2$$
+
+where $f$ = neural network mapping inputs to embedding space, $c$ = fixed hypersphere center (initialized from mean of initial feature vectors), $n$ = number of normal training samples.
 
 Hypersphere collapse: if $f$ learns $f(x) = c$ for all inputs (trivial), the loss is zero. Fix: initialize $c$ from the mean of initial feature vectors; do not use bias in the last layer (would allow shifting to $c$ trivially).
 
@@ -67,6 +70,8 @@ Why it works: pretrained CNN features already encode rich visual information. No
 [[normalizing-flows|Normalizing flows]] learn an invertible mapping $f: x \mapsto z$ such that $z \sim \mathcal{N}(0,I)$:
 
 $$\log p(x) = \log p_z(f(x)) + \log|\det J_f(x)|$$
+
+where $p_z$ = standard Normal density on latent space, $f$ = invertible flow network, $J_f(x)$ = Jacobian of $f$ at $x$, and $\log|\det J_f(x)|$ = log volume scaling from the change of variables.
 
 Both terms are tractable. Anomaly score: $-\log p(x)$. Advantage over reconstruction: gives exact likelihoods rather than proxy distances.
 
@@ -106,4 +111,12 @@ Train on normal data with a [[self-supervised-overview|self-supervised]] pretext
 
 ---
 
-*See also: [[self-supervised-overview]] · [[contrastive-learning]] · [[distributions-gaussian]] · [[evaluation-metrics-guide]] · [[variational-autoencoders]] · [[normalizing-flows]] · [[clip]]*
+## Links
+
+- [[distributions-gaussian]] — density-based anomaly detection (GMM, Mahalanobis distance) assumes normality; anomalies are points with low log-likelihood $\log p(x)$ under the fitted Gaussian
+- [[statistical-inference-mle]] — anomaly scores are often derived from likelihood: MLE fits a density to normal data, then flags low-likelihood points as anomalies
+- [[evaluation-metrics-guide]] — anomaly detection is evaluated with AUROC and AUPRC on the anomaly score; F1 requires choosing a threshold, which depends on the anomaly budget
+- [[self-supervised-overview]] — self-supervised anomaly detection trains on normal data only; the model fails to reconstruct (or represent) anomalies, so reconstruction error becomes the score
+- [[contrastive-learning]] — contrastive SSL learns compact normal-class representations; anomalies fall far from the normal cluster in embedding space
+- [[variational-autoencoders]] — VAE-based anomaly detection uses reconstruction error + KL divergence as the anomaly score; the KL term catches anomalies that are easy to reconstruct but have unusual latent codes
+- [[normalizing-flows]] — normalizing flows compute exact likelihoods; anomaly detection simply thresholds $\log p(x)$; the exact score is both an advantage and a risk (bits-back coding artefacts)

@@ -5,6 +5,7 @@ aliases: [hyperparameter tuning, HPO, Bayesian optimization, Hyperband, ASHA, ne
 difficulty: 2
 status: complete
 related: [cross-validation, bias-variance-double-descent, gaussian-processes, optimizer-lr-schedules, generalization-bounds]
+depends_on: [cross-validation, gaussian-processes, bayesian-inference]
 ---
 
 # Hyperparameter Optimization
@@ -43,8 +44,8 @@ related: [cross-validation, bias-variance-double-descent, gaussian-processes, op
 5. Repeat from step 2
 
 **Acquisition functions:**
-- **Expected Improvement (EI):** $\mathbb{E}[\max(y_\text{next} - y^*, 0)]$ — expected gain over current best $y^*$
-- **Upper Confidence Bound (UCB):** $\mu(\lambda) + \kappa \sigma(\lambda)$ — exploration-exploitation tradeoff
+- **Expected Improvement (EI):** $\mathbb{E}[\max(y_\text{next} - y^*, 0)]$ — expected gain over current best $y^*$, where $y^*$ = best validation score seen so far, $y_\text{next}$ = predicted score at the next configuration
+- **Upper Confidence Bound (UCB):** $\mu(\lambda) + \kappa \sigma(\lambda)$ — where $\mu(\lambda)$ = GP posterior mean, $\sigma(\lambda)$ = GP posterior standard deviation, $\kappa$ = exploration coefficient (high $\kappa$ explores uncertain regions)
 - **Thompson Sampling:** sample one realization from the GP posterior, maximize it
 
 **BO scales well** to 5–20 hyperparameters and typically finds good solutions in 50–200 evaluations vs thousands for random search.
@@ -84,4 +85,10 @@ This is a principled version of "train briefly and keep the promising ones." Use
 
 **Warm-starting from similar tasks:** initialize the BO surrogate with results from similar tasks (e.g., same model, different dataset). Reduces required evaluations significantly.
 
-*See also: [[cross-validation]] · [[gaussian-processes]] · [[optimizer-lr-schedules]] · [[bias-variance-double-descent]]*
+## Links
+
+- [[cross-validation]] — HPO uses CV to evaluate each hyperparameter configuration; the CV score is the acquisition function's "truth value" that the surrogate model learns to predict
+- [[gaussian-processes]] — Bayesian Optimization uses a GP as the surrogate model: GP posterior gives a mean prediction and uncertainty for each hyperparameter configuration
+- [[bayesian-inference]] — the BO acquisition function (EI, UCB) balances exploration (uncertainty) and exploitation (expected improvement) using the GP posterior
+- [[optimizer-lr-schedules]] — the learning rate schedule is itself a hyperparameter; HPO often jointly optimizes initial LR, decay schedule, and warmup steps
+- [[bias-variance-double-descent]] — the regularization coefficient $\lambda$ and model capacity are the primary hyperparameters controlling the bias-variance tradeoff; HPO finds the optimal tradeoff

@@ -4,6 +4,7 @@ tags: [generative-models, deep-learning, probabilistic-modeling, score-matching,
 aliases: [DDPM, score matching, denoising diffusion, DDIM, latent diffusion, classifier-free guidance]
 difficulty: 2
 status: complete
+depends_on: [variational-autoencoders, distributions-gaussian, loss-mse]
 related: [variational-autoencoders, bayesian-inference, unet, normalizing-flows, activation-gelu-swish]
 ---
 
@@ -21,11 +22,15 @@ Given a data point $x_0 \sim q(x_0)$, define a Markov chain that gradually adds 
 
 $$q(x_t \mid x_{t-1}) = \mathcal{N}\!\left(x_t;\, \sqrt{1-\beta_t}\,x_{t-1},\, \beta_t I\right)$$
 
+where $x_0$ = original clean data point, $x_t$ = noisy version after $t$ steps, $\beta_t \in (0,1)$ = noise schedule at step $t$ (controls how much noise is added at each step — small at first, increasing over time), $\sqrt{1-\beta_t}$ = scaling factor that shrinks the signal so that total energy stays constant, and $\beta_t I$ = variance of the added Gaussian noise (isotropic, same in all dimensions).
+
 $\beta_t$ is the noise schedule (small, increases over time). After $T=1000$ steps, $x_T \approx \mathcal{N}(0,I)$.
 
 **Closed-form sampling at any timestep:** define $\alpha_t = 1-\beta_t$, $\bar\alpha_t = \prod_{s=1}^t \alpha_s$:
 
 $$\boxed{x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon, \quad \epsilon \sim \mathcal{N}(0,I)}$$
+
+where $\alpha_t = 1 - \beta_t$ (signal retention at step $t$), $\bar\alpha_t = \prod_{s=1}^t \alpha_s$ (cumulative product — fraction of original signal remaining after $t$ steps), $\sqrt{\bar\alpha_t}$ = how much of the clean image $x_0$ survives, $\sqrt{1-\bar\alpha_t}$ = noise magnitude at step $t$, and $\epsilon \sim \mathcal{N}(0,I)$ = a single standard Gaussian sample (the combined noise from all $t$ steps telescopes into one).
 
 > [!tip] Why the noise telescopes to $\sqrt{1-\bar\alpha_t}$ ([[distributions-gaussian]])
 > Each step: $x_t = \sqrt{\alpha_t}\,x_{t-1} + \sqrt{1-\alpha_t}\,\epsilon_t$.
@@ -41,6 +46,8 @@ This allows sampling $x_t$ directly from $x_0$ without simulating all $t$ interm
 Train a [[unet|U-Net]] $\epsilon_\theta(x_t, t)$ to predict the noise $\epsilon$ that was added:
 
 $$\boxed{\mathcal{L}_{\text{simple}} = \mathbb{E}_{t,\,x_0,\,\epsilon}\left[\|\epsilon - \epsilon_\theta(\sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon,\, t)\|^2\right]}$$
+
+where $\epsilon$ = the noise actually added (ground truth), $\epsilon_\theta(\cdot, t)$ = the neural network's prediction of that noise given the noisy image $x_t$ and timestep $t$, and $\|\cdot\|^2$ = squared L2 norm (mean squared error). The expectation is over random timesteps $t$, data points $x_0$, and noise samples $\epsilon$.
 
 **Algorithm:** (1) sample $x_0$ from data; (2) sample random $t$ and noise $\epsilon$; (3) compute $x_t$; (4) predict $\hat\epsilon = \epsilon_\theta(x_t, t)$; (5) backprop on [[loss-mse|MSE]]. Just supervised regression — no adversarial training, no [[bayesian-inference|posterior]] approximation.
 
@@ -59,6 +66,8 @@ $$\boxed{\mathcal{L}_{\text{simple}} = \mathbb{E}_{t,\,x_0,\,\epsilon}\left[\|\e
 **DDPM reverse step:**
 $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}}\!\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon_\theta(x_t,t)\right) + \sqrt{\tilde\beta_t}\,z, \quad z \sim \mathcal{N}(0,I)$$
 
+where $\alpha_t = 1 - \beta_t$, $\tilde\beta_t = \frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}\beta_t$ = posterior variance (computed from the schedule), and $z \sim \mathcal{N}(0,I)$ = fresh noise injected at each step (makes the reverse process stochastic). The $\frac{\beta_t}{\sqrt{1-\bar\alpha_t}}$ coefficient rescales the predicted noise to correct the signal.
+
 Requires 1000 steps — slow.
 
 **DDIM (Song et al., 2020):** deterministic non-Markovian update that uses the same trained $\epsilon_\theta$:
@@ -71,6 +80,8 @@ $$x_{t-1} = \sqrt{\bar\alpha_{t-1}}\underbrace{\left(\frac{x_t - \sqrt{1-\bar\al
 Train the same model jointly on conditioned and unconditioned inputs (10% of training examples, drop the condition $c$ and replace with null token $\emptyset$). At inference, linearly extrapolate:
 
 $$\hat\epsilon = \epsilon_\theta(x_t, \emptyset) + w\!\left(\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t, \emptyset)\right)$$
+
+where $\epsilon_\theta(x_t, c)$ = conditional noise prediction (given the text/class condition $c$), $\epsilon_\theta(x_t, \emptyset)$ = unconditional noise prediction (condition replaced with null token), $w$ = guidance scale (how strongly to follow the condition), and $\hat\epsilon$ = the guided noise prediction used for the reverse step. When $w=1$, reverts to pure conditional; when $w=0$, reverts to unconditional.
 
 Guidance scale $w > 1$ amplifies the conditioning signal — trades diversity for fidelity. In practice $w \in [5, 12]$ for text-to-image. Single model, no separate classifier needed.
 
@@ -115,4 +126,13 @@ The only remaining advantage of GANs is single-step inference. Consistency Model
 
 ---
 
-*See also: [[variational-autoencoders]] · [[unet]] · [[normalizing-flows]] · [[bayesian-inference]] · [[distributions-gaussian]] · [[attention-mechanism]] · [[clip]] · [[loss-mse]]*
+## Links
+
+- [[variational-autoencoders]] — VAEs also learn latent representations but use a single-step ELBO; diffusion models use a T-step Markov chain of noising
+- [[distributions-gaussian]] — the forward noising process adds Gaussian noise at each step; the reverse process predicts Gaussian noise
+- [[loss-mse]] — diffusion training minimizes MSE between predicted and actual noise; the simplified objective discards time-step weighting
+- [[normalizing-flows]] — flows compute exact log-likelihood; diffusion models compute a variational lower bound analogous to the VAE ELBO
+- [[bayesian-inference]] — the reverse denoising process is a learned posterior; classifier-free guidance is Bayesian conditioning on the class label
+- [[unet]] — the standard noise-prediction backbone; skip connections preserve spatial structure across scales at each denoising step
+- [[attention-mechanism]] — U-Net variants add self-attention at lower spatial resolutions for long-range coherence in generated images
+- [[clip]] — text conditioning in Stable Diffusion is done via CLIP embeddings injected into the U-Net through cross-attention

@@ -5,6 +5,7 @@ aliases: [curse of dimensionality, high-dimensional geometry, distance concentra
 difficulty: 2
 status: complete
 related: [linear-algebra-fundamentals, eigenvalues-pca, math-svd, distributions-gaussian]
+depends_on: [linear-algebra-fundamentals, distributions-gaussian]
 ---
 
 # Curse of Dimensionality
@@ -101,4 +102,11 @@ for all pairs from $n$ points. This is the theoretical basis for random hashing 
 
 ---
 
-*See also: [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[math-svd]] · [[distributions-gaussian]] · [[kernel-methods]] · [[variational-autoencoders]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — volume of a hypercube scales as $r^d$; for a unit hypersphere, volume → 0 as $d \to \infty$; the curse is fundamentally a geometric phenomenon in high-dimensional vector spaces
+- [[distributions-gaussian]] — in high dimensions, Gaussian samples concentrate on a thin shell at radius $\approx\sqrt{d}$; the center of the distribution has near-zero probability mass
+- [[eigenvalues-pca]] — PCA addresses the curse by projecting data onto the top-$k$ principal components; the effective dimensionality is the number of large eigenvalues
+- [[kernel-methods]] — kernel methods avoid explicit high-dimensional feature maps using the kernel trick; however, kernels like RBF still suffer from the curse for very high $d$
+- [[manifold-learning]] — the manifold hypothesis argues data lies on a low-dimensional manifold in high-dimensional space; manifold learning bypasses the curse by working in intrinsic coordinates
+- [[variational-autoencoders]] — VAE latent spaces are low-dimensional by design; the encoder compresses high-dimensional inputs to a low-dimensional bottleneck, escaping the curse

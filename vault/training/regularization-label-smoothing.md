@@ -5,6 +5,7 @@ aliases: [label smoothing, soft labels]
 difficulty: 2
 status: complete
 related: [loss-cross-entropy, regularization-dropout, activation-softmax, model-calibration, knowledge-distillation]
+depends_on: [loss-cross-entropy, activation-softmax, entropy-mutual-info]
 ---
 
 # Label Smoothing
@@ -23,6 +24,8 @@ where $\varepsilon$ is the smoothing factor (typically 0.1) and $K$ is the numbe
 
 **Equivalently:**
 $$\mathcal{L}_{\text{LS}} = (1-\varepsilon)\,\mathcal{L}_{\text{CE}} + \varepsilon\cdot H(\text{Uniform}, p)$$
+
+where $\mathcal{L}_{\text{CE}}$ = standard cross-entropy with hard labels, $H(\text{Uniform}, p)$ = cross-entropy from the uniform distribution to model predictions (penalty for overconfidence), $\varepsilon$ = smoothing weight.
 
 Label smoothing = standard cross-entropy + penalty for KL distance from uniform — the model is discouraged from being arbitrarily confident.
 
@@ -48,6 +51,8 @@ With hard labels, the loss-minimizing model drives $z_y - z_k \to \infty$ for al
 With label smoothing, the optimal logit gap is **finite**:
 
 $$z_y - z_k = \log\frac{(K-1)(1-\varepsilon)}{\varepsilon}$$
+
+where $z_y$ = logit for the true class, $z_k$ = logit for any other class, $K$ = number of classes, $\varepsilon$ = smoothing factor, the ratio $(K-1)(1-\varepsilon)/\varepsilon$ sets the finite maximum confidence the model can express.
 
 For ImageNet ($K = 1000$, $\varepsilon = 0.1$): gap $= \log\frac{999 \times 0.9}{0.1} = \log 8991 \approx 9.1$ nats. The optimizer has a well-defined fixed point; logits cannot diverge.
 
@@ -98,4 +103,11 @@ Mixup training $(\tilde{x}, \tilde{y}) = (\lambda x_i + (1-\lambda)x_j,\; \lambd
 
 ---
 
-*See also: [[loss-cross-entropy]] · [[activation-softmax]] · [[model-calibration]] · [[knowledge-distillation]] · [[regularization-dropout]] · [[entropy-mutual-info]] · [[maximum-entropy-principle]]*
+## Links
+
+- [[loss-cross-entropy]] — label smoothing replaces one-hot target $y=1$ with $(1-\epsilon) + \epsilon/K$ and $y=0$ with $\epsilon/K$; the cross-entropy loss is computed against these soft targets
+- [[activation-softmax]] — without label smoothing, cross-entropy pushes logits to $\pm\infty$; label smoothing caps the maximum achievable softmax confidence at $(1-\epsilon)$, preventing overconfidence
+- [[entropy-mutual-info]] — label smoothing is equivalent to minimizing $H(\tilde{y}, \hat{y}) = (1-\epsilon)H(y,\hat{y}) + \epsilon H(\text{Uniform},\hat{y})$; the uniform entropy term prevents zero-entropy (overconfident) predictions
+- [[model-calibration]] — label smoothing improves calibration by preventing the model from being maximally confident; ECE decreases when label smoothing is applied
+- [[knowledge-distillation]] — Hinton's knowledge distillation produces soft targets from the teacher's logits; this is conceptually similar to label smoothing but uses teacher knowledge rather than uniform noise
+- [[maximum-entropy-principle]] — label smoothing is a MaxEnt regularizer: it encourages the label distribution to have higher entropy, which corresponds to more uniform predictions for uncertain examples

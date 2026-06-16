@@ -5,6 +5,7 @@ aliases: [calibration, reliability diagram, ECE, temperature scaling, overconfid
 difficulty: 2
 status: complete
 related: [evaluation-metrics-guide, statistical-inference-mle, activation-softmax, bayesian-inference, regularization-label-smoothing]
+depends_on: [activation-softmax, statistical-inference-mle, bayesian-inference]
 ---
 
 # Model Calibration
@@ -28,6 +29,8 @@ Perfect calibration = points on the diagonal $y = x$. Overconfident model (commo
 
 **Expected Calibration Error (ECE):**
 $$\text{ECE} = \sum_{b=1}^B \frac{|B_b|}{n} \left|\text{acc}(B_b) - \text{conf}(B_b)\right|$$
+
+where $B$ = number of confidence bins, $B_b$ = set of examples in bin $b$, $|B_b|$ = bin count, $n$ = total examples, $\text{acc}(B_b)$ = fraction correct in bin $b$, $\text{conf}(B_b)$ = mean predicted confidence in bin $b$.
 
 Weighted average absolute gap between confidence and accuracy across bins. Lower = better; 0 = perfect.
 
@@ -54,6 +57,8 @@ $\text{ECE} = \frac{2}{5}(0.15) + \frac{3}{5}(0.27) = 0.06 + 0.162 = 0.22$.
 **Temperature scaling** — the simplest and most effective fix:
 
 $$\hat{p}_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$
+
+where $z_i$ = raw logit for class $i$, $T > 1$ = temperature (learned scalar), and dividing by $T$ softens the distribution — larger $T$ → flatter probabilities → less overconfident.
 
 Find $T > 1$ by minimizing NLL on a held-out validation set with $T$ as the only free parameter. Does not change accuracy (argmax is invariant to scaling). $T=1$ is the original softmax; $T>1$ flattens the distribution.
 
@@ -116,4 +121,11 @@ for any test distribution, with no distributional assumptions. The coverage guar
 
 ---
 
-*See also: [[evaluation-metrics-guide]] · [[activation-softmax]] · [[regularization-label-smoothing]] · [[bayesian-inference]] · [[loss-cross-entropy]]*
+## Links
+
+- [[activation-softmax]] — the softmax output is a probability distribution; well-calibrated models have softmax confidence = empirical accuracy, but modern networks are systematically overconfident
+- [[statistical-inference-mle]] — cross-entropy minimization (MLE) maximizes likelihood but doesn't directly optimize calibration; NLL minimization and calibration align in the limit but diverge in practice
+- [[bayesian-inference]] — Bayesian neural networks are better calibrated by construction; the posterior over weights marginalizes out uncertainty rather than collapsing to a point estimate
+- [[evaluation-metrics-guide]] — ECE (Expected Calibration Error) measures calibration by binning confidence scores; a perfectly calibrated model has ECE = 0
+- [[regularization-label-smoothing]] — label smoothing replaces one-hot targets with $(1-\epsilon)$ on the correct class and $\epsilon/(K-1)$ on others; this prevents the model from pushing logits to $\pm\infty$ and improves calibration
+- [[loss-cross-entropy]] — calibrated cross-entropy requires the model's confidence to match empirical frequencies; temperature scaling $T > 1$ divides logits to soften the softmax and reduce overconfidence

@@ -5,6 +5,7 @@ aliases: [clustering, k-means, DBSCAN, hierarchical clustering, Gaussian mixture
 difficulty: 2
 status: complete
 related: [distributions-gaussian, eigenvalues-pca, curse-of-dimensionality, evaluation-metrics-guide, bayesian-inference, distributions-overview, ensemble-methods]
+depends_on: [distributions-gaussian, linear-algebra-fundamentals, statistical-inference-mle]
 ---
 
 # Clustering
@@ -52,6 +53,8 @@ where $\mu_j$ is the centroid of cluster $C_j$.
 **Silhouette score:** for each point $i$, let $a(i)$ = mean distance to points in the same cluster, $b(i)$ = mean distance to points in the nearest other cluster:
 
 $$s(i) = \frac{b(i) - a(i)}{\max(a(i),\, b(i))} \in [-1, 1]$$
+
+where $a(i)$ = mean distance from point $i$ to all points in its own cluster, $b(i)$ = mean distance to points in the nearest other cluster, $s(i) \in [-1,1]$ = silhouette coefficient (higher = better).
 
 $s(i) \approx 1$: well-clustered; $s(i) \approx 0$: on a boundary; $s(i) < 0$: likely mis-assigned. Average silhouette over all points peaks at the best $k$.
 
@@ -110,6 +113,8 @@ where $\pi_j$ are mixing weights ($\sum_j \pi_j = 1$). The responsibility of com
 
 $$r_{ij} = \frac{\pi_j\, \mathcal{N}(x_i;\, \mu_j, \Sigma_j)}{\sum_{l=1}^k \pi_l\, \mathcal{N}(x_i;\, \mu_l, \Sigma_l)}$$
 
+where $r_{ij}$ = posterior probability ("responsibility") that component $j$ generated point $x_i$, numerator = weighted likelihood of $x_i$ under component $j$, denominator = total likelihood (normalizer).
+
 Fit via **Expectation-Maximization (EM)**:
 - **E-step:** compute responsibilities $r_{ij}$ using current parameters.
 - **M-step:** update $\mu_j$, $\Sigma_j$, $\pi_j$ as weighted averages over all points.
@@ -149,4 +154,12 @@ As $d \to \infty$, Euclidean distances concentrate: $\max_i d(x, x_i) / \min_i d
 
 ---
 
-*See also: [[curse-of-dimensionality]] · [[eigenvalues-pca]] · [[distributions-gaussian]] · [[bayesian-inference]] · [[evaluation-metrics-guide]] · [[anomaly-detection]] · [[ensemble-methods]]*
+## Links
+
+- [[distributions-gaussian]] — Gaussian mixture models are soft-assignment clustering; k-means is hard-assignment GMM with isotropic equal-variance components
+- [[linear-algebra-fundamentals]] — spectral clustering (Laplacian Eigenmaps) eigendecomposes the graph Laplacian matrix; the top-$k$ eigenvectors define the $k$-dimensional embedding for k-means
+- [[statistical-inference-mle]] — the silhouette score and within-cluster SSE are model selection criteria for choosing $k$; there is no likelihood to maximize in hard k-means
+- [[eigenvalues-pca]] — dimensionality reduction (PCA) before clustering mitigates the curse of dimensionality; the top principal components capture most cluster structure
+- [[curse-of-dimensionality]] — distance-based clustering (k-means, DBSCAN) degrades in high dimensions as all pairwise distances converge; dimensionality reduction is a prerequisite
+- [[evaluation-metrics-guide]] — clustering evaluation uses internal metrics (silhouette, Davies-Bouldin) when labels are unavailable, or ARI/NMI when labels are known
+- [[anomaly-detection]] — DBSCAN naturally identifies outliers as points with fewer than `min_samples` neighbors within `eps`; these are labeled as noise, not assigned to a cluster

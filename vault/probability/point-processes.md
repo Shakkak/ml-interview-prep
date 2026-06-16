@@ -5,6 +5,7 @@ aliases: [Poisson process, Hawkes process, temporal point process, counting proc
 difficulty: 2
 status: complete
 related: [distributions-overview, markov-chains, monte-carlo-methods, bayesian-inference, rnn-lstm]
+depends_on: [distributions-overview, markov-chains, bayesian-inference]
 ---
 
 # Point Processes
@@ -80,4 +81,10 @@ Maximum likelihood estimation of Hawkes process parameters is straightforward wh
 
 Extension to 2D: a **spatial Poisson process** with intensity $\lambda(x, y)$ models the distribution of locations (e.g., trees in a forest, crime locations, stars). The **K-function** and **pair correlation function** measure spatial clustering or repulsion beyond the Poisson baseline.
 
-*See also: [[distributions-overview]] · [[markov-chains]] · [[monte-carlo-methods]] · [[rnn-lstm]]*
+## Links
+
+- [[distributions-overview]] — the Poisson process is a Poisson distribution over counts in intervals; the waiting time between events follows an Exponential distribution
+- [[markov-chains]] — Markov modulated Poisson processes have intensity governed by a Markov chain; this allows temporal clustering and state-switching behavior
+- [[bayesian-inference]] — Bayesian inference for the intensity function uses Gaussian process priors; the posterior intensity is a GP conditioned on observed event times
+- [[monte-carlo-methods]] — Poisson process simulation uses the thinning algorithm; Hawkes processes are simulated by sequential thinning of the conditional intensity
+- [[rnn-lstm]] — neural point processes model event intensity using an RNN that updates after each event; the LSTM hidden state captures temporal history

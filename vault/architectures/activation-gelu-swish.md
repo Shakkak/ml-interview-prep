@@ -4,6 +4,7 @@ tags: [activation, training, transformers]
 aliases: [GELU, Swish, SiLU, smooth activations]
 difficulty: 2
 status: complete
+depends_on: [activation-relu-variants, backpropagation]
 related: [activation-relu-variants, activation-sigmoid-tanh, normalization-layers]
 ---
 
@@ -13,7 +14,9 @@ related: [activation-relu-variants, activation-sigmoid-tanh, normalization-layer
 
 ## Fundamental
 
-[[activation-relu-variants|ReLU]] is non-differentiable at 0 and has zero gradient for $x < 0$. For transformers and modern architectures, smoother activations improve gradient flow and empirical performance.
+**The problem with ReLU in transformers:** [[activation-relu-variants|ReLU]] is non-differentiable at 0 and has zero gradient for $x < 0$ (dying neurons). For deep transformers with many layers, this causes optimization issues. Smoother activations provide gradient signal everywhere and empirically improve training.
+
+**Intuition:** both GELU and Swish implement *soft gating* — instead of ReLU's hard threshold (pass through if positive, kill if negative), they smoothly interpolate: small negatives are attenuated rather than zeroed, large positives pass through, the transition is smooth and differentiable everywhere.
 
 **GELU (Gaussian Error Linear Unit):**
 
@@ -75,6 +78,8 @@ Gate Linear Unit (GLU) splits the input in two and multiplicatively gates one ha
 
 $$\text{GLU}(x, W, V) = \sigma(xW) \otimes (xV)$$
 
+where $x \in \mathbb{R}^d$ is the input, $W, V \in \mathbb{R}^{d \times m}$ are learned weight matrices, $\sigma$ is the sigmoid gate, $\otimes$ denotes element-wise multiplication, and $xV$ is the value stream being gated.
+
 **SwiGLU** replaces [[activation-sigmoid-tanh|sigmoid]] with Swish (used in LLaMA, PaLM, Mistral):
 
 $$\text{SwiGLU}(x, W, V) = \text{Swish}(xW) \otimes (xV)$$
@@ -82,6 +87,8 @@ $$\text{SwiGLU}(x, W, V) = \text{Swish}(xW) \otimes (xV)$$
 In a transformer FFN block with SwiGLU:
 
 $$\text{FFN}(x) = \text{SwiGLU}(xW_1, xW_2) \cdot W_3$$
+
+where $x \in \mathbb{R}^d$ is the token representation, $W_1, W_2 \in \mathbb{R}^{d \times m}$ are the gate and value projection matrices, $m$ is the intermediate (hidden) dimension, and $W_3 \in \mathbb{R}^{m \times d}$ projects back to model dimension $d$.
 
 **Critical parameter count detail:** the standard FFN uses hidden dimension $4d$ (one weight matrix $W \in \mathbb{R}^{d \times 4d}$). SwiGLU uses *two* weight matrices of size $d \times \frac{8d}{3}$ each. The $\frac{8d}{3}$ factor keeps the total parameter count matched to the standard $4d$ FFN:
 $$2 \times d \times \frac{8d}{3} + \frac{8d}{3} \times d = \frac{16d^2}{3} + \frac{8d^2}{3} = 8d^2 = 2 \times 4d^2$$
@@ -96,4 +103,11 @@ Both [[attention-mechanism|attention]] (softmax-weighted sum) and SwiGLU (elemen
 
 ---
 
-*See also: [[activation-relu-variants]] · [[activation-sigmoid-tanh]] · [[attention-mechanism]] · [[distributions-gaussian]] · [[bert-mlm]]*
+## Links
+
+- [[activation-relu-variants]] — GELU and Swish generalize ReLU by multiplying the input by a smooth gating function instead of a hard threshold
+- [[backpropagation]] — GELU/Swish have smooth, non-zero gradients everywhere; unlike ReLU, they avoid the dying-neuron problem where units get stuck at zero gradient
+- [[activation-sigmoid-tanh]] — the sigmoid appears in both GELU (as the CDF approximation) and Swish ($\text{Swish}(x) = x\sigma(x)$); smoother than tanh-based saturation
+- [[attention-mechanism]] — transformers predominantly use GELU/Swish in the FFN sublayer; the choice is partly empirical and partly gradient-flow motivated
+- [[distributions-gaussian]] — GELU uses the Gaussian CDF $\Phi(x)$; the approximation $0.5x(1 + \tanh[\ldots])$ is a polynomial fit to $\Phi$
+- [[bert-mlm]] — BERT uses GELU in its FFN layers; this was one of the early adopters that made GELU mainstream

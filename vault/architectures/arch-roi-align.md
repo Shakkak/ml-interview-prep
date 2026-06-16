@@ -4,6 +4,7 @@ tags: [architecture, object-detection, segmentation]
 aliases: [ROI Align, ROI Pooling, RoIAlign, region of interest]
 difficulty: 2
 status: complete
+depends_on: [feature-pyramid-networks, convolution-math]
 related: [feature-pyramid-networks, cnn-architectures-guide]
 ---
 
@@ -19,6 +20,8 @@ related: [feature-pyramid-networks, cnn-architectures-guide]
 2. Divide the feature-map region into $7 \times 7$ bins with integer boundaries (rounded).
 
 Rounding errors of 0.5–1 pixels on the feature map correspond to **16–32 pixels in the input image** (stride 32). For detection this is tolerable; for instance segmentation or keypoints, it causes visible misalignment.
+
+**Intuition:** bilinear interpolation reads a feature value at any floating-point coordinate by blending the four nearest integer-grid neighbors. Applied to ROI extraction, this replaces the coarse "round to the nearest pixel" step with a smooth, differentiable lookup — precise enough for mask and keypoint prediction.
 
 **ROI Align (He et al., Mask R-CNN, 2017):** eliminate both quantization steps using bilinear interpolation.
 
@@ -62,6 +65,8 @@ In Mask R-CNN, ROI Align is applied to [[feature-pyramid-networks|FPN]] feature 
 
 $$\text{level} = \left\lfloor k_0 + \log_2\left(\frac{\sqrt{wh}}{224}\right) \right\rfloor$$
 
+where $k_0 = 4$ is the reference level (P4, stride 16), $w$ and $h$ are the proposal width and height in input-image pixels, and $224$ is the reference scale (an object of $224 \times 224$ pixels maps to level P4). Larger objects map to higher (coarser) levels; smaller objects to lower (finer) levels.
+
 Large objects → coarser levels (P5, low resolution). Small objects → finer levels (P2, high resolution). ROI Align then extracts from the assigned level, ensuring features are sampled at an appropriate spatial scale.
 
 ---
@@ -86,4 +91,8 @@ With 1 sample per bin: fast but lower quality. With 4 samples ($2 \times 2$) per
 
 ---
 
-*See also: [[feature-pyramid-networks]] · [[cnn-architectures-guide]]*
+## Links
+
+- [[feature-pyramid-networks]] — ROI Align extracts region features from FPN feature maps; the FPN level is chosen based on region size
+- [[convolution-math]] — ROI Align uses bilinear interpolation to extract sub-pixel features from the convolutional feature map
+- [[cnn-architectures-guide]] — Mask R-CNN and Faster R-CNN use ROI Align as the bridge between the backbone feature map and per-region heads

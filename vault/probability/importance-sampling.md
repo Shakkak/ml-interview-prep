@@ -5,6 +5,7 @@ aliases: [IS, importance weights, self-normalized IS, effective sample size]
 difficulty: 2
 status: complete
 related: [sampling-methods, bayesian-inference, variational-inference, distributions-overview, statistical-inference-mle]
+depends_on: [distributions-overview, bayesian-inference, monte-carlo-methods]
 ---
 
 # Importance Sampling
@@ -87,4 +88,10 @@ This is impractical (requires the answer), but it motivates designing $q$ to put
 
 Annealed importance sampling (AIS, Neal 2001) bridges $q$ to $p$ via a sequence of intermediate distributions $p_0 = q, p_1, \ldots, p_T = p$, running MCMC steps between them. Produces unbiased estimates of the normalizing constant $Z$ that are impossible with standard MCMC.
 
-*See also: [[sampling-methods]] · [[variational-inference]] · [[bayesian-inference]] · [[distributions-overview]]*
+## Links
+
+- [[distributions-overview]] — importance sampling reweights samples from a proposal $q$ to estimate expectations under a target $p$; the ratio $p(x)/q(x)$ corrects for the distributional mismatch
+- [[bayesian-inference]] — IS is used for Bayesian model comparison (marginal likelihood estimation) and sequential Monte Carlo (particle filters) for online Bayesian inference
+- [[monte-carlo-methods]] — importance sampling reduces Monte Carlo variance when the proposal $q$ concentrates on high-probability regions of $p$; optimal $q \propto |f(x)|p(x)$
+- [[variational-inference]] — IS estimates the partition function for evidence lower bounds; self-normalized IS is an alternative to VI that is asymptotically unbiased
+- [[sampling-methods]] — IS is a variance reduction technique for Monte Carlo; MCMC draws from $p$ directly but requires burn-in; IS reuses samples from a fixed proposal

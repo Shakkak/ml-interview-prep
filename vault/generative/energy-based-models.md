@@ -4,6 +4,7 @@ tags: [energy-based-models, ebm, score-matching, contrastive-divergence, unnorma
 aliases: [EBM, energy based model, score matching, contrastive divergence, Langevin dynamics]
 difficulty: 3
 status: complete
+depends_on: [statistical-inference-mle, entropy-mutual-info, distributions-overview]
 related: [diffusion-models, sampling-methods, variational-inference, normalizing-flows, generative-adversarial-networks]
 ---
 
@@ -55,6 +56,8 @@ where $s_\theta(x) = \nabla_x \log p_\theta(x) = -\nabla_x E_\theta(x)$. The par
 **Denoising Score Matching (DSM):** easier to compute — add noise to data, train score to point toward clean data:
 $$\mathcal{L}_\text{DSM} = \mathbb{E}_{x, \tilde{x}}\left[\|s_\theta(\tilde{x}) - \nabla_{\tilde{x}} \log p(\tilde{x}|x)\|^2\right]$$
 
+where $x$ = clean data point from $p_\text{data}$, $\tilde{x} = x + \sigma\eta$ = noisy version of $x$ (Gaussian corruption), $s_\theta(\tilde{x}) = -\nabla_{\tilde{x}} E_\theta(\tilde{x})$ = predicted score (points toward clean $x$), and $\nabla_{\tilde{x}} \log p(\tilde{x}|x) = -({\tilde{x} - x})/{\sigma^2}$ = the analytical target score (points directly toward $x$, computable without $Z$).
+
 DSM connects directly to **diffusion models** — the diffusion model's denoising objective is exactly DSM at multiple noise levels.
 
 ---
@@ -66,6 +69,8 @@ DSM connects directly to **diffusion models** — the diffusion model's denoisin
 Given a trained EBM (or score function), generate samples via **Langevin Monte Carlo**:
 
 $$x_{t+1} = x_t - \frac{\epsilon}{2} \nabla_x E_\theta(x_t) + \sqrt{\epsilon} \, \eta_t, \quad \eta_t \sim \mathcal{N}(0, I)$$
+
+where $\epsilon > 0$ = step size (both the gradient coefficient $\epsilon/2$ and noise scale $\sqrt\epsilon$ depend on it — this relationship ensures the chain converges to $p_\theta$ as $\epsilon \to 0$), $\nabla_x E_\theta(x_t)$ = gradient of the energy function (points toward higher energy, so negated by the minus sign to move toward lower energy), and $\eta_t \sim \mathcal{N}(0,I)$ = fresh isotropic Gaussian noise at each step (prevents collapse to a single mode).
 
 The gradient term pushes toward low-energy (high-probability) regions; noise ensures exploration. As $\epsilon \to 0$ and $t \to \infty$, this converges to $p_\theta(x)$.
 
@@ -83,4 +88,12 @@ $$p_\theta(x) = \frac{\exp(\text{LogSumExp}(f_\theta(x)))}{Z_\theta}$$
 
 The same network is simultaneously a classifier (via $p(y|x) = \text{softmax}(f_\theta(x))_y$) and a generative model. Training with both classification loss and contrastive divergence yields better calibration and out-of-distribution detection.
 
-*See also: [[diffusion-models]] · [[sampling-methods]] · [[variational-inference]] · [[normalizing-flows]]*
+## Links
+
+- [[statistical-inference-mle]] — training EBMs via MLE requires computing the partition function $Z$, which is intractable; contrastive divergence approximates the MLE gradient
+- [[entropy-mutual-info]] — the free energy $F = E - TS$ connects EBMs to thermodynamics; entropy plays the role of temperature-scaled regularization
+- [[distributions-overview]] — EBMs define unnormalized densities $p(x) \propto e^{-E(x)}$; the partition function is the normalizing constant that makes this a valid distribution
+- [[diffusion-models]] — diffusion models can be viewed as EBMs with a score function $\nabla_x \log p(x)$; score matching connects the two frameworks
+- [[sampling-methods]] — Langevin dynamics (SGLD) samples from EBMs by following the score function with noise; Markov chain convergence requires careful step size tuning
+- [[variational-inference]] — ELBO-based training of EBMs uses a variational approximation to the partition function; VAEs can be interpreted as EBMs with learned samplers
+- [[normalizing-flows]] — flows compute exact log-likelihoods; EBMs learn unnormalized densities; they are complementary approaches to density modeling

@@ -4,6 +4,7 @@ tags: [label-noise, noisy-labels, confident-learning, co-teaching, robust-traini
 aliases: [label noise, noisy labels, confident learning, Co-teaching, symmetric noise, asymmetric noise]
 difficulty: 2
 status: complete
+depends_on: [loss-cross-entropy, statistical-inference-mle]
 related: [regularization-label-smoothing, data-augmentation, cross-validation, loss-cross-entropy, bias-variance-double-descent]
 ---
 
@@ -87,4 +88,11 @@ Some loss functions are theoretically robust to symmetric label noise:
 
 **Symmetric Cross-Entropy:** combines forward and reverse KL — $\mathcal{L}_\text{SCE} = \alpha \cdot \text{CE}(p, y) + \beta \cdot \text{CE}(y, p)$ — the reverse KL term is robust to noisy labels.
 
-*See also: [[regularization-label-smoothing]] · [[cross-validation]] · [[loss-cross-entropy]] · [[data-augmentation]]*
+## Links
+
+- [[loss-cross-entropy]] — label noise inflates cross-entropy loss on noisy examples; confident learning detects noisy examples by comparing predicted probabilities against the noisy labels
+- [[statistical-inference-mle]] — the transition matrix model for label noise is a MLE problem over the clean-label posterior; EM can solve it
+- [[regularization-label-smoothing]] — label smoothing implicitly models symmetric label noise; it prevents the model from becoming overconfident on any label
+- [[cross-validation]] — leave-one-out detection methods score each example's label consistency against its cross-validated predictions
+- [[data-augmentation]] — augmentation helps with label noise by forcing the model to generalize beyond memorizing individual noisy examples
+- [[bias-variance-double-descent]] — label noise increases the irreducible error floor; no amount of model complexity or data can achieve zero loss under label noise

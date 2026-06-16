@@ -4,6 +4,7 @@ tags: [flash-attention, attention, memory-efficiency, gpu-optimization, tiling, 
 aliases: [FlashAttention, Flash Attention, IO-aware attention, fused attention kernel]
 difficulty: 3
 status: complete
+depends_on: [attention-mechanism, linear-algebra-fundamentals]
 related: [attention-mechanism, arch-kv-cache, vision-transformer, normalization-layers]
 ---
 
@@ -20,6 +21,8 @@ Modern GPUs have two memory levels:
 - **SRAM (on-chip):** tiny (192 KB on A100), ~19 TB/s bandwidth — ~10× faster.
 
 Standard attention writes the $N \times N$ matrix to HBM, reads it for softmax, writes it back, then reads it for the $V$ multiplication. **The bottleneck is HBM bandwidth, not FLOPs.** The computation is memory-bound.
+
+**Intuition:** standard attention is bottlenecked by how often it reads and writes the $N \times N$ matrix to slow GPU memory. Flash Attention sidesteps this entirely — it keeps all intermediate values in fast on-chip SRAM and processes the attention in small tiles, never writing the full matrix to slow HBM. The result is mathematically identical but 2–4× faster.
 
 **Flash Attention** computes exact attention **without materializing the $N \times N$ matrix in HBM**, by keeping intermediate computations in fast SRAM using block-by-block tiling.
 
@@ -107,4 +110,11 @@ Flash Attention is unique: **exact** computation with $O(N)$ memory footprint.
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[vision-transformer]] · [[backpropagation-advanced]] · [[activation-softmax]]*
+## Links
+
+- [[attention-mechanism]] — Flash Attention computes the exact same result as standard attention; the difference is IO efficiency, not mathematical definition
+- [[linear-algebra-fundamentals]] — tiling decomposes the $N\times N$ attention matrix into blocks that fit in SRAM; the block structure is why online softmax can accumulate correctly
+- [[arch-kv-cache]] — Flash Attention and KV cache are complementary: Flash reduces memory during training; KV cache reduces recomputation during inference
+- [[activation-softmax]] — the online softmax trick used in Flash Attention computes the softmax incrementally across blocks without materializing the full matrix
+- [[backpropagation-advanced]] — Flash Attention recomputes attention scores during the backward pass (recomputation/selective checkpointing) instead of storing them
+- [[vision-transformer]] — ViT training at high resolution benefits greatly from Flash Attention's $O(N)$ memory vs. standard attention's $O(N^2)$

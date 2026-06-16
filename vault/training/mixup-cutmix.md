@@ -5,6 +5,7 @@ aliases: [Mixup, CutMix, manifold mixup, FMix, label interpolation]
 difficulty: 1
 status: complete
 related: [data-augmentation, regularization-label-smoothing, vit-training-recipe, bias-variance-double-descent, loss-cross-entropy]
+depends_on: [data-augmentation, loss-cross-entropy, regularization-label-smoothing]
 ---
 
 # Mixup and CutMix
@@ -85,4 +86,9 @@ For text, Mixup can be applied in embedding space:
 
 Sequence-level mixing is complicated by variable length — padding alignment and attention masks must be handled carefully.
 
-*See also: [[data-augmentation]] · [[regularization-label-smoothing]] · [[vit-training-recipe]] · [[loss-cross-entropy]]*
+## Links
+
+- [[data-augmentation]] — Mixup and CutMix are data augmentation methods that operate in the sample space; unlike geometric augmentations, they create entirely new training examples by interpolating
+- [[loss-cross-entropy]] — Mixup requires soft labels $\tilde{y} = \lambda y_a + (1-\lambda)y_b$; the cross-entropy is computed against these mixed targets: $H(\tilde{y}, f(x)) = \lambda H(y_a, f(x)) + (1-\lambda)H(y_b, f(x))$
+- [[regularization-label-smoothing]] — Mixup's soft labels implicitly smooth the training targets; label smoothing is a special case of Mixup where the second label is the uniform distribution
+- [[vit-training-recipe]] — DeiT's training recipe combines Mixup, CutMix, RandAugment, and stochastic depth; these augmentations together allow ViT to train without more data than ResNet

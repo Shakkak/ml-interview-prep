@@ -4,6 +4,7 @@ tags: [imbalanced-sampling, smote, adasyn, tomek-links, oversampling, undersampl
 aliases: [SMOTE, ADASYN, Tomek links, cluster centroids, NearMiss, oversampling, undersampling]
 difficulty: 1
 status: complete
+depends_on: [feature-preprocessing, distributions-overview]
 related: [class-imbalance, data-augmentation, feature-preprocessing, loss-focal, evaluation-metrics-guide]
 ---
 
@@ -16,6 +17,8 @@ related: [class-imbalance, data-augmentation, feature-preprocessing, loss-focal,
 ### Why Sampling?
 
 Class imbalance causes models to ignore minority classes. One solution is to modify the training data distribution via **oversampling** (add minority examples) or **undersampling** (remove majority examples) before training.
+
+**Intuition:** if the minority class has only 1% of examples, the model can achieve 99% accuracy by always predicting the majority class — never seeing a minority example worth learning from. Sampling restores the balance before training starts, making the minority class an equally-weighted learning signal.
 
 Sampling works at the data level — the model sees a balanced distribution regardless of the algorithm used. Contrast with **algorithmic approaches** (focal loss, class weights) which work at the loss level.
 
@@ -85,4 +88,11 @@ for train_idx, val_idx in cv.split(X, y):
     # train on X_train_resampled, evaluate on X[val_idx]
 ```
 
-*See also: [[class-imbalance]] · [[data-augmentation]] · [[loss-focal]] · [[feature-preprocessing]] · [[data-leakage]]*
+## Links
+
+- [[feature-preprocessing]] — SMOTE interpolates in feature space; features should be scaled before SMOTE as it is distance-based
+- [[distributions-overview]] — imbalanced sampling methods change the class marginal distribution $P(y)$; they do not change the class-conditional distribution $P(x|y)$
+- [[class-imbalance]] — class-imbalance covers the problem definition and diagnostic tools; this file covers the sampling-based solutions
+- [[data-augmentation]] — augmentation addresses imbalance by generating new examples from existing ones; SMOTE is a feature-space version of augmentation
+- [[loss-focal]] — Focal Loss addresses class imbalance at the loss level without resampling; it down-weights easy majority-class examples
+- [[data-leakage]] — oversampling must be done inside cross-validation folds to prevent synthetic minority examples from appearing in validation folds

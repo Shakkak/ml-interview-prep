@@ -4,6 +4,7 @@ tags: [mixture-of-experts, moe, sparse-moe, routing, switch-transformer, mixtral
 aliases: [MoE, sparse MoE, expert routing, top-k gating, Switch Transformer, Mixtral]
 difficulty: 3
 status: complete
+depends_on: [attention-mechanism, normalization-layers, linear-algebra-fundamentals]
 related: [attention-mechanism, arch-kv-cache, flash-attention, autoregressive-models, normalization-layers, lora-quantization]
 ---
 
@@ -34,7 +35,7 @@ Token embedding → Router → [top-k expert indices + scores]
 
 $$g(x) = \text{softmax}(\text{TopK}(W_r x, k))$$
 
-Tokens routed to the same expert are batched together for efficiency.
+where $x \in \mathbb{R}^d$ = the token's hidden state, $W_r \in \mathbb{R}^{d \times E}$ = the router weight matrix mapping token representations to per-expert logits, $E$ = total number of experts, $\text{TopK}(\cdot, k)$ = sets all but the $k$ largest logits to $-\infty$ before softmax (so only $k$ experts get non-zero weights), and $g(x) \in \mathbb{R}^E$ = the sparse gating vector (at most $k$ non-zero entries). Tokens routed to the same expert are batched together for efficiency.
 
 ---
 
@@ -102,4 +103,11 @@ MoE loses when:
 - Training is communication-bottlenecked
 - Very small batch sizes (routing overhead dominates)
 
-*See also: [[attention-mechanism]] · [[autoregressive-models]] · [[arch-kv-cache]] · [[lora-quantization]] · [[flash-attention]]*
+## Links
+
+- [[attention-mechanism]] — MoE replaces the dense FFN sublayer while keeping attention unchanged; the attention mechanism sees all tokens, FFN experts see only routed subsets
+- [[normalization-layers]] — load balancing in MoE is sensitive to activation scale; layer normalization before routing gates stabilizes the routing distribution
+- [[linear-algebra-fundamentals]] — the router is a learned linear projection to $E$ experts; top-$k$ selection is an argmax operation over the dot products
+- [[autoregressive-models]] — Mixtral, Switch Transformer, and Gemini MoE use sparse MoE layers; they achieve GPT-scale quality at 2–4× lower FLOPs per token
+- [[arch-kv-cache]] — MoE increases model capacity without increasing FLOPs, but it does increase memory: all expert weights must reside in GPU VRAM or be offloaded
+- [[lora-quantization]] — LoRA fine-tuning of MoE models can target just the router or the expert FFNs; expert-specific LoRA adapters specialize individual experts

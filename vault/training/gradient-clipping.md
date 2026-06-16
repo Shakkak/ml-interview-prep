@@ -5,6 +5,7 @@ aliases: [gradient norm clipping, gradient value clipping, exploding gradients]
 difficulty: 1
 status: complete
 related: [backpropagation, rnn-lstm, optimizer-sgd-momentum, optimizer-adam, loss-landscape, initialization]
+depends_on: [backpropagation, optimizer-sgd-momentum, loss-landscape]
 ---
 
 # Gradient Clipping
@@ -27,6 +28,8 @@ During backpropagation through deep or recurrent networks, gradients can grow ex
 **Clip by norm:** scale the entire gradient vector if its $\ell_2$ norm exceeds a threshold $\tau$:
 
 $$\mathbf{g} \leftarrow \begin{cases} \mathbf{g} & \text{if } \|\mathbf{g}\|_2 \leq \tau \\ \tau \cdot \frac{\mathbf{g}}{\|\mathbf{g}\|_2} & \text{otherwise} \end{cases}$$
+
+where $\mathbf{g}$ = the concatenated gradient vector over all model parameters, $\|\mathbf{g}\|_2$ = the global gradient L2 norm (square root of sum of squared gradients across all parameters), $\tau > 0$ = the clipping threshold, and $\frac{\mathbf{g}}{\|\mathbf{g}\|_2}$ = the unit gradient vector (same direction, scaled to length 1).
 
 This preserves the gradient direction while bounding its magnitude. All parameters share a single global norm computation.
 
@@ -87,4 +90,10 @@ The gradient norm over training is a useful diagnostic:
 
 Standard clipping computes a single global norm across all parameters. **Per-layer clipping** clips each parameter group independently — sometimes used in LoRA fine-tuning to avoid the small LoRA adapter gradients being dominated by the large base model gradients (or vice versa).
 
-*See also: [[backpropagation]] · [[rnn-lstm]] · [[optimizer-adam]] · [[loss-landscape]] · [[initialization]]*
+## Links
+
+- [[backpropagation]] — gradient clipping rescales the gradient vector before the parameter update; it does not change the gradient direction, only its magnitude
+- [[rnn-lstm]] — LSTMs with gradient clipping were the first practical solution to exploding gradients; the LSTM's gating already addresses vanishing gradients
+- [[optimizer-sgd-momentum]] — gradient clipping caps the effective step size; combined with momentum, it prevents the momentum buffer from accumulating catastrophically large updates
+- [[loss-landscape]] — exploding gradients arise from sharp regions (large Hessian eigenvalues) in the loss landscape; gradient clipping is a heuristic that prevents steps into these regions
+- [[initialization]] — good initialization (Xavier, He) reduces the frequency of gradient explosions; gradient clipping is a safety net for pathological cases that slip through

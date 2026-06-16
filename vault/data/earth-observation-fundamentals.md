@@ -1,280 +1,141 @@
 ---
 title: "Earth Observation Fundamentals"
 tags: [earth-observation, remote-sensing, satellite-imagery, multispectral, sar, geotiff, ndvi, sentinel-2, landsat]
-aliases: [Remote Sensing Basics, Satellite Imagery Fundamentals, EO Fundamentals]
+aliases: [Remote Sensing Basics, Satellite Imagery Fundamentals, EO Fundamentals, Earth Observation, EO, Remote Sensing]
+difficulty: 2
 status: complete
+depends_on: [feature-preprocessing, linear-algebra-fundamentals]
+related: [satellite-imagery-preprocessing, multi-source-fusion, domain-adaptation, clip]
 ---
 
-Earth observation (EO) uses satellite and airborne sensors to acquire information about Earth's surface. This file covers everything from raw sensor physics to datasets — written so a complete beginner can follow, while still being precise enough for an ML practitioner.
-
-## 1. Why Earth Observation Matters for ML
-
-Traditional ML datasets (ImageNet, COCO) contain everyday photos taken by consumer cameras in RGB. Earth observation imagery is fundamentally different:
-
-- **Sensor diversity**: satellites carry optical, radar, thermal, and hyperspectral sensors
-- **Spectral richness**: data extends far beyond red-green-blue (R-G-B) visible wavelengths
-- **Spatial scale**: a single pixel might cover 10 m × 10 m to 1 km × 1 km of ground
-- **Temporal depth**: the same location is imaged repeatedly (every 5 days for Sentinel-2)
-- **Physical meaning**: pixel values encode physical quantities (reflectance, backscatter) not perceptual ones
-
-For biodiversity and ecology applications, satellite data lets us monitor:
-- vegetation health and structure (NDVI, LAI, canopy height)
-- land cover and land use change
-- phenological cycles (greening, peak biomass, senescence)
-- habitat mapping at continental scale
+# Earth Observation Fundamentals
 
 ---
 
-## 2. Key Satellite Missions and Their Sensors
+## Fundamental
 
-### 2.1 Sentinel-2 (ESA, launched 2015/2017)
+**Why EO differs from standard ML imagery:** ordinary photos (ImageNet, COCO) contain everyday RGB images at human-eye wavelengths. Earth observation imagery is fundamentally different:
 
-The workhorse of open-access EO for vegetation monitoring.
+- **Spectral richness:** data extends far beyond red-green-blue (13 bands in Sentinel-2, hundreds in hyperspectral sensors)
+- **Physical meaning:** pixel values encode physical quantities (reflectance, radar backscatter), not perceptual ones
+- **Spatial scale:** a single pixel can cover 10 m × 10 m (Sentinel-2) to 1 km × 1 km (MODIS) of ground
+- **Temporal depth:** the same location is imaged repeatedly — every 5 days for Sentinel-2
 
-| Property | Value |
-|----------|-------|
-| Operator | ESA (European Space Agency) |
-| Revisit time | 5 days (with both satellites) |
-| Spatial resolution | 10 m (RGB + NIR), 20 m (Red Edge, SWIR), 60 m (atmospheric bands) |
-| Swath width | 290 km |
-| Free access | Yes (Copernicus Open Access Hub) |
+For biodiversity and ecology: satellite data monitors vegetation health (NDVI, LAI, canopy height), land cover change, phenological cycles (greening, peak biomass, senescence), and habitat mapping at continental scale.
 
-**13 spectral bands:**
+**Intuition for spectral bands:** every material reflects electromagnetic radiation differently — this "spectral signature" is like a fingerprint. Healthy vegetation absorbs red (chlorophyll uses it for photosynthesis), reflects green (why leaves look green), and strongly reflects near-infrared (NIR) via leaf cell structure. This signature vanishes in stressed or dead vegetation, making it diagnostic.
 
-| Band | Wavelength (nm) | Resolution | Common Use |
-|------|----------------|------------|------------|
-| B1 | 443 (Coastal aerosol) | 60 m | Aerosol correction |
-| B2 | 490 (Blue) | 10 m | True color, water |
-| B3 | 560 (Green) | 10 m | True color, vegetation |
-| B4 | 665 (Red) | 10 m | True color, chlorophyll |
-| B5 | 705 (Red Edge 1) | 20 m | Canopy chlorophyll |
-| B6 | 740 (Red Edge 2) | 20 m | Canopy structure |
-| B7 | 783 (Red Edge 3) | 20 m | Leaf area index |
-| B8 | 842 (NIR broad) | 10 m | Vegetation vigour |
-| B8A | 865 (NIR narrow) | 20 m | Water vapour correction |
-| B9 | 945 (Water vapour) | 60 m | Atmospheric correction |
-| B10 | 1375 (Cirrus) | 60 m | Cloud detection |
-| B11 | 1610 (SWIR 1) | 20 m | Soil moisture, snow |
-| B12 | 2190 (SWIR 2) | 20 m | Geology, dry vegetation |
+### Key Spectral Indices
 
-### 2.2 Landsat (USGS/NASA, since 1972)
+**NDVI (Normalized Difference Vegetation Index)**:
+$$\text{NDVI} = \frac{\rho_\text{NIR} - \rho_\text{Red}}{\rho_\text{NIR} + \rho_\text{Red}} \in [-1, 1]$$
 
-The longest continuous EO record — 50+ years of comparable observations.
+where $\rho_\text{NIR}$ = surface reflectance in the near-infrared band (e.g., Sentinel-2 B8, ~842 nm) and $\rho_\text{Red}$ = surface reflectance in the red band (~665 nm). The normalization by the sum makes the index robust to illumination differences. Dense healthy vegetation: NDVI 0.6–0.9; sparse vegetation: 0.2–0.5; bare soil: 0.1–0.2; water or cloud: < 0. NDVI saturates at high biomass (LAI > 3).
 
-| Property | Value |
-|----------|-------|
-| Current satellite | Landsat 8 (2013) and Landsat 9 (2021) |
-| Revisit time | 16 days |
-| Spatial resolution | 30 m (multispectral), 15 m (panchromatic), 100 m (thermal) |
-| Bands | 11 (similar to Sentinel-2 but coarser) |
+**EVI (Enhanced Vegetation Index)**:
+$$\text{EVI} = 2.5 \cdot \frac{\rho_\text{NIR} - \rho_\text{Red}}{\rho_\text{NIR} + 6\rho_\text{Red} - 7.5\rho_\text{Blue} + 1}$$
 
-Key advantage over Sentinel-2: decades of historical data enable long-term trend analysis.
+Less saturated at high biomass. Uses the blue band to correct aerosol contamination. Standard constants (2.5, 6, 7.5, 1) are empirically calibrated for MODIS/Sentinel-2.
 
-### 2.3 MODIS (NASA, 2000–present)
-
-Low resolution (250 m – 1 km), but near-daily global coverage.
-Used for large-scale phenology monitoring, fire detection, ocean color.
-
-### 2.4 Planet Labs / SkySat (Commercial)
-
-Planet Dove constellation: 3–5 m resolution, daily revisit, RGB+NIR.
-SkySat: sub-meter resolution. Licensed access; increasingly open for research.
-
-### 2.5 WorldView (Maxar, Commercial)
-
-Sub-meter resolution (30–50 cm). Extremely detailed but expensive. Used for individual tree mapping, infrastructure inspection.
+**Other key indices:**
+- **NDWI** = $(ρ_\text{Green} - ρ_\text{NIR}) / (ρ_\text{Green} + ρ_\text{NIR})$ — detects open water (> 0) and leaf water content
+- **Red Edge NDVI** = $(ρ_\text{NIR} - ρ_\text{RedEdge}) / (ρ_\text{NIR} + ρ_\text{RedEdge})$ — more sensitive to subtle chlorophyll changes than standard NDVI; critical for crop stress monitoring
 
 ---
 
-## 3. Understanding Spectral Bands
+## Intermediate
 
-### 3.1 Why Different Bands?
+### Key Satellite Missions
 
-Every material reflects and absorbs electromagnetic radiation differently. The "spectral signature" of a material — how much it reflects at each wavelength — is like a fingerprint.
+**Sentinel-2 (ESA)** — the workhorse of open-access EO for vegetation:
+- Revisit: 5 days (two satellites); Swath: 290 km; Free access
+- 13 spectral bands: 10 m (RGB + NIR), 20 m (Red Edge, SWIR), 60 m (atmospheric correction)
+- Red Edge bands (B5 705nm, B6 740nm, B7 783nm) are absent from Landsat — unique to Sentinel-2 for plant health
 
-**Key spectral regions:**
+**Landsat (USGS/NASA)** — the longest continuous EO record (1972–present):
+- 16-day revisit; 30 m spatial resolution; 11 bands similar to Sentinel-2
+- Key advantage: 50+ years of comparable observations for long-term trend analysis
 
-```
-UV      Visible      NIR          SWIR         TIR (Thermal)
-|-------|------------|------------|-------------|-------------|
- 200nm   400  700nm  700-1400nm  1400-3000nm   8000-14000nm
-```
+**Planet / SkySat (Commercial)** — 3–5 m resolution, daily revisit (Planet Dove); sub-meter (SkySat). Enables individual tree canopy mapping.
 
-**Vegetation spectral signature (the "red edge"):**
-- Absorbs **red** (665 nm) strongly → used for photosynthesis (chlorophyll a, b)
-- Reflects **green** (560 nm) moderately → why leaves look green
-- Reflects **NIR** (700-1300 nm) very strongly → cell structure scatters NIR internally
-- Transition from red-absorbing to NIR-reflecting happens around 700-730 nm = "Red Edge"
+### SAR: Radar That Sees Through Clouds
 
-The steep slope in the red edge region is uniquely diagnostic of photosynthetically active vegetation. Stressed, senescent, or dead vegetation loses this signature.
+Optical sensors (Sentinel-2) only work under clear skies. **SAR (Synthetic Aperture Radar)** is an active microwave sensor — it transmits radar pulses and records backscatter. Microwaves penetrate clouds, smoke, and (partially) dense canopy. Works day and night.
 
-### 3.2 Key Spectral Indices
+**Key missions:** Sentinel-1 (C-band, 5.4 GHz, 10 m, free); ALOS PALSAR-2 (L-band, 1.2 GHz, penetrates canopy, useful for biomass).
 
-**NDVI (Normalized Difference Vegetation Index)**
-$$\text{NDVI} = \frac{\rho_{NIR} - \rho_{Red}}{\rho_{NIR} + \rho_{Red}} \in [-1, 1]$$
+**SAR polarization:**
 
-- Dense healthy vegetation: NDVI 0.6–0.9
-- Sparse vegetation / grassland: 0.2–0.5
-- Bare soil: 0.1–0.2
-- Water / cloud / snow: < 0
-- Saturates at high biomass (LAI > 3) — EVI was designed to fix this
+| Polarization | What it captures |
+|---|---|
+| VV | Surface roughness, soil moisture |
+| VH (cross-pol) | Volume scattering — sensitive to vegetation structure, forests |
+| HH | Penetrates canopy; used for above-ground biomass estimation |
 
-**EVI (Enhanced Vegetation Index)**
-$$\text{EVI} = 2.5 \cdot \frac{\rho_{NIR} - \rho_{Red}}{\rho_{NIR} + 6\rho_{Red} - 7.5\rho_{Blue} + 1}$$
+**Physics:** smooth surfaces (calm water) reflect away from sensor → low backscatter. Rough surfaces (forest, crops) scatter back → high backscatter. Urban double-bounce (wall + ground) → very high HH.
 
-Less saturated at high biomass. Uses blue band to correct aerosol contamination.
+**SAR preprocessing requirements:** speckle filtering (multiplicative coherent noise), radiometric terrain correction (RTC) in mountainous areas, conversion to dB: $\sigma^0_{dB} = 10 \log_{10}(\sigma^0)$ where $\sigma^0$ = linear backscatter coefficient.
 
-**NDWI (Normalized Difference Water Index)**
-$$\text{NDWI} = \frac{\rho_{Green} - \rho_{NIR}}{\rho_{Green} + \rho_{NIR}}$$
+### Four Resolutions: The Core Trade-Off
 
-Detects open water (NDWI > 0) and leaf water content (variant uses SWIR).
+| Resolution | Definition | Example |
+|---|---|---|
+| Spatial | Ground pixel size | Sentinel-2: 10 m; WorldView: 0.5 m |
+| Spectral | Number of bands | Sentinel-2: 13 bands; Hyperion: 242 bands |
+| Temporal | Revisit cycle | Sentinel-2: 5 days; Landsat: 16 days |
+| Radiometric | Bit depth / sensitivity | Landsat 8: 16-bit; older sensors: 8-bit |
 
-**NDSI (Normalized Difference Snow Index)**
-$$\text{NDSI} = \frac{\rho_{Green} - \rho_{SWIR}}{\rho_{Green} + \rho_{SWIR}}$$
-
-Snow is bright in Green but dark in SWIR; vegetation is the opposite.
-
-**Red Edge indices for plant health:**
-$$\text{Red Edge NDVI} = \frac{\rho_{NIR} - \rho_{RedEdge}}{\rho_{NIR} + \rho_{RedEdge}}$$
-
-More sensitive to subtle chlorophyll changes than standard NDVI. Critical for crop stress monitoring.
+High spatial resolution (WorldView, 0.5 m) → small swath, rare revisit, expensive. Sentinel-2 (10 m) is the sweet spot for biodiversity monitoring: individual tree canopy resolution + frequent revisit for phenology.
 
 ---
 
-## 4. SAR (Synthetic Aperture Radar)
+## Advanced
 
-### 4.1 What is SAR and Why Does It Matter?
+### Coordinate Reference Systems and GeoTIFF
 
-Optical sensors (Sentinel-2, Landsat) only see surface reflectance when the sky is clear. In cloudy tropical or boreal regions, months of data can be lost to cloud cover.
+Every EO image declares *where* it is on Earth via a CRS (Coordinate Reference System):
+- **WGS84:** global standard; GPS coordinates; latitude/longitude in degrees
+- **UTM:** divides Earth into 60 zones; coordinates in metres — better for measuring distances
 
-**SAR is an active microwave sensor** — it transmits its own radar pulses and records the backscatter. Microwaves penetrate clouds, smoke, and (partially) dense canopy. SAR works day and night.
+A GeoTIFF is a TIFF with embedded geospatial metadata: CRS, affine transform (maps pixel (row, col) to (x, y) coordinates), no-data value, and multiple spectral bands.
 
-**Key SAR missions:**
-- Sentinel-1 (ESA): C-band (5.4 GHz), free access, 10 m resolution, 12-day revisit
-- ALOS PALSAR-2 (JAXA): L-band (1.2 GHz), penetrates canopy better, useful for biomass
-- TerraSAR-X: X-band, very high resolution, commercial
-
-### 4.2 SAR Polarization
-
-SAR transmits and receives horizontally (H) or vertically (V) polarized pulses.
-
-| Polarization | What it measures |
-|-------------|-----------------|
-| VV | Vertical–vertical: sensitive to surface roughness, soil moisture |
-| VH | Vertical–horizontal (cross-pol): sensitive to volume scattering (vegetation, forest) |
-| HH | Horizontal–horizontal: penetrates into canopy, used for biomass |
-
-Sentinel-1 acquires VV and VH dual-polarization in most regions.
-
-### 4.3 SAR Backscatter Physics
-
-- Smooth surfaces (calm water) reflect away from sensor → low backscatter (dark)
-- Rough surfaces (waves, urban, forest) scatter back → high backscatter (bright)
-- Volume scatterers (forest canopy, crops) scatter from multiple layers → VH high
-- Double-bounce (vertical structures + ground) → very high HH in urban areas
-
-### 4.4 SAR Challenges for ML
-
-- Speckle noise: coherent imaging creates multiplicative noise — must be filtered
-- Geometric distortions: layover (tall structures lean toward sensor), foreshortening
-- Units: raw SAR is in linear power or amplitude; convert to dB (logarithmic): $\sigma^0_{dB} = 10 \log_{10}(\sigma^0)$
-- Radiometric terrain correction (RTC) needed in mountainous areas
-
----
-
-## 5. Spatial, Spectral, Temporal, and Radiometric Resolution
-
-These four "resolutions" are often traded off against each other — no sensor is best on all four:
-
-| Resolution type | Definition | Example |
-|----------------|------------|---------|
-| **Spatial** | Ground pixel size | Sentinel-2: 10 m; WorldView: 0.5 m |
-| **Spectral** | Number and width of spectral bands | Sentinel-2: 13 bands; Hyperion: 242 bands |
-| **Temporal** | Repeat cycle (revisit time) | Sentinel-2: 5 days; Landsat: 16 days |
-| **Radiometric** | Bit depth / sensitivity | Landsat 8: 16-bit; older sensors: 8-bit |
-
-**Practical trade-off example:**
-- High spatial resolution (WorldView, 0.5 m) → small swath, rare revisit, expensive
-- Moderate spatial resolution (Sentinel-2, 10 m) → wide swath, frequent revisit, free
-- Coarse spatial resolution (MODIS, 250 m–1 km) → daily global coverage
-
-For biodiversity monitoring: Sentinel-2 is the sweet spot — 10 m allows individual tree canopy mapping with temporal frequency for phenology.
-
----
-
-## 6. Coordinate Reference Systems and GeoTIFF
-
-### 6.1 Why CRS Matters
-
-Every EO image must declare *where* it is on Earth. The coordinate reference system (CRS) defines:
-1. The geodetic datum (shape model of Earth): typically WGS84
-2. The projection (how 3D sphere maps to 2D): UTM, Lambert, Plate Carrée, etc.
-
-**WGS84** is the global standard (GPS uses it). Coordinates are latitude/longitude in degrees.
-**UTM (Universal Transverse Mercator)** divides Earth into 60 zones; coordinates are in metres within each zone. Better for measuring distances.
-
-### 6.2 GeoTIFF Format
-
-A GeoTIFF is a TIFF image file with embedded geospatial metadata:
-
-```
-GeoTIFF metadata:
-  - CRS (EPSG code, e.g., EPSG:32632 = WGS84/UTM Zone 32N)
-  - Affine transform: maps pixel (row, col) → (x, y) in CRS coordinates
-      x = x_origin + col * pixel_width
-      y = y_origin + row * pixel_height
-  - No-data value: sentinel value for missing pixels (often 0 or -9999)
-  - Bands: multiple spectral bands in a single file
-```
-
-Reading a GeoTIFF in Python (rasterio):
 ```python
 import rasterio
 with rasterio.open("sentinel2_scene.tif") as src:
     data = src.read()            # shape: (bands, height, width)
     transform = src.transform    # affine: pixel → coordinate
-    crs = src.crs               # CRS object (EPSG code)
-    bounds = src.bounds          # (left, bottom, right, top)
+    crs = src.crs               # e.g., EPSG:32632 = WGS84/UTM Zone 32N
 ```
 
-### 6.3 Common Issues
+**Common issues:** CRS mismatch (drone in WGS84 + satellite in UTM → must reproject before fusing); pixel grid offset (same CRS but different origins → need coregistration); cloud-masked pixels (stored as 0 or no-data, must be excluded before ML).
 
-- **CRS mismatch**: drone in WGS84 + satellite in UTM → must reproject before fusing
-- **Pixel alignment**: even same CRS can have offset grids → need coregistration
-- **Cloud-masked pixels**: stored as 0 or no-data; must be handled before feeding to ML
-
----
-
-## 7. Key Open Datasets for EO Machine Learning
+### Key Open Datasets
 
 | Dataset | Size | Task | Resolution | Sensor |
-|---------|------|------|------------|--------|
-| **BigEarthNet** | 590,326 patches | Multi-label land cover | 120×120 px at 10–60 m | Sentinel-2 |
-| **EuroSAT** | 27,000 patches | Land use classification | 64×64 px at 10 m | Sentinel-2 |
-| **DeepGlobe** | 1,146 images | Road/building/land cover seg. | 50 cm | Satellite |
-| **SpaceNet** | City-scale | Building footprint extraction | 30–50 cm | WorldView |
-| **DOTA** | 2,806 images | Object detection (aerial) | Variable | Aerial |
-| **iSAID** | 655,451 instances | Instance segmentation | Variable | Aerial |
-| **SEN12MS** | 180,662 patches | Multi-modal classification | 10 m | Sentinel-1 + 2 |
-| **TreeSatAI** | 50,000 patches | Forest species classification | 20 m + 0.2 m aerial | Sentinel-2 + aerial |
+|---|---|---|---|---|
+| BigEarthNet | 590K patches | Multi-label land cover | 120×120 px at 10–60 m | Sentinel-2 |
+| EuroSAT | 27K patches | Land use classification | 64×64 px at 10 m | Sentinel-2 |
+| SEN12MS | 180K patches | Multi-modal classification | 10 m | Sentinel-1 + 2 |
+| TreeSatAI | 50K patches | Forest species classification | 20 m + 0.2 m aerial | Sentinel-2 + aerial |
+| SpaceNet | City-scale | Building footprint extraction | 30–50 cm | WorldView |
 
-**Data portals:**
-- [Copernicus Open Access Hub](https://scihub.copernicus.eu/) — all Sentinel data, free
-- [USGS EarthExplorer](https://earthexplorer.usgs.gov/) — Landsat, free
-- [Google Earth Engine](https://earthengine.google.com/) — petabyte-scale cloud computing on satellite data
+**Data portals:** Copernicus Open Access Hub (all Sentinel), USGS EarthExplorer (Landsat), Google Earth Engine (petabyte-scale cloud computing on satellite data).
 
----
+### Common EO Failure Modes
 
-## 8. Common Failure Modes in EO ML
-
-1. **Spectral shift between sensors**: a model trained on Sentinel-2 will fail on Landsat without [[domain-adaptation]] — different bands, different sensor response functions
-2. **Seasonal distribution shift**: training on summer imagery and testing on winter imagery gives very different vegetation appearance
-3. **Geographic bias**: most labelled EO data is from Europe and North America — models may fail in tropical forests or African savanna
-4. **Cloud contamination**: pixels under thin cloud still have cloud signal; not all cloud masks are perfect
-5. **Topographic effects**: slopes facing away from sun appear darker — must correct if using reflectance for classification
+1. **Spectral shift between sensors:** a model trained on Sentinel-2 fails on Landsat without [[domain-adaptation]] — different bands, different sensor response functions
+2. **Seasonal distribution shift:** summer → winter imagery gives very different vegetation appearance; models overfit to seasonal signal if trained on single-season data
+3. **Geographic bias:** most labelled EO data is from Europe and North America — models fail in tropical forests or African savanna
+4. **Cloud contamination:** pixels under thin cloud still have cloud signal; not all cloud masks are perfect — check cloud probability layer before use
+5. **Topographic effects:** slopes facing away from sun appear darker — must apply topographic correction if using reflectance for classification in mountainous areas
 
 ---
 
-## See Also
+## Links
 
-[[satellite-imagery-preprocessing]], [[multi-source-fusion]], [[remote-sensing-foundation-models]], [[biodiversity-ml]], [[clip]], [[blip]], [[domain-adaptation]]
+- [[feature-preprocessing]] — EO data requires sensor-specific preprocessing (radiometric calibration, atmospheric correction) before generic ML preprocessing steps apply
+- [[linear-algebra-fundamentals]] — spectral bands are vectors; band ratios, PCA on hyperspectral cubes, and change detection all use linear algebra on the band dimension
+- [[satellite-imagery-preprocessing]] — follow-up covering the full preprocessing pipeline from raw digital numbers to model-ready tensors
+- [[multi-source-fusion]] — fusing satellite, drone, and in-situ data requires understanding each sensor's spatial/spectral/temporal properties
+- [[clip]] — CLIP-pretrained models transfer to satellite imagery; understanding EO sensor characteristics informs which image transformations preserve CLIP's image statistics
+- [[domain-adaptation]] — EO models trained on one sensor or season often fail on another; physical differences between sensors guide domain adaptation strategies

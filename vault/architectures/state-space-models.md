@@ -4,6 +4,7 @@ tags: [state-space-models, ssm, mamba, s4, sequence-modeling, selective-ssm]
 aliases: [SSM, S4, Mamba, selective state space model, linear recurrence, structured SSM]
 difficulty: 3
 status: complete
+depends_on: [rnn-lstm, linear-algebra-fundamentals, fourier-transform]
 related: [rnn-lstm, attention-mechanism, flash-attention, arch-kv-cache, autoregressive-models, fourier-transform]
 ---
 
@@ -63,7 +64,7 @@ where $\Delta_t$ is the discretization step size. Now $B_t$ and $C_t$ vary with 
 **Discretization:** continuous-time $A$ is discretized using $\Delta_t$:
 $$\bar{A}_t = \exp(\Delta_t A), \qquad \bar{B}_t = (\Delta_t A)^{-1}(\exp(\Delta_t A) - I)\Delta_t B_t$$
 
-Large $\Delta_t$ → strong dependence on current input (ignore state). Small $\Delta_t$ → strong dependence on state (ignore current input). $\Delta_t$ becomes a learned gating mechanism — analogous to forget gate in LSTM.
+where $A \in \mathbb{R}^{N \times N}$ = the (fixed) continuous-time state transition matrix, $\Delta_t > 0$ = the input-dependent discretization step size (computed by a linear layer + softplus from $x_t$), $\bar{A}_t$ = the discrete state transition for step $t$ (via matrix exponential — exact for linear ODEs), and $\bar{B}_t$ = the corresponding discrete input matrix (zero-order hold method). Large $\Delta_t$ → strong dependence on current input (ignore state). Small $\Delta_t$ → strong dependence on state (ignore current input). $\Delta_t$ becomes a learned gating mechanism — analogous to forget gate in LSTM.
 
 **Why selective parameters break the parallel convolution:** with input-dependent $\bar{B}_t, \bar{A}_t$, the kernel $\bar{K}$ changes at every step — can't precompute it. Mamba uses a **hardware-aware parallel scan** algorithm: process the recurrence in $O(\log L)$ parallel steps using prefix-scan on GPU (like parallel prefix sum). This uses SRAM (fast) rather than HBM (slow) for intermediate states.
 
@@ -109,4 +110,12 @@ Jamba (AI21 Labs, 2024) interleaves Mamba and Transformer layers: Mamba layers h
 
 ---
 
-*See also: [[rnn-lstm]] · [[attention-mechanism]] · [[flash-attention]] · [[arch-kv-cache]] · [[autoregressive-models]] · [[fourier-transform]]*
+## Links
+
+- [[rnn-lstm]] — SSMs generalize linear RNNs; Mamba's selective mechanism adds the gating of LSTMs to the SSM framework
+- [[linear-algebra-fundamentals]] — SSMs are defined by matrix multiplication $h_t = Ah_{t-1} + Bx_t$; HiPPO initialization designs $A$ to preserve long-range history
+- [[fourier-transform]] — SSMs with diagonalized $A$ can be computed as convolutions via FFT; the connection to spectral methods explains their sequence-length efficiency
+- [[attention-mechanism]] — SSMs are the main alternative to attention for long-context modeling; Mamba achieves linear $O(N)$ complexity vs. attention's $O(N^2)$
+- [[flash-attention]] — both target efficient sequence modeling; Flash Attention speeds up quadratic attention while SSMs avoid the quadratic cost entirely
+- [[arch-kv-cache]] — SSMs maintain a fixed-size state $h_t \in \mathbb{R}^d$ analogous to KV cache, but with fixed memory regardless of context length
+- [[autoregressive-models]] — Mamba can generate autoregressively with $O(1)$ per-step cost; transformer autoregressive generation is $O(N)$ per step with KV cache

@@ -4,6 +4,7 @@ tags: [gguf, ggml, quantization, k-quant, llm-inference, cpu-inference]
 aliases: [GGUF, GGML, k-quants, Q4_K_M, llama.cpp, quantization formats]
 difficulty: 1
 status: complete
+depends_on: [lora-quantization, linear-algebra-fundamentals]
 related: [lora-quantization, mixed-precision, model-compression, autoregressive-models, arch-kv-cache]
 ---
 
@@ -18,6 +19,8 @@ related: [lora-quantization, mixed-precision, model-compression, autoregressive-
 Running large language models locally requires fitting model weights in RAM/VRAM. A 7B parameter model at FP32 requires 28 GB; at FP16, 14 GB. Most consumer hardware has 8–24 GB of memory.
 
 **Quantization** reduces precision: instead of 16-bit floats, store weights as 4-bit or 8-bit integers. A 7B model at 4-bit needs only ~4 GB — runnable on most modern GPUs and even CPUs.
+
+**Intuition:** trained neural network weights don't need full floating-point precision to produce accurate predictions. Most of the "meaning" in a weight matrix is captured by its rough magnitude and sign. Quantization replaces each 32-bit or 16-bit float with a small integer (4 or 8 bits), storing a single scale factor per group of weights to convert back. Some precision is lost in the rounding, but the model retains most of its capability because the loss landscape is relatively flat near the trained minimum — small weight perturbations don't change predictions much.
 
 ### GGML and GGUF
 
@@ -66,7 +69,7 @@ Weights are grouped into blocks of $k$ values (e.g., $k = 256$). For each block:
 
 ### Perplexity vs Compression
 
-The standard quality measure for quantized LLMs is **perplexity** on a standard text corpus (Wikitext-2 or similar). Lower perplexity = better language model.
+The standard quality measure for quantized LLMs is **perplexity** on a standard text corpus (Wikitext-2 or similar). Perplexity measures how surprised the model is by real text: $\text{PPL} = \exp(-\frac{1}{N}\sum_{i=1}^N \log p_\theta(x_i | x_{<i}))$, where the average negative log-likelihood over $N$ tokens is exponentiated — a model that assigns high probability to real text has low perplexity. Lower perplexity = better language model.
 
 **Typical perplexity increase over FP16:**
 - Q8_0: <0.1% increase (essentially lossless)
@@ -86,4 +89,11 @@ Modern approaches quantize different parts of the model differently:
 
 This mixed approach is what `_M` formats do automatically. More aggressive mixed precision (per-layer bit assignment based on sensitivity) is used by SpQR, QuIP#, and similar research methods achieving near-lossless 4-bit quantization.
 
-*See also: [[lora-quantization]] · [[mixed-precision]] · [[model-compression]] · [[autoregressive-models]]*
+## Links
+
+- [[lora-quantization]] — QLoRA combines GGUF-style 4-bit quantization with LoRA adapters; the quantization reduces memory, the adapters enable fine-tuning
+- [[linear-algebra-fundamentals]] — quantization maps float32/float16 weight matrices to low-bit integers; the quantization bins partition the weight value range
+- [[mixed-precision]] — GGUF uses mixed precision within a block: scale factors and zeros in float16/float32, activations in float16/bfloat16
+- [[model-compression]] — GGUF is one of several model compression techniques; others include pruning, knowledge distillation, and structured quantization
+- [[autoregressive-models]] — GGUF enables autoregressive LLaMA/Mistral inference on consumer CPUs and mobile devices via llama.cpp
+- [[arch-kv-cache]] — quantized KV cache (K-quant for the cache) further reduces inference memory; GGUF supports quantized KV by default in llama.cpp

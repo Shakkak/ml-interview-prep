@@ -5,6 +5,7 @@ aliases: [k-fold cross-validation, k-fold CV, leave-one-out cross-validation, LO
 difficulty: 1
 status: complete
 related: [bias-variance-double-descent, bootstrap, ensemble-methods, decision-trees, regularization-weight-decay]
+depends_on: [statistical-inference-mle, bias-variance-double-descent]
 ---
 
 # Cross-Validation
@@ -133,4 +134,11 @@ is the better fit.
 
 ---
 
-*See also: [[bias-variance-double-descent]] · [[bootstrap]] · [[ensemble-methods]] · [[decision-trees]] · [[regularization-weight-decay]]*
+## Links
+
+- [[statistical-inference-mle]] — CV estimates the generalization error of an estimator; it approximates the expected test error $E_{x_{\text{test}}}[L(f(x_{\text{test}}), y_{\text{test}})]$ without a separate test set
+- [[bias-variance-double-descent]] — CV measures the full MSE = bias² + variance + noise; the optimal model complexity minimizes CV error, not training error
+- [[bootstrap]] — bootstrap .632 estimator and k-fold CV both estimate test error; bootstrap is smoother but more computationally expensive; k-fold is the standard choice for hyperparameter tuning
+- [[ensemble-methods]] — nested CV is required when both selecting a model and evaluating it; inner loop tunes hyperparameters, outer loop estimates generalization
+- [[decision-trees]] — CART and random forests use CV to select max depth or number of estimators; CV is more reliable than AIC/BIC for non-parametric models
+- [[regularization-weight-decay]] — the regularization coefficient $\lambda$ is chosen by CV; the optimal $\lambda$ balances in-sample fit against out-of-sample generalization

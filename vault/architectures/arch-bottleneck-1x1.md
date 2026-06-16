@@ -4,6 +4,7 @@ tags: [architecture, cnn, convolution]
 aliases: [1x1 conv, pointwise conv, network-in-network, bottleneck]
 difficulty: 1
 status: complete
+depends_on: [convolution-math, arch-residual-block]
 related: [arch-residual-block, arch-depthwise-separable, cnn-architectures-guide, feature-pyramid-networks]
 ---
 
@@ -12,6 +13,10 @@ related: [arch-residual-block, arch-depthwise-separable, cnn-architectures-guide
 ---
 
 ## Fundamental
+
+**The problem:** standard $3 \times 3$ convolutions mix channels and spatial information together. When channel counts are large (256, 512, 1024), the channel-mixing part is the dominant cost. A $3 \times 3$ conv on 256 channels connecting to 256 output channels requires $256 \times 256 \times 9 \approx 589K$ operations per spatial location.
+
+**The solution:** separate channel mixing from spatial filtering. Use $1 \times 1$ convolutions to cheaply change channel counts, then apply expensive spatial operations only on the reduced representation.
 
 A $1 \times 1$ convolution applies a learned linear combination across *channels* at each spatial location independently.
 
@@ -103,4 +108,11 @@ The $1 \times 1$ conv was introduced in Network-in-Network (Lin et al., 2013) as
 
 ---
 
-*See also: [[arch-residual-block]] · [[arch-depthwise-separable]] · [[feature-pyramid-networks]] · [[cnn-architectures-guide]] · [[activation-relu-variants]]*
+## Links
+
+- [[convolution-math]] — $1\times 1$ convolution is a special case of convolution with kernel size 1; it mixes channel information without spatial aggregation
+- [[arch-residual-block]] — the bottleneck residual block uses $1\times 1$ convolutions to reduce then restore channel depth around the $3\times 3$ conv
+- [[arch-depthwise-separable]] — depthwise separable convolutions use a $1\times 1$ pointwise conv to mix channels after the spatial depthwise step
+- [[feature-pyramid-networks]] — FPN uses $1\times 1$ lateral connections to align channel depths across pyramid levels before merging
+- [[cnn-architectures-guide]] — bottleneck blocks are the core building block of ResNet-50+, ResNeXt, and EfficientNet
+- [[activation-relu-variants]] — the $1\times 1$ conv is typically followed by BN + ReLU to introduce nonlinearity at the channel-mixing step

@@ -4,6 +4,7 @@ tags: [grouped-convolution, resnext, depthwise-convolution, cardinality, efficie
 aliases: [grouped convolution, group convolution, ResNeXt, cardinality, channel groups]
 difficulty: 1
 status: complete
+depends_on: [convolution-math, arch-bottleneck-1x1]
 related: [arch-depthwise-separable, convolution-math, arch-residual-block, arch-bottleneck-1x1, cnn-architectures-guide]
 ---
 
@@ -16,6 +17,8 @@ related: [arch-depthwise-separable, convolution-math, arch-residual-block, arch-
 ### Standard vs Grouped Convolution
 
 **Standard convolution:** a filter of shape $(k \times k \times C_\text{in})$ convolves with all $C_\text{in}$ input channels to produce one output channel. For $C_\text{out}$ output channels: parameters = $k^2 \times C_\text{in} \times C_\text{out}$.
+
+**Intuition:** standard convolution lets every output channel interact with every input channel — a fully connected mixing across channels. Grouped convolution restricts this: each output channel group only sees the corresponding input channel group. This is like having $g$ smaller independent convolutions running in parallel, which cuts cost by $g\times$ and sometimes improves accuracy by forcing the model to learn more diverse feature subsets.
 
 **Grouped convolution** partitions input and output channels into $g$ groups, applying convolution independently within each group:
 
@@ -73,4 +76,10 @@ Grouped query attention (see [[grouped-query-attention]]) in transformers is str
 
 Both grouped convolution and multi-head attention leverage the same insight: parallel independent transformations on feature partitions, combined at the output.
 
-*See also: [[arch-depthwise-separable]] · [[convolution-math]] · [[arch-residual-block]] · [[arch-bottleneck-1x1]] · [[cnn-architectures-guide]]*
+## Links
+
+- [[convolution-math]] — grouped convolution partitions input channels into $G$ groups and convolves each group independently; standard convolution is the special case $G=1$
+- [[arch-bottleneck-1x1]] — ResNeXt uses grouped $3\times 3$ convolutions inside bottleneck blocks; increasing cardinality $G$ improves accuracy at the same FLOPs
+- [[arch-depthwise-separable]] — depthwise convolution is the extreme case of grouped convolution where $G = C_\text{in}$; each channel forms its own group
+- [[arch-residual-block]] — ResNeXt replaces standard convolutions in residual blocks with grouped convolutions, demonstrating "cardinality" as a dimension for scaling
+- [[cnn-architectures-guide]] — ShuffleNet combines grouped convolutions with channel shuffling to enable cross-group information flow at low FLOPs

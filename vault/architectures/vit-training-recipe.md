@@ -4,6 +4,7 @@ tags: [vision-transformer, training, stochastic-depth, droppath, llrd, layer-wis
 aliases: [ViT training recipe, stochastic depth, DropPath, layer-wise learning rate decay, LLRD, DeiT recipe, ViT fine-tuning]
 difficulty: 2
 status: complete
+depends_on: [vision-transformer, optimizer-adam, normalization-layers]
 related: [vision-transformer, optimizer-adam, optimizer-lr-schedules, data-augmentation, regularization-dropout, arch-positional-encoding, normalization-layers, knowledge-distillation]
 ---
 
@@ -133,4 +134,14 @@ At ViT-G scale (1.8B–2B params), the standard recipes need adjustment:
 
 ---
 
-*See also: [[vision-transformer]] · [[optimizer-adam]] · [[optimizer-lr-schedules]] · [[data-augmentation]] · [[regularization-dropout]] · [[arch-positional-encoding]] · [[knowledge-distillation]] · [[lora-quantization]] · [[normalization-layers]]*
+## Links
+
+- [[vision-transformer]] — this file documents the training details needed to actually reproduce ViT results; the architecture file describes structure, this one describes the recipe
+- [[optimizer-adam]] — AdamW (Adam with decoupled weight decay) is the standard optimizer for ViT training; the weight decay rate and $\beta_2$ differ from CNN recipes
+- [[normalization-layers]] — pre-norm ViTs (LayerNorm before attention/FFN) are more stable than post-norm; this choice significantly affects learning rate sensitivity
+- [[optimizer-lr-schedules]] — cosine schedule with linear warmup is the standard ViT LR schedule; LLRD (layer-wise LR decay) improves fine-tuning by using lower LRs in earlier layers
+- [[data-augmentation]] — strong augmentation (RandAugment, Mixup, CutMix) is essential for ViT training from scratch; ViTs have fewer inductive biases than CNNs
+- [[regularization-dropout]] — DropPath (stochastic depth) randomly drops entire residual branches during training; it is the primary regularization for ViT, replacing dropout
+- [[knowledge-distillation]] — DeiT trains ViT-S/B from scratch using a CNN teacher via a distillation token; knowledge distillation compensates for ViT's lack of local inductive biases
+- [[lora-quantization]] — LoRA fine-tuning of ViT uses lower ranks for earlier layers and higher ranks for later ones, following the LLRD intuition
+- [[arch-positional-encoding]] — 2D learned position embeddings must be interpolated when fine-tuning at higher resolution than pretraining; bilinear interpolation is the standard approach

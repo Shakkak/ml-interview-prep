@@ -4,6 +4,7 @@ tags: [ensemble, random-forest, boosting, bagging, bias-variance, statistics]
 aliases: [ensembles, bagging, boosting, random forest, gradient boosting, model averaging]
 difficulty: 2
 status: complete
+depends_on: [decision-trees, statistical-inference-mle]
 related: [bias-variance-double-descent, regularization-dropout, statistical-inference-mle]
 ---
 
@@ -20,11 +21,15 @@ For $N$ independent models, each with bias $b$ and variance $\sigma^2$, the ense
 $$\mathbb{E}[\bar{y}] = \mu + b \quad \text{(bias unchanged)}$$
 $$\text{Var}(\bar{y}) = \frac{\sigma^2}{N} \quad \text{(variance reduced by } N\text{)}$$
 
+where $\bar{y} = \frac{1}{N}\sum_i \hat{y}_i$ = ensemble prediction (average of $N$ models), $\mu$ = true value, $b$ = bias of each model (systematic error shared by all models), $\sigma^2$ = variance of each individual model, and $N$ = number of models. The variance shrinks by $N$ because averaging $N$ independent variables each with variance $\sigma^2$ gives variance $\sigma^2/N$.
+
 **Key insight:** ensembles reduce variance but not bias. They help most when individual models are high-variance (overfit). They cannot fix underfitting.
 
 With partially correlated models (correlation $\rho$):
 
 $$\text{Var}(\bar{y}) = \frac{\sigma^2}{N} + \frac{N-1}{N}\rho\sigma^2 \approx \rho\sigma^2 \text{ for large } N$$
+
+where $\rho$ = pairwise correlation between any two models' predictions (ranges from 0 = fully diverse to 1 = identical models). As $N \to \infty$, the variance floor is $\rho\sigma^2$ — the correlation, not the number of models, becomes the binding constraint.
 
 **Consequence:** the benefit of ensembling vanishes when models are highly correlated. Diversity is essential.
 
@@ -47,7 +52,7 @@ Feature randomness decorrelates trees further, breaking the tendency for all tre
 **AdaBoost:**
 1. Initialize sample weights $w_i = 1/n$
 2. Train model $f_t$ on weighted data; compute weighted error $\epsilon_t$
-3. Compute model weight $\alpha_t = \frac{1}{2}\ln\frac{1-\epsilon_t}{\epsilon_t}$
+3. Compute model weight $\alpha_t = \frac{1}{2}\ln\frac{1-\epsilon_t}{\epsilon_t}$ (where $\epsilon_t$ = weighted error rate of model $t$, i.e., sum of $w_i$ for misclassified examples; $\alpha_t > 0$ for better-than-chance models, $\alpha_t = 0$ for 50% error)
 4. Increase weights of misclassified examples: $w_i \leftarrow w_i e^{\alpha_t \mathbf{1}[\text{wrong}]}$
 5. Final: $F(x) = \text{sign}\left(\sum_t \alpha_t f_t(x)\right)$
 
@@ -120,4 +125,12 @@ Advantage: can combine models of different types (CNN + GBM + SVM) and learn the
 
 ---
 
-*See also: [[bias-variance-double-descent]] · [[regularization-dropout]] · [[statistical-inference-mle]] · [[bayesian-inference]] · [[decision-trees]] · [[bootstrap]]*
+## Links
+
+- [[decision-trees]] — trees are the canonical base learner for both bagging (Random Forest) and boosting (gradient boosting) because of their high variance and tuneable bias
+- [[statistical-inference-mle]] — model averaging reduces variance for the same reason averaging i.i.d. estimates reduces variance: $\text{Var}(\bar{X}) = \sigma^2/n$
+- [[bias-variance-double-descent]] — bagging reduces variance without increasing bias; boosting reduces bias with controlled variance; both exploit the bias-variance decomposition
+- [[regularization-dropout]] — dropout is equivalent to an implicit ensemble over exponentially many sub-networks; at inference, weight scaling approximates averaging them
+- [[bayesian-inference]] — Bayesian model averaging is the principled form of ensembling: average predictions weighted by posterior probability of each model
+- [[bootstrap]] — bagging samples each tree's training set with replacement (bootstrap resampling); the decorrelation of trees is what makes variance reduction work
+- [[gradient-boosting]] — gradient boosting is the sequential (boosting) complement to bagging; both are covered here as special cases of the ensemble framework

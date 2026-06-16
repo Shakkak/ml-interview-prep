@@ -5,6 +5,7 @@ aliases: [early stopping, validation loss, patience]
 difficulty: 1
 status: complete
 related: [regularization-dropout, regularization-weight-decay, optimizer-lr-schedules, bias-variance-double-descent, spectral-bias]
+depends_on: [bias-variance-double-descent, optimizer-lr-schedules]
 ---
 
 # Early Stopping
@@ -111,4 +112,11 @@ Fix:
 
 ---
 
-*See also: [[regularization-dropout]] · [[regularization-weight-decay]] · [[optimizer-lr-schedules]] · [[bias-variance-double-descent]] · [[spectral-bias]] · [[cross-validation]]*
+## Links
+
+- [[bias-variance-double-descent]] — early stopping limits model complexity in time (number of gradient steps); stopping at the validation minimum prevents overfitting without explicit regularization
+- [[optimizer-lr-schedules]] — early stopping and LR decay serve similar purposes; LR decay reduces the effective step size, early stopping halts training; both prevent the model from fitting noise
+- [[regularization-dropout]] — dropout reduces capacity during training; early stopping limits training time; they are complementary and both reduce overfitting
+- [[regularization-weight-decay]] — weight decay continuously penalizes large weights; early stopping is a hard stop; weight decay is preferred when the full training budget is used
+- [[spectral-bias]] — early stopping biases models toward low-frequency solutions (spectral bias); the model first learns smooth functions, then memorizes details; stopping early keeps only the smooth part
+- [[cross-validation]] — the stopping epoch is chosen by monitoring validation loss; this is implicit cross-validation and must be treated as a hyperparameter to avoid test set leakage

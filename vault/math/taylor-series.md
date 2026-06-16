@@ -4,6 +4,7 @@ tags: [taylor-series, calculus, approximation, numerical-methods]
 aliases: [Taylor expansion, Maclaurin series, power series]
 difficulty: 2
 status: complete
+depends_on: [matrix-calculus]
 related: [matrix-calculus, math-convexity-jensen, lagrangian-optimization, activation-gelu-swish, loss-cross-entropy, backpropagation]
 ---
 
@@ -16,6 +17,8 @@ related: [matrix-calculus, math-convexity-jensen, lagrangian-optimization, activ
 A Taylor series expresses any sufficiently smooth function $f$ as an infinite polynomial around a point $a$:
 
 $$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n = f(a) + f'(a)(x-a) + \frac{f''(a)}{2!}(x-a)^2 + \cdots$$
+
+where $a$ = the expansion point (the point around which we approximate), $f^{(n)}(a)$ = the $n$-th derivative of $f$ evaluated at $a$, $n!$ = factorial of $n$ (e.g., $3! = 6$), and $(x-a)^n$ = the distance from $a$ raised to the $n$-th power.
 
 When $a = 0$, this is called the **Maclaurin series**. The key insight: every smooth function looks like a polynomial locally. How far "locally" extends is determined by the radius of convergence.
 
@@ -47,6 +50,8 @@ Not all series converge everywhere. The radius of convergence $R$ is determined 
 
 $$R = \lim_{n \to \infty} \left|\frac{a_n}{a_{n+1}}\right|$$
 
+where $a_n$ is the coefficient of $x^n$ in the power series (e.g., for $e^x = \sum x^n/n!$, we have $a_n = 1/n!$) and $R$ is the radius of convergence (the series is valid for all $|x - a| < R$).
+
 The series converges absolutely for $|x - a| < R$ and diverges for $|x - a| > R$. Boundary behavior ($|x-a| = R$) requires separate analysis.
 
 **Why this matters in ML:** $\ln(1+x)$ only converges for $|x| \leq 1$. Using the series to approximate $\log(1 + e^z)$ for large $z$ fails — this is why the numerically stable log-sum-exp trick exists (see below).
@@ -54,6 +59,8 @@ The series converges absolutely for $|x - a| < R$ and diverges for $|x - a| > R$
 **Truncation error (Taylor's remainder theorem):** the error from stopping at degree $n$ is:
 
 $$R_n(x) = \frac{f^{(n+1)}(c)}{(n+1)!}(x-a)^{n+1}$$
+
+where $R_n(x)$ is the truncation error from using only the first $n+1$ terms of the Taylor series, $c$ is some unknown point between $a$ and $x$ (Lagrange form — the exact value of $c$ is unknown but we know it exists), and $f^{(n+1)}(c)$ is the $(n+1)$-th derivative evaluated there.
 
 for some $c$ between $a$ and $x$ (Lagrange form). This bounds how many terms you need for a given accuracy — critical for designing polynomial approximations in hardware or fast inference.
 
@@ -135,4 +142,12 @@ This is the fundamental connection: the Taylor series of the MGF encodes all mom
 
 ---
 
-*See also: [[matrix-calculus]] · [[math-convexity-jensen]] · [[lagrangian-optimization]] · [[activation-gelu-swish]] · [[loss-cross-entropy]] · [[backpropagation]] · [[fisher-information]]*
+## Links
+
+- [[matrix-calculus]] — the multivariable Taylor expansion uses the gradient (first-order) and Hessian (second-order); these are the objects of matrix calculus
+- [[math-convexity-jensen]] — a function is convex iff its second-order Taylor remainder is non-negative everywhere; convexity analysis relies on the Taylor approximation
+- [[lagrangian-optimization]] — Newton's method solves the KKT stationarity condition using a second-order Taylor expansion of the Lagrangian
+- [[activation-gelu-swish]] — GELU approximates the Gaussian CDF using a polynomial; the approximation is accurate because of the Taylor series for $\tanh$
+- [[loss-cross-entropy]] — the cross-entropy approximation $-\log p \approx 1 - p$ for $p \approx 1$ is a first-order Taylor expansion; it explains the linear gradient at confident predictions
+- [[backpropagation]] — the linearization of the network around current weights is a first-order Taylor approximation; gradient descent follows this linear approximation
+- [[fisher-information]] — the Fisher information is the second-order Taylor coefficient of KL divergence at $d\theta = 0$; natural gradient uses this curvature

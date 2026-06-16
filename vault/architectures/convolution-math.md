@@ -4,6 +4,7 @@ tags: [convolution, signal-processing, cnn, fourier, linear-algebra]
 aliases: [discrete convolution, cross-correlation, convolution theorem, convolutional layer math]
 difficulty: 2
 status: complete
+depends_on: [linear-algebra-fundamentals, fourier-transform]
 related: [cnn-architectures-guide, fourier-transform, arch-depthwise-separable, arch-bottleneck-1x1, dilated-convolution, backpropagation-advanced, linear-algebra-fundamentals]
 ---
 
@@ -12,6 +13,8 @@ related: [cnn-architectures-guide, fourier-transform, arch-depthwise-separable, 
 ---
 
 ## Fundamental
+
+**The problem convolution solves:** images and signals have local structure — nearby pixels are correlated, not independent. A fully connected layer treating each pixel independently ignores this structure entirely and requires $H \times W \times C$ parameters just for the first layer. Convolution exploits locality and translation equivariance: the same pattern detector (edge, texture, shape) can be reused everywhere in the image, reducing parameters from millions to thousands.
 
 ### Continuous and Discrete Convolution
 
@@ -24,8 +27,12 @@ Intuition: the output at time $t$ is a weighted sum of all past values of $f$, w
 **Discrete convolution** (for sequences):
 $$(f * g)[n] = \sum_{k=-\infty}^\infty f[k]\, g[n - k]$$
 
+where $f, g$ are discrete signals (sequences), $n$ is the output index, and $k$ ranges over all positions — the kernel $g$ is "flipped and slid" over $f$, computing a dot product at each shift.
+
 **2D discrete convolution** (for images):
 $$(I * K)[i, j] = \sum_m \sum_n I[m, n]\, K[i-m, j-n]$$
+
+where $I$ is the input image, $K$ is the kernel (filter), $(i, j)$ is the output pixel location, and $(m, n)$ are the pixel coordinates being summed over — the kernel is centered at $(i, j)$ and dotted with the image patch there.
 
 ### Cross-Correlation vs Convolution
 
@@ -48,6 +55,8 @@ where $s$ is the stride. Each output channel is a 2D correlation of all input ch
 **Output spatial dimensions:**
 
 $$H_{out} = \left\lfloor\frac{H_{in} + 2p - K_H}{s}\right\rfloor + 1, \qquad W_{out} = \left\lfloor\frac{W_{in} + 2p - K_W}{s}\right\rfloor + 1$$
+
+where $H_{in}, W_{in}$ = input height and width, $p$ = zero-padding (number of zeros added to each border), $K_H, K_W$ = kernel height and width, $s$ = stride (step size between kernel placements), and $\lfloor \cdot \rfloor$ = floor (round down).
 
 For $K=3, s=1, p=1$ (the most common config): $H_{out} = H_{in}$ — "same" padding preserves spatial size.
 
@@ -77,6 +86,8 @@ For a stack of $L$ conv layers each with kernel size $K$ and stride 1:
 
 $$\text{RF}_L = 1 + L(K - 1)$$
 
+where $L$ = number of convolutional layers stacked sequentially, $K$ = kernel size (e.g., 3 for a 3×3 kernel), and $\text{RF}_L$ = the number of input pixels that influence a single output pixel after $L$ layers.
+
 **With dilation $d$:** a dilated conv with dilation $d$ and kernel $K$ has effective kernel size $K + (K-1)(d-1) = d(K-1) + 1$. The receptive field grows as $1 + L \cdot d(K-1)$.
 
 **With striding:** stride $s$ at layer $l$ multiplies the receptive field contribution of earlier layers by $s$. The receptive field grows multiplicatively with depth when using stride $> 1$ — this is why pooling (stride 2) expands the receptive field faster than padding+stacking.
@@ -99,6 +110,8 @@ Total: $K^2 C + C^2 = C(K^2 + C)$. For $K=3, C=256$: standard has $589,824$; sep
 For upsampling in encoder-decoder architectures (UNet, generative models), transposed convolution inserts zeros between input elements and then convolves:
 
 $$H_{out} = (H_{in} - 1) \cdot s - 2p + K$$
+
+where $H_{in}$ = input height, $s$ = stride used in the original (downsampling) forward convolution, $p$ = padding, and $K$ = kernel size. Transposed convolution reverses a stride-$s$ downsampling, so its output grows roughly $s$-fold.
 
 For $K=3, s=2, p=0$: $H_{out} = 2H_{in} - 1$ → nearly doubles spatial size. With $p=1$: $H_{out} = 2H_{in}$.
 
@@ -162,4 +175,12 @@ $$\begin{pmatrix} y_0 \\ y_1 \\ y_2 \\ y_3 \end{pmatrix} = \begin{pmatrix} w_0 &
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[fourier-transform]] · [[arch-depthwise-separable]] · [[dilated-convolution]] · [[backpropagation-advanced]] · [[arch-bottleneck-1x1]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — convolution is a linear operation; it can be expressed as a sparse matrix multiplication with shared weights
+- [[fourier-transform]] — the convolution theorem says pointwise multiplication in the frequency domain equals convolution in the spatial domain; FFT-based convolution is $O(n \log n)$
+- [[cnn-architectures-guide]] — convolution math is the foundation of all CNN architectures; filters, feature maps, and receptive fields are derived from it
+- [[arch-depthwise-separable]] — depthwise-separable convolution splits the standard convolution into depthwise + pointwise to reduce compute from $O(k^2 CD)$ to $O(k^2 C + CD)$
+- [[dilated-convolution]] — dilated convolution inserts zeros into the kernel to expand receptive field without increasing parameter count
+- [[arch-bottleneck-1x1]] — $1\times 1$ convolutions apply pointwise linear transformations to change channel depth without spatial mixing
+- [[backpropagation-advanced]] — the backward pass through a conv layer is also a convolution (correlation with the flipped kernel)

@@ -4,6 +4,7 @@ tags: [information-theory, probability, loss]
 aliases: [entropy, mutual information, information gain, conditional entropy, joint entropy]
 difficulty: 2
 status: complete
+depends_on: [distributions-overview]
 related: [loss-cross-entropy, loss-kl-divergence, loss-nt-xent, bayesian-inference]
 ---
 
@@ -13,11 +14,19 @@ related: [loss-cross-entropy, loss-kl-divergence, loss-nt-xent, bayesian-inferen
 
 ## Fundamental
 
+**What problem does entropy solve?** Suppose you want to quantify "how uncertain" a distribution is, or equivalently "how much information an observation carries." These questions arise constantly in ML: choosing decision tree splits (which feature tells us most about the class?), designing optimal compression codes, and measuring what information a learned representation preserves.
+
+**Intuition:** a fair coin toss is maximally uncertain — you cannot guess the outcome any better than chance. A biased coin with $p=0.99$ for heads is nearly deterministic — you can almost always guess correctly. We need a number that captures this difference.
+
+Shannon's key insight: the "surprise" of an event with probability $p$ is $-\log p$ — rare events surprise us more. Entropy is the *expected surprise* over the whole distribution.
+
 ### Shannon Entropy
 
 The entropy of a discrete random variable $X$ with distribution $p$:
 
 $$H(X) = -\sum_x p(x) \log p(x) = \mathbb{E}_p[-\log p(X)]$$
+
+where $X$ = a discrete random variable, $p(x)$ = probability that $X$ takes value $x$, $\sum_x$ = sum over all possible values of $X$, $\log$ = logarithm (base 2 for bits, base $e$ for nats), and $-\log p(x)$ = the "surprise" or information content of outcome $x$ (rare events with small $p(x)$ have high surprise).
 
 Measures **uncertainty** or **information content** of a distribution.
 
@@ -44,6 +53,8 @@ Minimizing cross-entropy (ML training objective) is equivalent to minimizing KL 
 ### Conditional Entropy
 
 $$H(X|Y) = -\sum_{x,y} p(x,y)\log p(x|y) = \mathbb{E}_{p(x,y)}[-\log p(X|Y)]$$
+
+where $p(x,y)$ = joint probability of $X=x$ and $Y=y$, $p(x|y)$ = conditional probability of $X=x$ given $Y=y$, and $H(X|Y)$ = expected value of $-\log p(X|Y)$ averaged over all joint outcomes.
 
 Average remaining uncertainty in $X$ after observing $Y$.
 
@@ -117,6 +128,8 @@ A theory of deep learning representation: $Z = f(X)$ should be:
 
 $$\mathcal{L}_{IB} = I(Z; Y) - \beta \cdot I(Z; X)$$
 
+where $Z = f(X)$ = the learned representation (encoder output), $I(Z;Y)$ = mutual information between representation and label (how much $Z$ predicts the target — maximize this), $I(Z;X)$ = mutual information between representation and input (how much $Z$ remembers the input — minimize this to compress), and $\beta > 0$ = the compression-sufficiency tradeoff coefficient.
+
 The Lagrange multiplier $\beta > 0$ controls the compression-sufficiency tradeoff. The **information plane** ($I(Z;X)$ vs $I(Z;Y)$) visualizes where a representation sits — a good encoder pushes $I(Z;Y)$ high while keeping $I(Z;X)$ low.
 
 Tishby & Schwartz-Ziv (2017) claimed deep networks undergo distinct compression and fitting phases in the information plane during training. This sparked controversy — Saxe et al. (2018) showed the claimed compression phase only appears with saturating activations (tanh), not ReLU. The IB framework remains theoretically interesting as a lens on generalization but its empirical claim is disputed.
@@ -163,4 +176,13 @@ The Rényi-2 divergence connects to Gaussian kernel density estimators and maxim
 
 ---
 
-*See also: [[loss-cross-entropy]] · [[loss-kl-divergence]] · [[loss-nt-xent]] · [[bayesian-inference]] · [[maximum-entropy-principle]] · [[variational-autoencoders]] · [[decision-trees]]*
+## Links
+
+- [[distributions-overview]] — entropy is a property of a distribution; choosing the right distribution determines the entropy of your model
+- [[loss-cross-entropy]] — cross-entropy $H(p,q)$ is the expected code length under $q$ for data from $p$; entropy $H(p)$ is the minimum achievable
+- [[loss-kl-divergence]] — $D_{KL}(p \| q) = H(p,q) - H(p)$; KL is the extra cost from using the wrong distribution
+- [[loss-nt-xent]] — NT-Xent contrastive loss is a lower bound on mutual information between two views
+- [[bayesian-inference]] — the ELBO contains mutual information $I(x;z)$ implicitly through the reconstruction term
+- [[maximum-entropy-principle]] — MaxEnt selects the distribution that maximizes entropy subject to observed constraints
+- [[variational-autoencoders]] — $\beta$-VAE controls $I(Z;X)$ through the KL weight; the information bottleneck Lagrangian is closely related
+- [[decision-trees]] — information gain = mutual information between a feature and the class label, computed locally at each node

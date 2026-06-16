@@ -5,6 +5,7 @@ aliases: [coordinate descent, block coordinate descent, alternating minimization
 difficulty: 2
 status: complete
 related: [optimizer-sgd-momentum, lagrangian-optimization, second-order-optimization, numerical-methods, support-vector-machines]
+depends_on: [optimizer-sgd-momentum, lagrangian-optimization, math-convexity-jensen]
 ---
 
 # Coordinate Descent
@@ -20,6 +21,8 @@ Some optimization problems become easy when you fix all variables but one — th
 **Coordinate descent** minimizes $f(\theta_1, \ldots, \theta_n)$ by cycling through variables and minimizing over each one while holding the others fixed:
 
 $$\theta_j^{(t+1)} = \arg\min_{\theta_j} f(\theta_1^{(t+1)}, \ldots, \theta_{j-1}^{(t+1)}, \theta_j, \theta_{j+1}^{(t)}, \ldots, \theta_n^{(t)})$$
+
+where $j$ = current coordinate being optimized, superscript $(t+1)$ on earlier coordinates = already updated this cycle (Gauss-Seidel style), superscript $(t)$ on later = not yet updated, $\arg\min_{\theta_j}$ = exactly solving the 1D subproblem.
 
 Each 1D subproblem is solved exactly (or approximately). The process cycles through $j = 1, \ldots, n$ repeatedly.
 
@@ -52,6 +55,8 @@ This is the core of **GLMNET** — the most widely used LASSO solver — which c
 
 $$\theta_B^{(t+1)} = \arg\min_{\theta_B} f(\theta_B, \theta_{\bar{B}}^{(t)})$$
 
+where $B$ = current block of variables being optimized, $\theta_{\bar{B}}^{(t)}$ = all other blocks held fixed at previous iterate.
+
 **Examples:**
 - **Alternating least squares (ALS)** for matrix factorization: fix $U$, solve for $V$ (linear system); fix $V$, solve for $U$ — each block is a linear system
 - **EM algorithm** (see [[expectation-maximization]]): alternating between the E-step (update latent variables) and M-step (update parameters)
@@ -70,6 +75,8 @@ $$x^{k+1} = \arg\min_x \left(f(x) + \frac{\rho}{2}\|Ax + Bz^k - c + u^k\|^2\righ
 $$z^{k+1} = \arg\min_z \left(g(z) + \frac{\rho}{2}\|Ax^{k+1} + Bz - c + u^k\|^2\right)$$
 $$u^{k+1} = u^k + Ax^{k+1} + Bz^{k+1} - c$$
 
+where $u^k$ = scaled dual variable (Lagrange multiplier for the constraint), $\rho > 0$ = augmented Lagrangian penalty parameter, $x$-step = minimizes $f$ with quadratic penalty, $z$-step = minimizes $g$ with quadratic penalty (proximal operator), $u$-step = dual ascent on constraint violation.
+
 ADMM is widely used for distributed optimization (split variables across machines, coordinate via dual variable $u$) and problems where $f$ and $g$ are each tractable separately but not jointly (e.g., one is smooth, one is a proximal operator like $\ell_1$).
 
 ---
@@ -86,4 +93,10 @@ ADMM is widely used for distributed optimization (split variables across machine
 
 Sequential Minimal Optimization (see [[support-vector-machines]]) is coordinate descent on the SVM dual, updating 2 dual variables per step (the minimum block size that satisfies the equality constraint $\sum_i \alpha_i y_i = 0$). Each 2D subproblem has a closed-form solution.
 
-*See also: [[lagrangian-optimization]] · [[second-order-optimization]] · [[support-vector-machines]] · [[expectation-maximization]] · [[numerical-methods]]*
+## Links
+
+- [[optimizer-sgd-momentum]] — SGD updates all parameters simultaneously; coordinate descent updates one (or a block) at a time; CD converges when the problem is separable or block-separable
+- [[lagrangian-optimization]] — SVM training (SMO) is coordinate descent on the Lagrangian dual; each step updates 2 dual variables to satisfy the equality constraint $\sum \alpha_i y_i = 0$
+- [[math-convexity-jensen]] — coordinate descent converges to the global minimum for convex separable objectives; for strongly convex functions, it converges at a linear rate
+- [[second-order-optimization]] — block coordinate Newton methods use second-order information within each block; they converge faster than first-order CD but require Hessian computation per block
+- [[expectation-maximization]] — EM is an instance of block coordinate ascent on the ELBO: E-step = optimize over $q(z)$, M-step = optimize over $\theta$; each step increases the objective

@@ -5,6 +5,7 @@ aliases: [convexity, Jensen's inequality, convex function, concave function, str
 difficulty: 2
 status: complete
 related: [loss-kl-divergence, variational-autoencoders, bayesian-inference, entropy-mutual-info, lagrangian-optimization]
+depends_on: [linear-algebra-fundamentals, matrix-calculus]
 ---
 
 # Convexity and Jensen's Inequality
@@ -18,6 +19,8 @@ A **convex function** curves upward like a bowl — the line segment between any
 A function $f: \mathbb{R}^n \to \mathbb{R}$ is **convex** if for any $x, y$ and $\lambda \in [0,1]$:
 
 $$f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda)f(y)$$
+
+where $x, y \in \mathbb{R}^n$ = any two points in the domain, $\lambda \in [0,1]$ = interpolation weight (the left side is a point on the chord; the right side is the weighted average of the function values at the endpoints — convexity says the function at any interior point is at most the chord value).
 
 Geometrically: the chord connecting any two points on the graph lies above or on the graph ("bowl up"). **Concave** functions reverse the inequality ("bowl down").
 
@@ -40,6 +43,8 @@ Common examples:
 For a **convex** function $f$ and a random variable $X$:
 
 $$f(\mathbb{E}[X]) \leq \mathbb{E}[f(X)]$$
+
+where $f$ = a convex function, $X$ = any random variable with finite expectation, $\mathbb{E}[X]$ = a single scalar (the mean), and $f(\mathbb{E}[X])$ vs $\mathbb{E}[f(X)]$ is the core comparison — applying $f$ to the average vs averaging the outputs of $f$.
 
 For a **concave** $f$: the inequality reverses. The function of the average $\leq$ the average of the function.
 
@@ -74,6 +79,8 @@ $$\log p_\theta(x) = \log \mathbb{E}_{q_\phi(z|x)}\!\left[\frac{p_\theta(x,z)}{q
 Apply Jensen ($\log$ is concave, so $\log\mathbb{E}[Y] \geq \mathbb{E}[\log Y]$):
 
 $$\log p_\theta(x) \geq \mathbb{E}_{q_\phi}\!\left[\log\frac{p_\theta(x,z)}{q_\phi(z|x)}\right] = \underbrace{\mathbb{E}_{q_\phi}[\log p_\theta(x|z)]}_{\text{reconstruction}} - \underbrace{D_{KL}(q_\phi(z|x) \| p(z))}_{\text{regularization}} = \text{ELBO}$$
+
+where $p_\theta(x) = \int p_\theta(x|z)p(z)\,dz$ = intractable marginal likelihood, $q_\phi(z|x)$ = variational (approximate) posterior, $p(z) = \mathcal{N}(0,I)$ = prior, and the ELBO is a lower bound on $\log p_\theta(x)$ that is tractable to compute and optimize.
 
 Jensen converts an intractable log-integral into a tractable lower bound. The gap equals $D_{KL}(q_\phi(z|x) \| p_\theta(z|x)) \geq 0$. Maximizing the [[variational-autoencoders|ELBO]] simultaneously tightens the lower bound (pushes $q_\phi$ toward the true [[bayesian-inference|posterior]]) and maximizes the likelihood lower bound.
 
@@ -137,4 +144,12 @@ The composition of convex functions need not be convex. $\text{ReLU}(x) = \max(0
 
 ---
 
-*See also: [[loss-kl-divergence]] · [[variational-autoencoders]] · [[entropy-mutual-info]] · [[lagrangian-optimization]] · [[optimizer-adam]] · [[normalization-layers]] · [[optimizer-sgd-momentum]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — convex sets are defined by linear inequalities; the convex hull, linear programming, and projection onto convex sets are linear algebra operations
+- [[matrix-calculus]] — a twice-differentiable function is convex iff its Hessian is positive semidefinite; strong convexity requires $H \succeq \mu I$ with $\mu > 0$
+- [[loss-kl-divergence]] — KL divergence is convex in both arguments; Jensen's inequality proves $\text{KL}(p\|q) \geq 0$ (Jensen applied to $-\log$, which is convex)
+- [[variational-autoencoders]] — the ELBO is derived using Jensen's inequality: $\log p(x) = \log \mathbb{E}_q[p(x,z)/q(z)] \geq \mathbb{E}_q[\log p(x,z)/q(z)]$
+- [[entropy-mutual-info]] — entropy is concave; mutual information is convex in one argument and concave in the other — both follow from Jensen's inequality
+- [[lagrangian-optimization]] — Lagrangian duality is exact when the primal is convex; strong duality (zero duality gap) requires convexity + constraint qualification
+- [[optimizer-sgd-momentum]] — for convex losses, SGD converges at rate $O(1/\sqrt{T})$; for strongly convex losses, convergence is $O(1/T)$ — both rely on the convexity structure

@@ -4,6 +4,7 @@ tags: [activation, training, architecture]
 aliases: [ReLU, Leaky ReLU, PReLU, ELU, dying ReLU]
 difficulty: 1
 status: complete
+depends_on: [backpropagation]
 related: [activation-gelu-swish, activation-sigmoid-tanh, backpropagation-advanced, optimizer-sgd-momentum]
 ---
 
@@ -73,7 +74,7 @@ $\lambda \approx 1.0507$, $\alpha \approx 1.6733$ — not chosen empirically but
 1. $\alpha \lambda e^{\alpha \lambda} = 1$ (mean preservation)
 2. $\lambda^2 [2\alpha \lambda e^{\alpha \lambda} - (\alpha \lambda)^2 e^{2\alpha \lambda}] = 1$ (variance preservation)
 
-Solving these simultaneous constraints yields the specific $(\lambda, \alpha)$ values. The derivation involves the Banach fixed-point theorem on the mapping of mean/variance distributions across layers.
+Solving these simultaneous constraints yields the specific $(\lambda, \alpha)$ values. The derivation uses the **Banach fixed-point theorem**: if the function mapping $(\mu, \nu)$ across one SELU layer is a contraction (it brings any two starting points closer together), then repeated application converges to a unique fixed point. The theorem guarantees that $(0, 1)$ is this fixed point and that the network's activations converge to mean 0, variance 1 regardless of the input distribution.
 
 **Requirements that limit practical adoption:** LeCun normal initialization (not Kaiming), AlphaDropout (not standard dropout), fully connected layers only (not conv), no residual connections. Rarely used outside of niche settings.
 
@@ -92,4 +93,10 @@ Solving these simultaneous constraints yields the specific $(\lambda, \alpha)$ v
 
 ---
 
-*See also: [[activation-gelu-swish]] · [[activation-sigmoid-tanh]] · [[backpropagation-advanced]] · [[normalization-layers]] · [[backpropagation]]*
+## Links
+
+- [[backpropagation]] — ReLU's piecewise gradient (0 or 1) is what backprop multiplies at each hidden layer; dead neurons block the gradient
+- [[activation-sigmoid-tanh]] — sigmoid and tanh are the saturating activations that ReLU was designed to replace in hidden layers
+- [[activation-gelu-swish]] — smooth probabilistic activations that outperform ReLU in transformers
+- [[normalization-layers]] — BatchNorm reduces dying ReLU risk by preventing pre-activations from drifting permanently negative
+- [[backpropagation-advanced]] — straight-through estimators generalize the subgradient trick for non-differentiable activations

@@ -4,6 +4,7 @@ tags: [transformers, attention, deep-learning, nlp, vision]
 aliases: [self-attention, scaled dot-product attention, QKV attention, multi-head attention]
 difficulty: 2
 status: complete
+depends_on: [linear-algebra-fundamentals, activation-softmax, rnn-lstm]
 related: [arch-positional-encoding, flash-attention, arch-kv-cache, normalization-layers, vision-transformer]
 ---
 
@@ -13,7 +14,9 @@ related: [arch-positional-encoding, flash-attention, arch-kv-cache, normalizatio
 
 ## Fundamental
 
-[[rnn-lstm|Recurrent networks]] process sequences step-by-step: $h_t = f(h_{t-1}, x_t)$. Every piece of information from token $x_1$ must survive $n-1$ sequential state updates to reach $h_n$. Two fatal consequences: (1) a fixed-size vector bottleneck that compresses arbitrarily long context, and (2) $O(n)$ sequential computation that prevents GPU parallelism.
+**The problem:** [[rnn-lstm|Recurrent networks]] process sequences step-by-step: $h_t = f(h_{t-1}, x_t)$. Every piece of information from token $x_1$ must survive $n-1$ sequential state updates to reach $h_n$. Two fatal consequences: (1) a fixed-size vector bottleneck that compresses arbitrarily long context, and (2) $O(n)$ sequential computation that prevents GPU parallelism.
+
+**Intuition:** instead of passing information forward through a chain of states, attention lets every output position directly ask every input position: "are you relevant to me?" The asking token emits a *query*; the answering tokens emit *keys* (searchable descriptions of their content) and *values* (their actual content). The output is a weighted blend of values, where the weights are determined by query-key compatibility.
 
 **Attention** abandons the bottleneck. Every output position directly reads from every input position in $O(1)$ hops. The sequence of updates is replaced by a single weighted retrieval over all positions simultaneously.
 
@@ -39,6 +42,8 @@ Convert scores to a probability distribution and compute a weighted sum of value
 
 $$\boxed{\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right) V}$$
 
+where $Q \in \mathbb{R}^{n \times d_k}$ = query matrix (what each token is looking for), $K \in \mathbb{R}^{n \times d_k}$ = key matrix (what each token advertises), $V \in \mathbb{R}^{n \times d_v}$ = value matrix (what each token contributes when retrieved), $d_k$ = key/query dimension (used for scaling), $QK^T \in \mathbb{R}^{n \times n}$ = raw attention scores (higher = more relevant), and $\text{softmax}(\cdot) V$ = weighted average of value vectors.
+
 Row $i$ of the output is a convex combination of all value vectors, with weights determined by how well query $i$ matches each key. The $n \times n$ weight matrix is never seen by the user — it exists transiently during computation.
 
 ---
@@ -52,6 +57,8 @@ A single head computes one similarity metric. Language and vision require multip
 $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V), \quad W_i^Q, W_i^K, W_i^V \in \mathbb{R}^{d_{model} \times d_k}$$
 
 $$\text{MHA}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h) W_O, \quad W_O \in \mathbb{R}^{h d_k \times d_{model}}$$
+
+where $h$ = number of heads, $d_{model}$ = full model embedding dimension, $d_k = d_{model}/h$ = per-head dimension (splitting $d_{model}$ evenly), $W_i^Q, W_i^K, W_i^V$ = learned projection matrices for head $i$, $\text{Concat}(\ldots)$ = concatenate all head outputs → shape $n \times (h d_k) = n \times d_{model}$, and $W_O$ = output projection mixing the concatenated heads back to $d_{model}$.
 
 **Parameter count:** each head uses $3 d_{model} d_k = 3 d_{model}^2/h$ parameters. For $h$ heads: $3 d_{model}^2$ total, plus $d_{model}^2$ for $W_O$ — exactly the same as one large attention head. Multiple heads are computationally free.
 
@@ -133,4 +140,15 @@ Many attention heads are redundant: pruning 20% of heads in BERT produces <1% pe
 
 ---
 
-*See also: [[arch-positional-encoding]] · [[flash-attention]] · [[arch-kv-cache]] · [[vision-transformer]] · [[normalization-layers]] · [[activation-softmax]] · [[activation-gelu-swish]] · [[lora-quantization]] · [[rnn-lstm]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — the QKV projections and the $QK^T$ matrix product are linear algebra operations; dot-product similarity requires an inner-product space
+- [[activation-softmax]] — converts raw attention scores to a probability distribution over tokens; saturation causes gradient vanishing
+- [[rnn-lstm]] — the sequential bottleneck of RNNs is the exact problem attention was designed to bypass
+- [[arch-positional-encoding]] — attention is permutation-invariant; positional encodings restore sequence order information
+- [[flash-attention]] — IO-efficient implementation that computes exact attention without materializing the $n \times n$ score matrix
+- [[arch-kv-cache]] — at inference, KV projections are cached across autoregressive steps to avoid recomputation
+- [[normalization-layers]] — LayerNorm precedes each attention sub-layer; it stabilizes the residual stream
+- [[vision-transformer]] — extends attention to images by treating patches as tokens
+- [[activation-gelu-swish]] — the FFN sub-layer uses GELU activation; GELU outperforms ReLU in transformers empirically
+- [[lora-quantization]] — low-rank adaptation modifies the $W_Q, W_K, W_V$ projection matrices

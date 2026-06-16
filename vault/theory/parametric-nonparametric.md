@@ -5,6 +5,7 @@ aliases: [parametric, non-parametric, KNN, Gaussian process, kernel density esti
 difficulty: 2
 status: complete
 related: [statistical-inference-mle, distributions-gaussian, kernel-methods, bias-variance-double-descent, curse-of-dimensionality]
+depends_on: [statistical-inference-mle, bayesian-inference, kernel-methods]
 ---
 
 # Parametric vs Non-Parametric Models
@@ -44,6 +45,8 @@ related: [statistical-inference-mle, distributions-gaussian, kernel-methods, bia
 
 $$\hat{p}(x) = \frac{1}{n}\sum_{i=1}^n K_h(x - x_i)$$
 
+where $K_h$ = kernel function (e.g. Gaussian) with bandwidth $h$, $x_i$ = $i$-th training point, $n$ = number of training points, $\hat{p}(x)$ = density estimate at query point $x$.
+
 Each training point contributes a "bump" of probability. **Silverman's rule of thumb** for optimal bandwidth: $h = 1.06\,\hat\sigma\, n^{-1/5}$ (1D Gaussian kernel).
 
 ---
@@ -58,6 +61,8 @@ A GP places a prior over functions: $f \sim \mathcal{GP}(\mu, k)$. Any finite co
 
 $$\mu^* = k(x^*, X)(K + \sigma^2 I)^{-1}y$$
 $$\sigma^{*2} = k(x^*, x^*) - k(x^*, X)(K + \sigma^2 I)^{-1}k(X, x^*)$$
+
+where $k(x^*, X)$ = vector of covariances between test point $x^*$ and all training points, $K$ = $n \times n$ kernel (covariance) matrix on training set, $\sigma^2$ = observation noise variance, $y$ = training targets, $\mu^*$ = posterior predictive mean, $\sigma^{*2}$ = posterior predictive variance (uncertainty at $x^*$).
 
 **Key property:** GPs give calibrated uncertainty estimates $\sigma^{*2}$, not just point predictions. The posterior variance $\sigma^{*2}$ is large far from training points (model is uncertain) and small near training points.
 
@@ -99,6 +104,8 @@ For infinitely wide neural networks, the limiting behavior under gradient descen
 
 $$K_\text{NTK}(x, x') = \mathbb{E}_{\theta\sim\text{init}}\left[\nabla_\theta f(x;\theta)^\top \nabla_\theta f(x';\theta)\right]$$
 
+where $\theta \sim \text{init}$ = parameters sampled from the random initialization distribution, $\nabla_\theta f(x;\theta) \in \mathbb{R}^{|\theta|}$ = gradient vector of the network output w.r.t. parameters at $x$, inner product = similarity in gradient space.
+
 In the infinite-width limit: (1) the NTK is constant during training (doesn't change as weights update); (2) training dynamics are linear; (3) the network converges to the minimum-norm interpolating solution in the NTK-induced RKHS.
 
 This means **infinitely wide neural networks are exactly equivalent to kernel regression with the NTK kernel** — a non-parametric method. Finite-width networks deviate from this limit (feature learning), which is precisely what makes them better in practice.
@@ -125,4 +132,12 @@ This means **infinitely wide neural networks are exactly equivalent to kernel re
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[kernel-methods]] · [[distributions-gaussian]] · [[bias-variance-double-descent]] · [[curse-of-dimensionality]] · [[neural-tangent-kernel]] · [[bayesian-inference]] · [[decision-trees]] · [[cross-validation]]*
+## Links
+
+- [[statistical-inference-mle]] — parametric models specify a family $p(x|\theta)$; MLE finds the $\hat\theta$ maximizing the likelihood; non-parametric models make no distributional assumption
+- [[bayesian-inference]] — Bayesian non-parametric models (Gaussian processes, Dirichlet processes) have infinitely many parameters that grow with data size; the prior governs smoothness
+- [[kernel-methods]] — SVMs and kernel regression are non-parametric: the model complexity (number of support vectors) grows with training data; the kernel encodes the inductive bias
+- [[distributions-gaussian]] — Gaussian process regression is non-parametric: predictions are mean and variance of an infinite-dimensional Gaussian; the kernel defines the covariance structure
+- [[bias-variance-double-descent]] — parametric models control complexity via parameter count (higher bias, lower variance for small models); non-parametric models grow in complexity with data
+- [[curse-of-dimensionality]] — non-parametric methods (KNN, kernel density estimation) suffer most from the curse; sample complexity grows exponentially with dimension
+- [[decision-trees]] — decision trees are non-parametric: a tree with $n$ leaves can fit any data with $n$ distinct input patterns; pruning (regularization) controls effective complexity

@@ -4,6 +4,7 @@ tags: [generative-models, latent-space, bayesian, deep-learning, elbo, reparamet
 aliases: [VAE, ELBO, variational inference, reparameterization trick, beta-VAE, evidence lower bound]
 difficulty: 2
 status: complete
+depends_on: [bayesian-inference, distributions-gaussian, loss-kl-divergence]
 related: [bayesian-inference, diffusion-models, normalizing-flows, backpropagation, distributions-gaussian]
 ---
 
@@ -51,6 +52,8 @@ This is the **ELBO** (Evidence Lower BOund). The gap to the true log-likelihood 
 **[[loss-kl-divergence|KL divergence]] term:** $D_{KL}(q_\phi(z \mid x) \| p(z))$ — push the encoder's posterior toward the standard Gaussian prior. For diagonal Gaussian:
 
 $$D_{KL}(\mathcal{N}(\mu, \sigma^2 I) \| \mathcal{N}(0,I)) = \frac{1}{2}\sum_{j=1}^d (\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1)$$
+
+where $d$ = dimensionality of the latent space $z$, $j$ = index over latent dimensions, $\mu_j$ = mean of the encoder's output distribution for dimension $j$ (how far the latent is from the prior mean 0), and $\sigma_j^2$ = variance for dimension $j$ (the $-\log\sigma_j^2$ and $\sigma_j^2$ terms together penalize distributions that are too narrow or too wide relative to the unit Gaussian prior).
 
 This has a **closed-form expression** — no sampling needed for the KL term, only for the reconstruction term.
 
@@ -109,4 +112,13 @@ The DDPM ELBO is the sum of $T$ KL terms $D_{KL}(q(x_{t-1} \mid x_t, x_0) \| p_\
 
 ---
 
-*See also: [[bayesian-inference]] · [[normalizing-flows]] · [[diffusion-models]] · [[backpropagation]] · [[loss-kl-divergence]] · [[loss-cross-entropy]] · [[math-convexity-jensen]] · [[rnn-lstm]]*
+## Links
+
+- [[bayesian-inference]] — VAEs are the deep learning instantiation of Bayesian inference; the encoder posterior $q(z|x)$ approximates the true posterior $p(z|x)$
+- [[distributions-gaussian]] — the prior $p(z) = \mathcal{N}(0,I)$ and the reparameterization trick both rely on Gaussian properties
+- [[loss-kl-divergence]] — the ELBO contains a KL term that regularizes the latent space toward the prior
+- [[loss-cross-entropy]] — the reconstruction term is cross-entropy (or MSE) measuring how well the decoder recovers the input
+- [[normalizing-flows]] — flows achieve exact log-likelihood without the ELBO approximation; complementary approach to latent-variable generation
+- [[diffusion-models]] — diffusion models supersede VAEs for image quality while sharing the latent-variable framing
+- [[math-convexity-jensen]] — Jensen's inequality is the key step in deriving the ELBO lower bound on log-likelihood
+- [[backpropagation]] — the reparameterization trick makes the stochastic latent variable differentiable, enabling gradient-based training

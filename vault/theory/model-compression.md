@@ -4,7 +4,8 @@ tags: [model-compression, pruning, quantization, distillation, low-rank, efficie
 aliases: [model compression, neural network compression, efficient inference, compression techniques]
 difficulty: 1
 status: complete
-related: [lora-quantization, knowledge-distillation, pruning-sparsity, mixed-precision, lora-quantization]
+related: [lora-quantization, knowledge-distillation, pruning-sparsity, mixed-precision]
+depends_on: [backpropagation, lora-quantization, knowledge-distillation]
 ---
 
 # Model Compression
@@ -84,4 +85,10 @@ In practice, methods are stacked:
 
 **Fine-tuning at scale:** LoRA + gradient checkpointing + BF16 — fine-tune 70B models on 1–2 A100s.
 
-*See also: [[pruning-sparsity]] · [[knowledge-distillation]] · [[lora-quantization]] · [[mixed-precision]]*
+## Links
+
+- [[backpropagation]] — compression techniques must be compatible with gradient flow; pruning masks require straight-through estimators, quantization uses fake quantization during training
+- [[lora-quantization]] — LoRA is a low-rank compression technique: $\Delta W = AB$ where $\text{rank}(A) = \text{rank}(B) = r \ll \min(m,n)$; reduces trainable parameters without changing inference cost
+- [[knowledge-distillation]] — distillation compresses by training a small student on soft teacher logits; complementary to pruning (removes weights) and quantization (reduces precision)
+- [[pruning-sparsity]] — structured pruning removes entire channels/heads; unstructured pruning removes individual weights; the lottery ticket hypothesis shows sparse masks exist from initialization
+- [[mixed-precision]] — FP16/BF16 quantization halves memory and doubles throughput on modern GPUs; weight-only INT8 quantization further reduces model size with minimal accuracy loss

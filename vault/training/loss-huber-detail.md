@@ -5,6 +5,7 @@ aliases: [Huber loss, pinball loss, quantile loss, MAE, robust regression, expec
 difficulty: 1
 status: complete
 related: [loss-mse, loss-huber, loss-cross-entropy, statistical-inference-mle, gradient-boosting]
+depends_on: [loss-mse, loss-huber, statistical-inference-mle]
 ---
 
 # Huber Loss, Quantile Regression, and Robust Losses
@@ -18,6 +19,8 @@ related: [loss-mse, loss-huber, loss-cross-entropy, statistical-inference-mle, g
 The **Huber loss** (see also [[loss-huber]]) combines MSE for small errors and MAE for large errors:
 
 $$\mathcal{L}_\delta(r) = \begin{cases} \frac{1}{2}r^2 & |r| \leq \delta \\ \delta(|r| - \frac{1}{2}\delta) & |r| > \delta \end{cases}$$
+
+where $r = y - \hat{y}$ = residual (true minus predicted), $\delta > 0$ = threshold separating quadratic from linear regime, $\frac{1}{2}r^2$ = MSE for small errors, $\delta(|r| - \frac{1}{2}\delta)$ = scaled MAE for large errors.
 
 **Choosing $\delta$:**
 - $\delta \to 0$: approaches MAE (fully robust, non-smooth at zero)
@@ -40,6 +43,8 @@ Instead of predicting the conditional mean $\mathbb{E}[y|x]$, **quantile regress
 
 $$\mathcal{L}_\tau(r) = \begin{cases} \tau \cdot r & r \geq 0 \\ (\tau - 1) \cdot r & r < 0 \end{cases} = r(\tau - \mathbf{1}[r < 0])$$
 
+where $r = y - \hat{y}$ = residual, $\tau \in (0,1)$ = target quantile, $\mathbf{1}[r < 0]$ = 1 if underprediction, penalizes overprediction by $(1-\tau)$ and underprediction by $\tau$.
+
 - Asymmetric: penalizes overprediction by $1-\tau$ and underprediction by $\tau$
 - Minimizing expected pinball loss gives the $\tau$-th conditional quantile
 - $\tau = 0.5$: median regression (equivalent to MAE up to scaling)
@@ -56,6 +61,8 @@ $$\mathcal{L}_\tau(r) = \begin{cases} \tau \cdot r & r \geq 0 \\ (\tau - 1) \cdo
 **Expectiles** are to $\ell_2$ loss what quantiles are to $\ell_1$ loss. The $\tau$-expectile minimizes:
 
 $$\mathcal{L}_\tau(r) = |\tau - \mathbf{1}[r < 0]| \cdot r^2$$
+
+where $\tau \in (0,1)$ = target expectile, $|\tau - \mathbf{1}[r < 0]|$ = asymmetric weight ($\tau$ for positive residuals, $1-\tau$ for negative), $r^2$ = squared residual.
 
 Asymmetric MSE — penalizes negative residuals by $(1-\tau)$ and positive residuals by $\tau$.
 
@@ -85,4 +92,9 @@ LightGBM and XGBoost both support quantile objectives natively.
 | Heavy-tailed errors | MAE or log-cosh |
 | Reinforcement learning (value distribution) | Quantile / expectile |
 
-*See also: [[loss-mse]] · [[loss-huber]] · [[statistical-inference-mle]] · [[gradient-boosting]]*
+## Links
+
+- [[loss-mse]] — MSE = $\frac{1}{2}(y-\hat{y})^2$ is quadratic everywhere; Huber loss is quadratic for small errors and linear for large ones, reducing outlier influence
+- [[loss-huber]] — this file extends the basic Huber loss file with quantile and expectile regression; quantile regression estimates $P(Y \leq \hat{y}|x) = q$ at a given quantile $q$
+- [[statistical-inference-mle]] — quantile regression corresponds to MLE under an asymmetric Laplace distribution; the pinball loss is the negative log-likelihood of this distribution
+- [[gradient-boosting]] — XGBoost and LightGBM support custom loss functions including Huber and quantile; gradient boosting can minimize any differentiable loss by fitting residuals

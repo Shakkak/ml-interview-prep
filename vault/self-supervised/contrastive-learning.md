@@ -5,6 +5,7 @@ aliases: [SimCLR, MoCo, BYOL, NT-Xent, InfoNCE]
 difficulty: 2
 status: complete
 related: [bayesian-inference, backpropagation, attention-mechanism]
+depends_on: [backpropagation, loss-nt-xent, normalization-layers]
 ---
 
 # Contrastive and Self-supervised Learning
@@ -30,7 +31,7 @@ Labeling data is expensive. ImageNet has 1.2M labeled images — tiny compared t
 
 $$\ell_{i,j} = -\log \frac{\exp(\text{sim}(z_i, z_j)/\tau)}{\sum_{k=1}^{2N} \mathbb{1}[k \neq i]\, \exp(\text{sim}(z_i, z_k)/\tau)}$$
 
-where $\text{sim}(u,v) = \frac{u^T v}{\|u\|\|v\|}$ (cosine similarity) and $\tau$ is temperature. The denominator sums over $2(N-1)$ negatives.
+where $z_i, z_j$ = projected representations of the two augmented views of the same image (a positive pair), $\text{sim}(u,v) = \frac{u^\top v}{\|u\|\|v\|}$ = cosine similarity (dot product of unit vectors, ranges from -1 to 1), $\tau$ = temperature hyperparameter (smaller = sharper distribution, focuses more on hard negatives), $N$ = number of images in the batch, $2N$ = total augmented views, and $\mathbb{1}[k \neq i]$ = indicator that excludes $z_i$ itself from the denominator sum. The loss is minimized when $z_i$ and $z_j$ are more similar to each other than to all $2(N-1)$ other views. The denominator sums over $2(N-1)$ negatives.
 
 **Why augmentation design is critical:** augmentations define what "invariance" means. Too weak: the pretext task is trivial (solved by low-level features). Too strong: positives look like negatives. SimCLR's critical combination: random resized crop + color jitter + Gaussian blur + grayscale. Random crop is most important — different crops share semantic content but differ spatially. Color jitter destroys the shortcut of using identical color statistics between crops.
 
@@ -46,7 +47,7 @@ where $\text{sim}(u,v) = \frac{u^T v}{\|u\|\|v\|}$ (cosine similarity) and $\tau
 
 $$\mathcal{I}(z^+; z^{++}) \geq \log K - \mathcal{L}_{NCE}$$
 
-where $K$ is the number of negatives. Maximizing $\mathcal{I}$ = minimizing $\mathcal{L}_{NCE}$. NT-Xent is a softmax classification loss where the "class" is the identity of the positive pair among all candidates.
+where $\mathcal{I}(z^+; z^{++})$ = mutual information between the two view representations (what information they share), $K$ = number of negative examples, and $\mathcal{L}_{NCE}$ = the NT-Xent / InfoNCE loss. As $K$ grows, the bound $\log K$ grows, making the lower bound tighter. Maximizing $\mathcal{I}$ = minimizing $\mathcal{L}_{NCE}$. NT-Xent is a softmax classification loss where the "class" is the identity of the positive pair among all candidates.
 
 **Why large batches are needed:** with few negatives (small batch), many negatives are "easy" — very dissimilar images where the model already knows they differ. With large batches (SimCLR uses 4096–8192), the pool contains diverse, hard negatives that provide strong learning signal. This requirement makes SimCLR expensive (32+ GPUs).
 
@@ -125,4 +126,12 @@ DINO ViT features show emergent segmentation properties without any supervision 
 
 ---
 
-*See also: [[bayesian-inference]] · [[attention-mechanism]] · [[backpropagation]] · [[self-supervised-overview]] · [[loss-cross-entropy]] · [[entropy-mutual-info]] · [[vision-transformer]]*
+## Links
+
+- [[backpropagation]] — contrastive learning is trained by backpropagating the InfoNCE / NT-Xent loss; momentum encoders (MoCo) use an EMA of the online encoder to generate stable negatives
+- [[loss-nt-xent]] — NT-Xent (InfoNCE) is the contrastive loss: pulls together positive pairs, pushes apart negatives; temperature $\tau$ balances uniformity and alignment
+- [[normalization-layers]] — batch normalization in SimCLR prevents collapse and provides implicit negatives via batch statistics; BYOL uses layer norm to avoid this information leakage
+- [[self-supervised-overview]] — contrastive learning is the dominant paradigm in visual SSL; SimCLR, MoCo, CLIP are all contrastive methods that learn by comparing augmented views
+- [[attention-mechanism]] — ViT encoders in CLIP/DINO use self-attention; contrastive learning provides the pretraining signal; the attention maps emerge without segmentation labels
+- [[entropy-mutual-info]] — InfoNCE is a lower bound on mutual information between two views; maximizing InfoNCE maximizes the shared information across augmentations
+- [[vision-transformer]] — contrastive SSL with ViT (DINOv2, CLIP) produces strong visual features; CNNs and ViTs both benefit from contrastive pretraining

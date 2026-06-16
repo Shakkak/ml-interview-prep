@@ -4,6 +4,7 @@ tags: [active-learning, uncertainty-sampling, query-by-committee, annotation-eff
 aliases: [active learning, uncertainty sampling, query by committee, core-set selection, batch active learning]
 difficulty: 2
 status: complete
+depends_on: [bayesian-inference, entropy-mutual-info, model-calibration]
 related: [model-calibration, regularization-dropout, anomaly-detection, evaluation-metrics-guide, bayesian-inference]
 ---
 
@@ -62,7 +63,7 @@ Uncertainty-based methods select hard examples but may leave large "easy" region
 
 $$S^* = \arg\min_{S:\,|S|=b} \max_{x \in U}\min_{x' \in S} d(x, x')$$
 
-This is a **$k$-center problem** — minimize the maximum distance from any unlabeled point to its nearest labeled neighbor. Solved greedily: at each step, add the unlabeled point farthest from any currently selected point (approximately optimal).
+where $S$ = the selected labeled subset, $b$ = batch budget (number of examples to select), $U$ = the unlabeled pool, $d(\cdot, \cdot)$ = distance in embedding space (e.g., Euclidean on encoder features), and $\max_{x \in U}\min_{x' \in S} d(x, x')$ = the maximum "coverage gap" — the distance from the furthest unlabeled point to its nearest labeled neighbor. This is a **$k$-center problem** — minimize the maximum distance from any unlabeled point to its nearest labeled neighbor. Solved greedily: at each step, add the unlabeled point farthest from any currently selected point (approximately optimal).
 
 Core-set is computed in **embedding space** from a pretrained encoder, not in raw input space. Distances in raw pixels are not meaningful for informativeness.
 
@@ -104,4 +105,12 @@ In **domain adaptation**, the target domain has cheap unlabeled data but expensi
 
 ---
 
-*See also: [[model-calibration]] · [[regularization-dropout]] · [[bayesian-inference]] · [[evaluation-metrics-guide]] · [[entropy-mutual-info]] · [[backpropagation]] · [[bootstrap]]*
+## Links
+
+- [[bayesian-inference]] — Bayesian active learning uses posterior uncertainty as the query criterion; BALD (Bayesian Active Learning by Disagreement) maximizes mutual information between predictions and model parameters
+- [[entropy-mutual-info]] — uncertainty sampling maximizes predictive entropy $H(y|x)$; BALD maximizes mutual information $I(y; \theta | x, \mathcal{D})$ between predictions and weights
+- [[model-calibration]] — well-calibrated probabilities are essential for uncertainty-based queries; a poorly calibrated model's confidence scores don't reflect true uncertainty
+- [[regularization-dropout]] — MC Dropout estimates model uncertainty by averaging predictions over multiple dropout forward passes; enables Bayesian approximation at inference time
+- [[evaluation-metrics-guide]] — active learning is evaluated by accuracy vs. annotation budget curves; area under the learning curve measures sample efficiency
+- [[backpropagation]] — gradient-based acquisition functions (BADGE, BAIT) use the gradient norm or Fisher information to select informative examples
+- [[bootstrap]] — ensemble-based active learning averages predictions from models trained on different bootstrap samples to estimate epistemic uncertainty

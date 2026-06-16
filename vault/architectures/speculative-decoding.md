@@ -4,6 +4,7 @@ tags: [speculative-decoding, draft-model, inference-acceleration, autoregressive
 aliases: [speculative sampling, draft-verify, assisted decoding, speculative execution]
 difficulty: 2
 status: complete
+depends_on: [arch-kv-cache, autoregressive-models]
 related: [arch-kv-cache, autoregressive-models, attention-mechanism, flash-attention, flash-decoding]
 ---
 
@@ -39,7 +40,7 @@ Let $\alpha$ = average acceptance rate per draft token. Expected tokens generate
 
 $$\mathbb{E}[\text{tokens per step}] = \frac{1 - \alpha^{\gamma+1}}{1 - \alpha}$$
 
-For $\gamma = 4$ draft tokens and $\alpha = 0.8$: expected $\approx 3.36$ tokens per target call, vs 1 without speculation.
+where $\alpha \in [0, 1]$ = average probability that a single draft token is accepted by the rejection sampling criterion, $\gamma$ = number of draft tokens proposed per target forward pass, and the formula sums a geometric series (the probability of accepting exactly $k$ tokens is $\alpha^k(1-\alpha)$ for $k < \gamma$, plus $\alpha^\gamma$ for all $\gamma$ accepted). For $\gamma = 4$ draft tokens and $\alpha = 0.8$: expected $\approx 3.36$ tokens per target call, vs 1 without speculation.
 
 **Wall-clock speedup** depends on:
 - $\alpha$ (acceptance rate) — driven by how well draft distribution matches target
@@ -79,4 +80,9 @@ Evaluating multiple draft continuations at once requires a **tree structure**: t
 
 Speculative decoding is strictly equivalent to target model sampling — it does not change the model's outputs, only the speed. This is important: methods that change the output distribution (e.g., lookahead decoding, contrastive decoding) are separate from speculative decoding and do not preserve the target distribution.
 
-*See also: [[arch-kv-cache]] · [[autoregressive-models]] · [[flash-decoding]] · [[attention-mechanism]]*
+## Links
+
+- [[arch-kv-cache]] — the target model's KV cache is populated in parallel during the verification step; speculative decoding reduces forward passes but not cache memory
+- [[autoregressive-models]] — autoregressive generation is the bottleneck speculative decoding solves: the target model verifies $k$ draft tokens in one forward pass instead of $k$ passes
+- [[flash-decoding]] — Flash Decoding reduces latency per attention call; speculative decoding reduces the number of target model calls; they compose multiplicatively
+- [[attention-mechanism]] — both the draft and target models use self-attention; the draft model is typically a smaller version of the target model

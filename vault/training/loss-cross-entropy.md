@@ -4,6 +4,7 @@ tags: [loss, classification, probability, information-theory]
 aliases: [log loss, NLL loss, categorical cross-entropy]
 difficulty: 1
 status: complete
+depends_on: [entropy-mutual-info, distributions-overview, activation-softmax, activation-sigmoid-tanh]
 related: [loss-kl-divergence, entropy-mutual-info, activation-softmax, activation-sigmoid-tanh, backpropagation]
 ---
 
@@ -13,14 +14,18 @@ related: [loss-kl-divergence, entropy-mutual-info, activation-softmax, activatio
 
 ## Fundamental
 
-Cross-entropy measures the average number of bits needed to encode samples from distribution $p$ using the optimal code for distribution $q$:
+Cross-entropy measures the average number of bits needed to encode samples from distribution $p$ using the optimal code for distribution $q$ (see [[entropy-mutual-info]] for the full information-theoretic picture). In classification, $p$ is the true label distribution and $q$ is the model's predicted distribution (see [[distributions-overview]] for how categorical distributions are defined).
 
 $$H(p, q) = -\sum_c p_c \log q_c$$
+
+where $c$ indexes classes (e.g., $c = 1, \ldots, C$ for $C$-class classification), $p_c$ = the true probability of class $c$ (in classification: 1 for the correct class, 0 for all others — a "one-hot" distribution), and $q_c$ = the model's predicted probability of class $c$ (softmax output). The $-\log q_c$ term gives the "code length" for class $c$ under the model's distribution; the more confident and correct the model, the smaller this value.
 
 In classification: $p$ = true distribution (one-hot labels), $q$ = model predictions ([[activation-softmax|softmax]] probabilities).
 
 **Binary cross-entropy** for label $y \in \{0, 1\}$ and predicted probability $\hat{y} \in (0,1)$:
 $$L_{BCE} = -\left[y \log \hat{y} + (1-y)\log(1-\hat{y})\right]$$
+
+where $y$ = the true binary label (0 or 1), and $\hat{y}$ = the model's predicted probability that the label is 1 (sigmoid output).
 
 - If $y=1$: loss $= -\log\hat{y}$ — penalizes low predicted probability for the true class.
 - If $y=0$: loss $= -\log(1-\hat{y})$ — penalizes high predicted probability for the false class.
@@ -29,6 +34,8 @@ For sigmoid output $\hat{y} = \sigma(z)$, the gradient simplifies to $\frac{\par
 
 **Categorical cross-entropy** for $C$ classes with one-hot label $y$ and softmax output $\hat{y}$:
 $$L_{CE} = -\sum_c y_c \log \hat{y}_c = -\log \hat{y}_{y_\text{true}}$$
+
+where $y_c \in \{0, 1\}$ = one-hot label component for class $c$ (1 only for the true class, 0 everywhere else), $\hat{y}_c$ = the model's softmax probability for class $c$, and $y_\text{true}$ = the index of the correct class. The sum collapses to just $-\log \hat{y}_{y_\text{true}}$ because all other $y_c = 0$.
 
 Only the log-probability of the correct class contributes (all other $y_c = 0$). Gradient with softmax: $\frac{\partial L}{\partial z_c} = \hat{y}_c - y_c$.
 
@@ -43,10 +50,14 @@ Only the log-probability of the correct class contributes (all other $y_c = 0$).
 **Connection to maximum likelihood estimation:** minimizing cross-entropy is equivalent to maximizing log-likelihood under the model distribution:
 $$\arg\min_q H(p, q) = \arg\max_q \mathbb{E}_p[\log q] = \arg\max_q \sum_i \log q(y_i \mid x_i)$$
 
+where $q$ = model distribution, $p$ = empirical data distribution, $\sum_i \log q(y_i|x_i)$ = log-likelihood of training labels under the model.
+
 Training with cross-entropy = MLE of model parameters. The choice of loss function implicitly specifies the assumed noise distribution: cross-entropy corresponds to a categorical (multinomial) likelihood.
 
 **Connection to [[loss-kl-divergence|KL divergence]]:**
 $$H(p, q) = H(p) + D_{KL}(p \,\|\, q)$$
+
+where $H(p)$ = entropy of the true label distribution (a constant w.r.t. model parameters), $D_{KL}(p\|q)$ = KL divergence measuring how far model $q$ is from truth $p$.
 
 Minimizing cross-entropy = minimizing KL divergence between label distribution and model (since $H(p)$ is constant w.r.t. model parameters).
 
@@ -62,6 +73,9 @@ Minimizing cross-entropy = minimizing KL divergence between label distribution a
 
 **Symmetric cross-entropy for noisy labels** (Wang et al., 2019): standard cross-entropy is asymmetric — $H(p, q) = -\sum p \log q$ has unbounded gradient when $q \to 0$ but finite gradient when $p \to 0$. For noisy labels, this causes the model to aggressively fit noise. Symmetric cross-entropy adds the reverse term:
 $$L_{SCE} = \alpha \cdot H(p, q) + \beta \cdot H(q, p)$$
+
+where $H(p,q)$ = standard CE (forward: follows label distribution), $H(q,p)$ = reverse CE (follows model distribution), $\alpha, \beta$ = balancing coefficients, reverse term bounds gradient for noisy labels.
+
 The reverse KL term $H(q, p) = -\sum_c q_c \log p_c$ bounds the gradient of noisy labels, providing noise tolerance without sacrificing clean-label accuracy.
 
 **Cross-entropy and the log-likelihood geometry:** for a $C$-class problem, the cross-entropy loss defines a statistical manifold over model outputs. The Fisher information matrix of the multinomial model is $F = \text{diag}(\hat{y}) - \hat{y}\hat{y}^T$ (exactly the softmax Jacobian). Natural gradient descent uses $F^{-1}g$ as the update direction, moving in the direction of steepest descent in KL-divergence space rather than Euclidean parameter space. This is the motivation behind K-FAC and Shampoo optimizers.
@@ -72,4 +86,12 @@ The reverse KL term $H(q, p) = -\sum_c q_c \log p_c$ bounds the gradient of nois
 
 ---
 
-*See also: [[loss-kl-divergence]] · [[entropy-mutual-info]] · [[loss-focal]] · [[regularization-label-smoothing]] · [[activation-softmax]]*
+## Links
+
+- [[entropy-mutual-info]] — cross-entropy is the expected code length under $q$ when data follows $p$; entropy is the optimal code length
+- [[distributions-overview]] — cross-entropy assumes categorical likelihood; knowing the correct noise distribution determines the right loss
+- [[activation-softmax]] — the output layer that converts logits to probabilities which cross-entropy consumes
+- [[activation-sigmoid-tanh]] — sigmoid is the binary case; sigmoid + BCE is the canonical binary classification pairing
+- [[loss-kl-divergence]] — cross-entropy $= H(p) + D_{KL}(p \| q)$; minimizing CE minimizes KL when true labels are fixed
+- [[loss-focal]] — modifies cross-entropy to down-weight easy examples in class-imbalanced detection
+- [[regularization-label-smoothing]] — replaces one-hot targets to prevent logits diverging to infinity under CE training

@@ -5,6 +5,7 @@ aliases: [OLS, ordinary least squares, ridge regression, LASSO, linear model]
 difficulty: 1
 status: complete
 related: [loss-mse, regularization-weight-decay, statistical-inference-mle, bias-variance-double-descent, numerical-methods, matrix-calculus, logistic-regression]
+depends_on: [linear-algebra-fundamentals, loss-mse, statistical-inference-mle]
 ---
 
 # Linear Regression
@@ -117,4 +118,12 @@ For non-linear relationships without explicit feature engineering: fit a weighte
 
 ---
 
-*See also: [[loss-mse]] · [[regularization-weight-decay]] · [[statistical-inference-mle]] · [[bias-variance-double-descent]] · [[numerical-methods]] · [[logistic-regression]] · [[kernel-methods]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — OLS solution is $\hat\beta = (X^\top X)^{-1}X^\top y$; the normal equations require matrix inversion, which is $O(d^3)$ and numerically unstable when $X^\top X$ is ill-conditioned
+- [[loss-mse]] — linear regression minimizes MSE; the squared loss is convex and differentiable, leading to the closed-form OLS solution
+- [[statistical-inference-mle]] — OLS is equivalent to MLE under Gaussian noise $y = X\beta + \epsilon$, $\epsilon \sim \mathcal{N}(0,\sigma^2)$; the MLE for $\beta$ equals the OLS estimator
+- [[regularization-weight-decay]] — ridge regression adds $\lambda\|\beta\|^2$ (L2) to the MSE; LASSO adds $\lambda\|\beta\|_1$ (L1) for sparsity; both shrink the OLS estimate
+- [[bias-variance-double-descent]] — OLS has zero bias but high variance for large $d$; ridge reduces variance at the cost of bias; the tradeoff is the classical bias-variance picture
+- [[numerical-methods]] — computing $(X^\top X)^{-1}$ via Cholesky decomposition is preferred over direct inversion; iterative solvers (conjugate gradient) scale to large $d$
+- [[logistic-regression]] — logistic regression replaces the MSE with cross-entropy and passes the linear predictor through a sigmoid; it is the classification analogue of linear regression

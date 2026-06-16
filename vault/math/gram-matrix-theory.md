@@ -4,6 +4,7 @@ tags: [gram-matrix, gram-schmidt, inner-product, kernel, style-transfer]
 aliases: [Gram matrix, Gramian, Gram-Schmidt orthogonalization, feature correlation matrix]
 difficulty: 1
 status: complete
+depends_on: [linear-algebra-fundamentals, eigenvalues-pca]
 related: [kernel-methods, linear-algebra-fundamentals, math-svd, eigenvalues-pca, neural-tangent-kernel]
 ---
 
@@ -79,4 +80,10 @@ is positive semidefinite by Mercer's theorem (see [[kernel-methods]]). The linea
 
 For wide neural networks at initialization, the kernel matrix of the network (the **Neural Tangent Kernel** matrix, see [[neural-tangent-kernel]]) behaves like a Gram matrix in the feature space induced by the gradients. Training dynamics of wide networks are governed by the eigenvalues of this kernel Gram matrix.
 
-*See also: [[kernel-methods]] · [[linear-algebra-fundamentals]] · [[math-svd]] · [[neural-tangent-kernel]] · [[eigenvalues-pca]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — the Gram matrix $G_{ij} = \langle x_i, x_j \rangle$ is the $n\times n$ matrix of pairwise inner products; it is positive semi-definite by construction
+- [[eigenvalues-pca]] — the Gram matrix's eigenvalues equal those of $XX^\top$; kernel PCA eigendecomposes the Gram matrix
+- [[kernel-methods]] — the kernel matrix is a Gram matrix in the feature space; every valid kernel matrix is a Gram matrix for some feature map (Mercer's theorem)
+- [[math-svd]] — if $X = U\Sigma V^\top$, then the Gram matrix $XX^\top = U\Sigma^2 U^\top$; the eigenvalues of the Gram matrix are the squared singular values of $X$
+- [[neural-tangent-kernel]] — the NTK is the Gram matrix of gradients: $K_{ij} = \nabla_\theta f(x_i) \cdot \nabla_\theta f(x_j)$; it governs the training dynamics of wide networks

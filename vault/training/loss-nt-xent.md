@@ -5,6 +5,7 @@ aliases: [NT-Xent, InfoNCE, contrastive loss, normalized temperature cross-entro
 difficulty: 2
 status: complete
 related: [loss-cross-entropy, loss-kl-divergence, contrastive-learning, entropy-mutual-info]
+depends_on: [loss-cross-entropy, entropy-mutual-info, distributions-gaussian]
 ---
 
 # NT-Xent Loss (Normalized Temperature-scaled Cross-Entropy)
@@ -64,6 +65,8 @@ NT-Xent optimizes both simultaneously: the numerator drives alignment, the denom
 **NT-Xent as a lower bound on [[entropy-mutual-info|mutual information]]:** the InfoNCE bound (Oord et al., 2018) establishes:
 $$I(z_i; z_j) \geq \log(N) - \mathcal{L}_{NT-Xent}$$
 
+where $I(z_i; z_j)$ = mutual information between the two augmented views, $N$ = number of negatives in the batch, $\log(N)$ = theoretical maximum MI achievable with $N$ negatives, $\mathcal{L}_{NT-Xent}$ = NT-Xent loss (lower = better MI bound).
+
 where $N$ is the number of negatives. Maximizing NT-Xent loss (making it less negative) lower-bounds the mutual information between the two views. This bound is tight when the optimal critic is used. However, the bound is inherently limited: with $N$ negatives, the maximum achievable bound is $\log N$ nats — larger batches allow tighter MI estimation. This theoretical insight motivates the empirical finding that larger batches systematically improve contrastive learning.
 
 **Why the projection head matters (SimCLR, Chen et al., 2020):** representations used for downstream tasks should be taken from the encoder $f$, not the projection head $g$. The projection head learns to be invariant to augmentations, discarding information (like color, texture) that is useful for other tasks but redundant for the contrastive objective. Without the projection head, the encoder itself must be invariant, harming transferability. This explains a seemingly counterintuitive finding: using a non-linear projection head improves representation quality even though the head is discarded after pretraining.
@@ -73,8 +76,15 @@ where $N$ is the number of negatives. Maximizing NT-Xent loss (making it less ne
 **Supervised contrastive loss** (Khosla et al., 2020): extends NT-Xent to supervised learning by treating all samples of the same class as positives:
 $$L_{sup} = \sum_{i \in I} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(\text{sim}(z_i, z_p)/\tau)}{\sum_{k \neq i} \exp(\text{sim}(z_i, z_k)/\tau)}$$
 
+where $P(i)$ = set of all same-class positives for anchor $i$, $|P(i)|$ = number of positives (more than 1 in supervised setting), $\tau$ = temperature, denominator = all other samples in batch (positives + negatives).
+
 where $P(i)$ is the set of all positives for anchor $i$. This consistently outperforms [[loss-cross-entropy|cross-entropy training]] (0.5–1% top-1 on ImageNet with the same architecture) by learning representations with better inter-class margins and intra-class compactness.
 
 ---
 
-*See also: [[contrastive-learning]] · [[loss-cross-entropy]] · [[entropy-mutual-info]]*
+## Links
+
+- [[loss-cross-entropy]] — NT-Xent is a softmax cross-entropy over positive vs. negative pairs; the numerator is the similarity to the positive pair, the denominator sums over all negatives in the batch
+- [[entropy-mutual-info]] — NT-Xent is equivalent to InfoNCE, which is a lower bound on mutual information between two views; maximizing NT-Xent maximizes $I(z_i; z_j)$
+- [[distributions-gaussian]] — negative pairs are implicitly defined by the batch; with batch size $N$, each example has $2(N-1)$ negatives (all other augmented views in the batch)
+- [[contrastive-learning]] — NT-Xent is the loss function used in SimCLR; temperature $\tau$ controls the concentration of the distribution — low $\tau$ = hard, high $\tau$ = soft contrastive

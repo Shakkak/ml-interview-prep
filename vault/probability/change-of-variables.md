@@ -5,6 +5,7 @@ aliases: [change of variables, transformation of random variables, probability d
 difficulty: 2
 status: complete
 related: [normalizing-flows, variational-autoencoders, distributions-gaussian, matrix-calculus, statistical-inference-mle, sampling-methods, taylor-series]
+depends_on: [distributions-overview, matrix-calculus]
 ---
 
 # Change of Variables & Probability Transformations
@@ -151,4 +152,12 @@ $$\int p(x) \nabla_x \log p(x) f(x) dx = \int \nabla_x p(x) f(x) dx = -\int p(x)
 
 ---
 
-*See also: [[normalizing-flows]] · [[variational-autoencoders]] · [[diffusion-models]] · [[distributions-gaussian]] · [[sampling-methods]] · [[fisher-information]] · [[central-limit-theorem]]*
+## Links
+
+- [[distributions-overview]] — the change-of-variables formula transforms one known distribution into another; the CDF method and probability integral transform rely on this
+- [[matrix-calculus]] — the Jacobian matrix $J = \partial y/\partial x$ encodes how volume changes under a transformation; the log-determinant of the Jacobian is the correction term in the density formula
+- [[normalizing-flows]] — normalizing flows are sequences of invertible change-of-variables; the exact log-likelihood is computed by summing log-Jacobian terms at each step
+- [[variational-autoencoders]] — the reparameterization trick ($z = \mu + \sigma\epsilon$) is a change of variables that makes the sampling step differentiable
+- [[diffusion-models]] — the forward diffusion process is a sequence of Gaussian change-of-variables; the closed-form $q(x_t|x_0)$ comes from composing these transformations
+- [[distributions-gaussian]] — linear transformations of Gaussians are Gaussian; the change-of-variables formula gives the new mean and covariance analytically
+- [[sampling-methods]] — inverse CDF sampling uses the change-of-variables: if $U \sim \text{Uniform}(0,1)$, then $X = F^{-1}(U)$ has CDF $F$

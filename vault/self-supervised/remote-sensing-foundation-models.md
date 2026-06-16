@@ -3,6 +3,7 @@ title: "Remote Sensing Foundation Models"
 tags: [remote-sensing, foundation-models, remote-clip, prithvi, geochat, satmae, scale-mae, geospatial-fm, earth-observation-ml]
 aliases: [EO Foundation Models, Geospatial Foundation Models, RemoteCLIP, Prithvi, GeoChat]
 status: complete
+depends_on: [clip, masked-autoencoders, earth-observation-fundamentals]
 ---
 
 Foundation models are large neural networks pretrained on broad data that can be fine-tuned for many downstream tasks. In Earth observation (EO), standard ImageNet-pretrained models underperform because satellite imagery differs fundamentally from natural photos. This file covers why domain-specific pretraining matters and the key models built for geospatial data.
@@ -75,6 +76,8 @@ Scale is a unique challenge in EO: a tree at 10 m resolution looks like a single
 
 **Architecture change**: the image encoder receives the Ground Sample Distance (GSD) as an additional input. Position encodings are scaled by GSD:
 $$PE(pos) = PE_{base}(pos \cdot GSD)$$
+
+where $pos$ = token position index (patch number), $GSD$ = Ground Sample Distance (physical size of each pixel in meters), and $PE_{base}(\cdot)$ = standard sinusoidal positional encoding — scaling by GSD makes the encoding reflect physical position rather than token index.
 
 This allows the model to understand "this pixel represents 10 m × 10 m" vs "this pixel represents 1 m × 1 m".
 
@@ -216,6 +219,12 @@ When your downstream task requires temporal reasoning (crop monitoring, phenolog
 
 ---
 
-## See Also
+## Links
 
-[[earth-observation-fundamentals]], [[satellite-imagery-preprocessing]], [[clip]], [[blip]], [[vlm-architectures]], [[biodiversity-ml]], [[self-supervised-overview]]
+- [[earth-observation-fundamentals]] — EO data properties (multi-spectral bands, temporal stacks, ground sampling distance) define why EO foundation models need domain-specific pretraining
+- [[satellite-imagery-preprocessing]] — EO FMs require careful preprocessing (band normalization, cloud masking, radiometric calibration) that differs from natural image preprocessing
+- [[clip]] — RemoteCLIP and GeoRSCLIP adapt CLIP's contrastive image-text pretraining to satellite imagery; the key change is curating EO-specific caption data
+- [[masked-autoencoders]] — SatMAE and Scale-MAE adapt MAE to multi-spectral satellite patches; Scale-MAE additionally conditions on image resolution (GSD) during pretraining
+- [[vlm-architectures]] — GeoChat is a VLM for remote sensing conversations; it connects an EO visual encoder to an LLM decoder via a projection layer
+- [[biodiversity-ml]] — EO foundation models enable biodiversity applications (species distribution mapping, habitat monitoring) by providing zero-shot geospatial representations
+- [[self-supervised-overview]] — EO FMs use both contrastive SSL (temporal/spectral augmentations) and masked prediction (MAE) to leverage unlabeled satellite archives

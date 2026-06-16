@@ -4,6 +4,7 @@ tags: [flash-decoding, inference, long-context, kv-cache, attention-inference]
 aliases: [Flash Decoding, FlashDecoding, long-context inference, parallel KV attention]
 difficulty: 2
 status: complete
+depends_on: [flash-attention, arch-kv-cache, grouped-query-attention]
 related: [flash-attention, arch-kv-cache, speculative-decoding, grouped-query-attention, autoregressive-models]
 ---
 
@@ -24,6 +25,8 @@ But during **token-by-token decoding**, each step generates one token by attendi
 
 The bottleneck is **memory bandwidth** (reading the KV cache), not arithmetic. Standard Flash Attention is designed for the prefill case and doesn't help here.
 
+**Intuition:** the fix is to parallelize across the KV cache length, the same way Flash Attention parallelizes across the batch. Split the KV cache into chunks, compute partial attention in parallel across chunks, then merge the partial results using the same online softmax trick — each chunk's contribution is re-scaled to the global max before combining.
+
 ---
 
 ## Intermediate
@@ -42,6 +45,8 @@ The bottleneck is **memory bandwidth** (reading the KV cache), not arithmetic. S
 The key math: for partial sums $m_c = \max_i s_{ci}$, $\ell_c = \sum_i e^{s_{ci} - m_c}$, $o_c = \sum_i e^{s_{ci} - m_c} v_i$, the global output is:
 
 $$o = \frac{\sum_c \ell_c e^{m_c - m} o_c}{\sum_c \ell_c e^{m_c - m}}, \quad m = \max_c m_c$$
+
+where $C$ = number of KV-cache chunks, $m_c$ = the maximum attention logit within chunk $c$ (used for numerically stable softmax), $\ell_c$ = the sum of exponentials $\sum_i e^{s_{ci} - m_c}$ within chunk $c$ (the local normalizer), $o_c$ = the unnormalized partial output $\sum_i e^{s_{ci} - m_c} v_i$ for chunk $c$, and $m = \max_c m_c$ = the global maximum across all chunks.
 
 This merging is the same as the online softmax trick in Flash Attention, extended to independent chunks.
 
@@ -75,4 +80,10 @@ Flash Decoding is most impactful for long-context single-request serving — exa
 
 Flash Decoding accelerates the memory-bandwidth bottleneck of reading the KV cache. KV cache quantization (INT8/INT4) reduces the same bottleneck by shrinking the cache size. Both are complementary: a 4-bit KV cache + Flash Decoding can achieve 4–16× speedup for long-context decoding.
 
-*See also: [[flash-attention]] · [[arch-kv-cache]] · [[speculative-decoding]] · [[grouped-query-attention]] · [[autoregressive-models]]*
+## Links
+
+- [[flash-attention]] — Flash Attention targets training (memory IO during forward/backward); Flash Decoding targets inference (parallel KV-head reduction across sequence positions)
+- [[arch-kv-cache]] — Flash Decoding operates on the KV cache directly; it parallelizes across the sequence length dimension which the KV cache accumulates
+- [[grouped-query-attention]] — GQA reduces KV cache size; Flash Decoding improves throughput for long-context inference by parallelizing over the remaining KV entries
+- [[speculative-decoding]] — both are inference acceleration techniques; Flash Decoding improves attention latency, speculative decoding reduces the number of attention calls
+- [[autoregressive-models]] — Flash Decoding is most impactful for long-context autoregressive generation where the KV cache grows large and attention dominates latency

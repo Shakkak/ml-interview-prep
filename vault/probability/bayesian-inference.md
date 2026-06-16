@@ -4,6 +4,7 @@ tags: [probability, bayesian, statistics, fundamentals]
 aliases: [Bayes theorem, posterior, prior, likelihood]
 difficulty: 1
 status: complete
+depends_on: [distributions-overview, statistical-inference-mle]
 related: [variational-autoencoders, diffusion-models, backpropagation-advanced]
 ---
 
@@ -12,6 +13,10 @@ related: [variational-autoencoders, diffusion-models, backpropagation-advanced]
 ---
 
 ## Fundamental
+
+**The problem Bayesian inference solves:** suppose you observe some data and want to draw conclusions about the process that generated it. Classical statistics (frequentist) treats model parameters as fixed unknowns and gives you point estimates. But what if you want to know not just *which* parameter value fits best, but *how certain* you are about it? What if you have prior domain knowledge you want to incorporate? Bayesian inference provides a principled framework for updating beliefs in light of evidence.
+
+The core idea: start with a **prior** distribution $p(\theta)$ representing your beliefs before seeing data (see [[distributions-overview]] for choosing the right distribution form). Observe data $D$. Update your beliefs to get the **posterior** distribution $p(\theta|D)$ — your beliefs after seeing the data. The formula that connects them is Bayes' theorem.
 
 ### Probability Review
 
@@ -136,6 +141,8 @@ A classical deterministic approximation: fit a Gaussian centered at the MAP esti
 
 $$p(\theta|D) \approx \mathcal{N}(\hat{\theta}_{MAP},\; [-\nabla^2 \log p(\theta|D)|_{\hat{\theta}}]^{-1})$$
 
+where $\hat{\theta}_{MAP}$ = the MAP estimate (posterior mode), $-\nabla^2 \log p(\theta|D)|_{\hat{\theta}}$ = the Hessian of the negative log-posterior evaluated at $\hat{\theta}_{MAP}$ (local curvature), and its inverse = the approximate posterior covariance (flat curvature → high uncertainty).
+
 Requires computing the Hessian of the log-posterior — $O(d^2)$ storage, $O(d^3)$ inversion. Practical with low-rank approximations (Ritter et al., 2018 — *A Scalable Laplace Approximation for Neural Networks*). Used in Bayesian deep learning to estimate predictive uncertainty post-hoc without retraining.
 
 ### ELBO Geometry and Tightness
@@ -157,4 +164,13 @@ These frameworks are theoretically principled but computationally demanding at s
 
 ---
 
-*See also: [[variational-autoencoders]] · [[diffusion-models]] · [[backpropagation-advanced]] · [[statistical-inference-mle]] · [[sampling-methods]] · [[fisher-information]] · [[loss-kl-divergence]]*
+## Links
+
+- [[distributions-overview]] — the prior and likelihood are chosen from the distribution families catalogued there
+- [[statistical-inference-mle]] — MLE is MAP with a flat prior; contrasting them clarifies exactly what Bayesian updating adds
+- [[variational-autoencoders]] — VAE encoder learns an approximate posterior $q(z|x)$; the ELBO is derived directly from Bayes
+- [[diffusion-models]] — diffusion training optimizes an ELBO on a hierarchical latent variable model
+- [[loss-kl-divergence]] — variational inference minimizes $D_{KL}(q \| p(\theta|D))$; the ELBO gap equals this KL
+- [[fisher-information]] — the Laplace approximation uses the Fisher information matrix as the posterior precision
+- [[sampling-methods]] — MCMC samples from the posterior without computing the intractable evidence $p(D)$
+- [[backpropagation-advanced]] — second-order methods for variational inference require Hessian-vector products

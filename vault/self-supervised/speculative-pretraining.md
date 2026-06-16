@@ -5,6 +5,7 @@ aliases: [span masking, T5 pretraining, prefix LM, UL2, denoising objectives, ma
 difficulty: 2
 status: complete
 related: [bert-mlm, autoregressive-models, instruction-tuning, self-supervised-overview, attention-mechanism]
+depends_on: [bert-mlm, autoregressive-models, self-supervised-overview]
 ---
 
 # Pretraining Objectives Beyond MLM
@@ -92,4 +93,10 @@ ELECTRA-large matches RoBERTa-large quality with 1/4 the compute.
 ```
 25% of sequences are reformatted this way during GPT pretraining. Enables code completion models to infill missing code given surrounding context.
 
-*See also: [[bert-mlm]] · [[autoregressive-models]] · [[instruction-tuning]] · [[self-supervised-overview]] · [[attention-mechanism]]*
+## Links
+
+- [[bert-mlm]] — BERT uses masked prediction; span corruption (T5) and prefix LM are hybrid objectives that mask spans or prefixes rather than individual tokens
+- [[autoregressive-models]] — causal LM is the dominant pretraining objective for generation; prefix LM and UL2 mix causal and masked objectives for better instruction-following
+- [[self-supervised-overview]] — pretraining objectives determine what structure the model learns: causal → next token; MLM → contextual representations; span masking → longer-range dependencies
+- [[instruction-tuning]] — pretraining objective choice affects fine-tuning behavior; prefix LM models (PaLM, UL2) transfer better to instruction tuning because they see both encoder and decoder contexts
+- [[attention-mechanism]] — prefix LM uses full (bidirectional) attention on the prefix and causal attention on the generation; this requires a special attention mask pattern

@@ -4,6 +4,7 @@ tags: [architecture, transformers, inference, efficiency]
 aliases: [KV cache, key-value cache, inference cache]
 difficulty: 2
 status: complete
+depends_on: [attention-mechanism, arch-positional-encoding]
 related: [attention-mechanism, arch-positional-encoding]
 ---
 
@@ -33,9 +34,9 @@ Each new token: one forward pass, one token's worth of projection.
 
 ### Memory Cost
 
-$$\text{Memory} = 2 \times L \times d_k \times H \times T \times \text{bytes}$$
+$$\text{Memory} = 2 \times L \times d_k \times H \times T \times \text{bytes per element}$$
 
-where $2$ = K and V, $L$ = layers, $H$ = heads, $T$ = sequence length.
+where $2$ accounts for both K and V caches, $L$ = number of transformer layers, $d_k$ = key/value head dimension (embedding size per head), $H$ = number of heads, $T$ = sequence length (tokens cached), and bytes per element = 2 for float16.
 
 **LLaMA-7B** ($L=32$, $d_k=128$, $H=32$, float16 = 2 bytes):
 
@@ -100,4 +101,11 @@ Speedup: $1.5$–$3\times$ for tasks with predictable continuations (code, struc
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-positional-encoding]] · [[flash-attention]] · [[autoregressive-models]] · [[lora-quantization]]*
+## Links
+
+- [[attention-mechanism]] — the KV cache stores previously computed keys and values; at each generation step only the new token's Q, K, V are computed and the old KVs are reused
+- [[arch-positional-encoding]] — absolute position encodings are baked into token embeddings; RoPE must be re-applied to the new query against cached keys at each step
+- [[flash-attention]] — Flash Attention reduces memory during training; KV cache reduces recomputation during inference; they are complementary optimizations
+- [[autoregressive-models]] — autoregressive generation requires attending over all previous tokens; without KV cache this is $O(N^2)$ per step, with it $O(N)$
+- [[grouped-query-attention]] — GQA reduces KV cache size by sharing key and value heads across groups of query heads; directly targets the KV cache memory bottleneck
+- [[lora-quantization]] — KV cache quantization (Q4 or FP8 for K/V) reduces inference memory at the cost of slight precision loss; supported in llama.cpp and vLLM

@@ -4,6 +4,7 @@ tags: [loss, probability, information-theory, bayesian]
 aliases: [KL divergence, Kullback-Leibler, relative entropy]
 difficulty: 2
 status: complete
+depends_on: [entropy-mutual-info, distributions-overview, math-convexity-jensen]
 related: [loss-cross-entropy, entropy-mutual-info, variational-autoencoders, bayesian-inference]
 ---
 
@@ -17,6 +18,8 @@ When training a model to approximate a distribution — a VAE encoder approximat
 
 The KL divergence from $q$ to $p$ measures how much information is lost when $q$ is used to approximate $p$:
 $$D_{KL}(p \,\|\, q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \mathbb{E}_p\left[\log\frac{p}{q}\right]$$
+
+where $p(x)$ = the true (reference) distribution, $q(x)$ = the approximating distribution, $\sum_x$ = sum over all possible outcomes, $\log \frac{p(x)}{q(x)}$ = the log-ratio (how much more likely $x$ is under $p$ than under $q$), and $\mathbb{E}_p[\cdot]$ = expectation taken under $p$ (samples from the true distribution). The notation $D_{KL}(p \| q)$ reads "KL divergence from $q$ to $p$" — the direction matters.
 
 For continuous distributions: $D_{KL}(p \,\|\, q) = \int p(x) \log \frac{p(x)}{q(x)}\, dx$.
 
@@ -52,6 +55,8 @@ For a bimodal $p$: forward KL gives a broad $q$ that sits between the modes; rev
 **Gaussian KL (used in [[variational-autoencoders|VAEs]]):** for $q = \mathcal{N}(\mu, \sigma^2)$ and $p = \mathcal{N}(0, 1)$:
 $$D_{KL}(q \,\|\, p) = \frac{1}{2}\left(\mu^2 + \sigma^2 - \log\sigma^2 - 1\right)$$
 
+where $q = \mathcal{N}(\mu, \sigma^2)$ is the approximate (encoder) distribution, $p = \mathcal{N}(0, 1)$ is the standard Gaussian prior, $\mu^2$ penalizes the mean being far from 0, $\sigma^2 - \log\sigma^2 - 1$ penalizes the variance deviating from 1 (this term equals 0 when $\sigma=1$), and the $1/2$ comes from the Gaussian KL derivation.
+
 For $d$-dimensional diagonal Gaussian: $D_{KL} = \frac{1}{2}\sum_{j=1}^d \left(\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1\right)$.
 
 Minimum at $\mu=0, \sigma=1$: substituting gives $\frac{1}{2}(0+1-0-1) = 0$. This closed form enables the VAE ELBO to be computed and differentiated analytically.
@@ -73,6 +78,8 @@ Minimum at $\mu=0, \sigma=1$: substituting gives $\frac{1}{2}(0+1-0-1) = 0$. Thi
 $$\log p(x) = \mathcal{L}_{ELBO}(q) + D_{KL}(q(z|x) \,\|\, p(z|x))$$
 $$\mathcal{L}_{ELBO} = \mathbb{E}_q[\log p(x|z)] - D_{KL}(q(z|x) \,\|\, p(z))$$
 
+where $q(z|x)$ = variational posterior (encoder), $p(z|x)$ = true posterior (intractable), $D_{KL}(q\|p(z|x))$ = gap between ELBO and log evidence (zero when $q$ = true posterior), $\mathbb{E}_q[\log p(x|z)]$ = reconstruction term, $D_{KL}(q\|p(z))$ = regularization toward prior $p(z)$.
+
 Maximizing the ELBO is equivalent to minimizing the KL between the variational posterior $q$ and the true posterior $p(z|x)$. The KL term is exactly zero iff $q = p(z|x)$ (posterior is recovered exactly). VAE training maximizes the ELBO via the reparameterization trick, which allows gradients to flow through the sampling operation $z = \mu + \sigma\epsilon$ where $\epsilon \sim \mathcal{N}(0,I)$.
 
 **KL in RLHF and the KL constraint choice:** in RLHF policy optimization, the KL penalty $D_{KL}(\pi_\theta \,\|\, \pi_\text{SFT})$ serves as a trust region constraint. The direction matters: reverse KL means the policy $\pi_\theta$ avoids actions the SFT model would never take (mode-seeking toward the SFT's preferences). This prevents reward hacking — the model can't shift probability to sequences that maximize reward but are out-of-distribution from the SFT model. Ziegler et al. (2019) showed this direction is crucial; using forward KL allows the policy to mode-collapse toward a narrow set of high-reward outputs.
@@ -80,12 +87,24 @@ Maximizing the ELBO is equivalent to minimizing the KL between the variational p
 **Jensen-Shannon divergence as a symmetric alternative:**
 $$JS(p \,\|\, q) = \frac{1}{2}D_{KL}(p \,\|\, m) + \frac{1}{2}D_{KL}(q \,\|\, m), \quad m = \frac{p+q}{2}$$
 
+where $m = (p+q)/2$ = mixture distribution (midpoint between $p$ and $q$), factor $1/2$ = symmetrizing constant, result bounded in $[0, \log 2]$ unlike KL which can be infinite.
+
 JSD is symmetric, bounded in $[0, \log 2]$, and well-defined even when supports don't overlap. The original GAN training objective is equivalent to minimizing the JSD between the data distribution and the generator distribution (Goodfellow et al., 2014). When supports don't overlap (early in training), JSD has zero gradient — a fundamental problem that motivates Wasserstein GAN, which uses the Earth mover's distance instead.
 
 **$f$-divergences and the general framework:** KL is a special case of an $f$-divergence:
 $$D_f(p \,\|\, q) = \int q(x) f\left(\frac{p(x)}{q(x)}\right)dx$$
+
+where $f$ = convex function with $f(1)=0$ (determines which divergence), $p(x)/q(x)$ = density ratio, $q(x)f(\cdot)$ = $q$-weighted expectation of $f$ applied to the ratio.
+
 for a convex function $f$ with $f(1)=0$. KL forward: $f(t) = t\log t$. KL reverse: $f(t) = -\log t$. JSD: $f(t) = t\log\frac{2t}{t+1} + \log\frac{2}{t+1}$. Chi-squared: $f(t) = (t-1)^2$. All $f$-divergences share the non-negativity property from Jensen's inequality. Different divergences emphasize different parts of the distribution (tails vs. modes), motivating the choice based on the application's requirements.
 
 ---
 
-*See also: [[loss-cross-entropy]] · [[entropy-mutual-info]] · [[variational-autoencoders]] · [[bayesian-inference]]*
+## Links
+
+- [[entropy-mutual-info]] — cross-entropy $H(p,q) = H(p) + D_{KL}(p \| q)$; Shannon entropy is the prerequisite for understanding KL
+- [[distributions-overview]] — KL is defined between two distributions; knowing which family to use is the starting point
+- [[math-convexity-jensen]] — KL $\geq 0$ is proven via Jensen's inequality applied to the concave log function
+- [[loss-cross-entropy]] — minimizing cross-entropy is equivalent to minimizing KL when true labels are fixed
+- [[variational-autoencoders]] — the VAE ELBO contains a KL term forcing the approximate posterior toward the prior
+- [[bayesian-inference]] — variational inference minimizes $D_{KL}(q \| p(\theta|D))$; the ELBO gap equals this KL

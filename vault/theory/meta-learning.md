@@ -5,6 +5,7 @@ aliases: [MAML, meta-learning, learning to learn, few-shot learning, prototypica
 difficulty: 3
 status: complete
 related: [transfer-learning, continual-learning, bayesian-inference, contrastive-learning, loss-cross-entropy]
+depends_on: [transfer-learning, backpropagation, bayesian-inference]
 ---
 
 # Meta-Learning
@@ -34,8 +35,12 @@ related: [transfer-learning, continual-learning, bayesian-inference, contrastive
 **Inner loop** (for task $\tau_i$):
 $$\theta'_i = \theta - \alpha \nabla_\theta \mathcal{L}_{\tau_i}^{\text{support}}(\theta)$$
 
+where $\alpha$ = inner-loop learning rate, $\mathcal{L}_{\tau_i}^{\text{support}}$ = loss on the support set of task $\tau_i$, $\theta'_i$ = task-adapted parameters after one gradient step.
+
 **Outer loop** (meta-update):
 $$\theta \leftarrow \theta - \beta \nabla_\theta \sum_{\tau_i} \mathcal{L}_{\tau_i}^{\text{query}}(\theta'_i)$$
+
+where $\beta$ = outer (meta) learning rate, $\mathcal{L}_{\tau_i}^{\text{query}}$ = loss on the query set evaluated at task-adapted $\theta'_i$, summed over a batch of tasks $\tau_i$.
 
 The outer gradient $\nabla_\theta \mathcal{L}(\theta')$ requires differentiating through the inner gradient update — second-order derivatives. **MAML computes the Hessian of the task loss**, which is expensive.
 
@@ -50,7 +55,11 @@ The outer gradient $\nabla_\theta \mathcal{L}(\theta')$ requires differentiating
 For class $c$ with support examples $S_c$:
 $$\mathbf{p}_c = \frac{1}{|S_c|} \sum_{(\mathbf{x}_i, y_i) \in S_c} f_\theta(\mathbf{x}_i)$$
 
+where $f_\theta$ = embedding network, $S_c$ = support set for class $c$, $|S_c|$ = number of support examples per class (e.g., 1 or 5 in $k$-shot settings).
+
 $$p(y = c | \mathbf{x}) = \frac{\exp(-d(f_\theta(\mathbf{x}), \mathbf{p}_c))}{\sum_{c'} \exp(-d(f_\theta(\mathbf{x}), \mathbf{p}_{c'}))}$$
+
+where $d(\cdot, \cdot)$ = distance metric (typically Euclidean), $\mathbf{p}_c$ = prototype of class $c$, and the softmax over distances is the classification probability.
 
 Training with episodic cross-entropy optimizes for this nearest-prototype classification. Simpler than MAML, often competitive. Natural connection to metric learning (see [[loss-triplet]]).
 
@@ -59,6 +68,8 @@ Training with episodic cross-entropy optimizes for this nearest-prototype classi
 **Matching Networks (Vinyals et al., 2016):** non-parametric — classify a query by attention-weighted nearest neighbor over support examples:
 
 $$\hat{y} = \sum_{i} a(\hat{x}, x_i) y_i, \quad a(\hat{x}, x_i) = \frac{\exp(\text{sim}(\hat{x}, x_i))}{\sum_j \exp(\text{sim}(\hat{x}, x_j))}$$
+
+where $\hat{x}$ = query example, $x_i$ = support example $i$, $y_i$ = its label, $\text{sim}(\cdot,\cdot)$ = cosine similarity in embedding space, and $a(\hat{x}, x_i)$ = soft attention weight (nearest-neighbor probability).
 
 The "attention" over examples is essentially a soft nearest-neighbor classifier. The embedding $f$ is trained end-to-end to make this work.
 
@@ -92,4 +103,11 @@ Meta-learning can be cast as Bayesian inference over tasks:
 - **NLP:** few-shot task adaptation for low-resource languages
 - **Computer vision:** open-vocabulary detection and segmentation
 
-*See also: [[transfer-learning]] · [[continual-learning]] · [[contrastive-learning]] · [[bayesian-inference]] · [[loss-triplet]]*
+## Links
+
+- [[transfer-learning]] — meta-learning and transfer learning both adapt pretrained models; the key difference is that meta-learning explicitly optimizes for fast adaptation via the bi-level objective
+- [[backpropagation]] — MAML requires differentiating through the inner-loop gradient update: $\theta' = \theta - \alpha\nabla_\theta L$; this "gradient-through-gradient" needs second-order derivatives
+- [[bayesian-inference]] — Bayesian meta-learning (MAML as variational inference) treats the meta-parameters as a prior; the inner loop is variational inference to the task posterior
+- [[contrastive-learning]] — prototypical networks use Euclidean distance in embedding space; the embedding is trained to bring same-class points together (similar to contrastive learning)
+- [[loss-triplet]] — metric-based meta-learning (Siamese, prototypical nets) uses triplet or contrastive losses; the support and query sets serve as positives and negatives
+- [[continual-learning]] — meta-learning can be applied to continual learning: learn an initialization that quickly adapts to new tasks without forgetting old ones (OML, ANML)

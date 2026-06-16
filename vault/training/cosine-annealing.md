@@ -5,6 +5,7 @@ aliases: [cosine annealing, SGDR, warm restarts, cosine decay, OneCycleLR, snaps
 difficulty: 1
 status: complete
 related: [optimizer-lr-schedules, optimizer-adam, optimizer-sgd-momentum, large-batch-training, loss-landscape]
+depends_on: [optimizer-sgd-momentum, optimizer-lr-schedules, loss-landscape]
 ---
 
 # Cosine Annealing and LR Schedules
@@ -20,6 +21,8 @@ A constant learning rate forces a compromise: high enough to make progress early
 **Cosine annealing** decays the learning rate from $\eta_\text{max}$ to $\eta_\text{min}$ following a cosine curve over $T$ steps:
 
 $$\eta_t = \eta_\text{min} + \frac{1}{2}(\eta_\text{max} - \eta_\text{min})\left(1 + \cos\!\left(\frac{\pi t}{T}\right)\right)$$
+
+where $\eta_t$ = learning rate at step $t$, $\eta_\text{min}$ = minimum LR (often 0 or 1e-6), $\eta_\text{max}$ = peak LR, $T$ = total number of training steps in the cycle, $\cos(\pi t/T)$ goes from 1 (at $t=0$) to −1 (at $t=T$).
 
 Properties:
 - Smooth decay (no sudden drops like step decay)
@@ -37,6 +40,8 @@ Compared to **linear decay** ($\eta_t = \eta_\text{max}(1 - t/T)$): cosine spend
 **SGDR (Loshchilov & Hutter, 2017):** periodically restart the learning rate to $\eta_\text{max}$ at intervals $T_i$, with intervals growing over time:
 
 $$T_i = T_0 \cdot T_\text{mult}^i$$
+
+where $T_i$ = length of the $i$-th restart cycle, $T_0$ = initial cycle length, $T_\text{mult} \geq 1$ = cycle-length multiplier per restart (typically 2).
 
 For $T_0 = 10$, $T_\text{mult} = 2$: restart at steps 10, 30, 70, 150 (each cycle twice as long).
 
@@ -81,8 +86,15 @@ This single-cycle approach (no restarts) works well because LLM training runs ar
 **CLR (Smith, 2017):** triangular oscillation between $\eta_\text{min}$ and $\eta_\text{max}$ with fixed period $2T$:
 $$\eta_t = \eta_\text{min} + (\eta_\text{max} - \eta_\text{min})\max(0, 1 - |\text{cycle} - 1|)$$
 
+where $\text{cycle} = \lfloor 1 + t/(2T) \rfloor$ = current cycle number, $|\text{cycle} - 1|$ = triangular wave oscillating between 0 and 1, $T$ = half-period (steps from $\eta_\text{min}$ to $\eta_\text{max}$).
+
 Simpler than SGDR, no growing periods. The periodic high-LR phases provide implicit exploration of the loss landscape.
 
 **Finding the right LR range (LR range test):** train for a few epochs while linearly increasing LR from very small to very large; plot loss vs LR; choose $\eta_\text{max}$ where loss starts increasing, $\eta_\text{min}$ about 10× smaller.
 
-*See also: [[optimizer-lr-schedules]] · [[optimizer-adam]] · [[large-batch-training]] · [[loss-landscape]]*
+## Links
+
+- [[optimizer-sgd-momentum]] — cosine annealing controls the learning rate for SGD; the periodic restarts in SGDR allow the optimizer to escape sharp minima and re-explore the loss landscape
+- [[optimizer-lr-schedules]] — cosine annealing is one learning rate schedule; others include step decay, polynomial decay, and linear warmup + cosine decay (the standard for transformers)
+- [[loss-landscape]] — cosine annealing's warm restarts help find flat minima; the large LR phases explore broadly, and the small LR phases converge to local minima
+- [[optimizer-adam]] — OneCycleLR (super-convergence) uses cosine annealing with a single large LR cycle; it trains faster than standard schedules by cycling through a large maximum LR

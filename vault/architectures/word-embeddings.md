@@ -4,6 +4,7 @@ tags: [word-embeddings, word2vec, glove, fasttext, embeddings, nlp]
 aliases: [word2vec, GloVe, FastText, word vectors, distributed representations, skip-gram, CBOW]
 difficulty: 1
 status: complete
+depends_on: [linear-algebra-fundamentals, distributions-overview]
 related: [tokenization, self-supervised-overview, contrastive-learning, attention-mechanism, bert-mlm, optimal-transport, loss-nt-xent]
 ---
 
@@ -26,13 +27,15 @@ Word2Vec (Mikolov et al., 2013) has two architectures:
 **Skip-gram:** given a center word, predict surrounding context words. Maximizes:
 $$\mathcal{L} = \sum_{t=1}^T \sum_{-c \leq j \leq c, j \neq 0} \log p(w_{t+j} | w_t)$$
 
-For a context window $c$ and $T$ total words. The predicted probability uses a softmax over all $V$ words — expensive.
+where $T$ = total number of words in the training corpus, $t$ = current center word position, $c$ = context window size (number of words on each side of the center word), $j$ = offset from the center word (skipping $j=0$ which is the center itself), $w_t$ = center word at position $t$, and $w_{t+j}$ = context word at position $t + j$. The predicted probability uses a softmax over all $V$ words — expensive.
 
 **CBOW (Continuous Bag of Words):** given context words, predict the center word. Averages context embeddings and predicts the target. Faster than skip-gram; skip-gram is better for infrequent words.
 
 **Negative sampling** makes training tractable: replace the softmax over $V$ words with a binary classifier that distinguishes true context pairs from $k$ random (negative) samples:
 
 $$\mathcal{L}_\text{neg} = \log\sigma(\mathbf{w}_o^\top \mathbf{w}_c) + \sum_{k=1}^K \log\sigma(-\mathbf{w}_k^\top \mathbf{w}_c)$$
+
+where $\mathbf{w}_c$ = embedding of the center (context) word, $\mathbf{w}_o$ = embedding of the true output (positive) word, $K$ = number of negative samples, $\mathbf{w}_k$ = embedding of a randomly sampled negative word (not in the true context), and $\sigma$ = sigmoid. The first term rewards the model for predicting the true context word; the second term penalizes it for predicting random noise words.
 
 $k = 5$–$20$ negatives is sufficient. This makes training linear in the context window size.
 
@@ -48,6 +51,8 @@ GloVe (Pennington et al., 2014) uses **global word co-occurrence statistics** di
 
 **Objective:** learn vectors $\mathbf{w}_i, \tilde{\mathbf{w}}_j$ and biases $b_i, \tilde{b}_j$ such that:
 $$\mathbf{w}_i^\top \tilde{\mathbf{w}}_j + b_i + \tilde{b}_j \approx \log X_{ij}$$
+
+where $\mathbf{w}_i$ = embedding of word $i$ (the "center word" vector), $\tilde{\mathbf{w}}_j$ = embedding of word $j$ (the "context word" vector — GloVe learns two vectors per word and averages them), $b_i, \tilde{b}_j$ = scalar bias terms, and $X_{ij}$ = co-occurrence count of word $j$ in the context of word $i$ (from the global corpus statistics). The log of co-occurrence is the prediction target.
 
 Weighted by $f(X_{ij})$ — a function that reduces weight for very frequent pairs (which are less informative). 
 
@@ -110,4 +115,13 @@ Word2Vec/GloVe produce **static** embeddings — one vector per word regardless 
 
 ---
 
-*See also: [[tokenization]] · [[bert-mlm]] · [[contrastive-learning]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[optimal-transport]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — word embeddings are vectors in $\mathbb{R}^d$; semantic similarity is measured by cosine distance (normalized dot product)
+- [[distributions-overview]] — word2vec's softmax output is a categorical distribution over the vocabulary; negative sampling approximates it
+- [[tokenization]] — tokens are the discrete units that get embedded; subword tokenization (BPE) allows embedding rarer words via composable pieces
+- [[self-supervised-overview]] — word2vec and GloVe are among the earliest self-supervised representation learning methods
+- [[contrastive-learning]] — modern contextual embeddings (SimCSE) use contrastive objectives to align sentence representations
+- [[attention-mechanism]] — transformer attention operates on token embeddings; the residual stream refines the embedding through layers
+- [[bert-mlm]] — BERT produces contextual embeddings via masked language modeling, superseding static word2vec/GloVe representations
+- [[optimal-transport]] — Wasserstein distance and optimal transport are used to compare word embedding distributions across languages

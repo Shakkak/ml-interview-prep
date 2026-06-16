@@ -5,6 +5,7 @@ aliases: [BLIP, BLIP-2, bootstrapping language-image pretraining, Q-Former]
 difficulty: 2
 status: complete
 related: [clip, attention-mechanism, self-supervised-overview, contrastive-learning]
+depends_on: [clip, contrastive-learning, attention-mechanism]
 ---
 
 # BLIP / BLIP-2 — Bootstrapping Language-Image Pretraining
@@ -118,4 +119,10 @@ Stage 2 — Vision-to-language generative learning (frozen ViT + frozen LLM, tra
 
 ---
 
-*See also: [[clip]] · [[attention-mechanism]] · [[self-supervised-overview]] · [[contrastive-learning]] · [[loss-nt-xent]]*
+## Links
+
+- [[clip]] — CLIP uses a dual encoder with contrastive loss; BLIP adds a decoder for generation and an ITM head, making it suitable for both understanding and generation tasks
+- [[contrastive-learning]] — BLIP uses ITC (Image-Text Contrastive) loss like CLIP, plus ITM (Image-Text Matching) and LM losses; the combination improves cross-modal alignment
+- [[attention-mechanism]] — the Q-Former in BLIP-2 uses cross-attention to query a frozen image encoder with 32 learned query tokens; this bottleneck distills visual information for the LLM
+- [[self-supervised-overview]] — BLIP applies CapFilt (Caption Filtering) to bootstrap noisy web captions; a captioner generates captions and a filter removes noisy ones using ITM scores
+- [[loss-nt-xent]] — the ITC loss in BLIP is NT-Xent applied to image-text pairs; in-batch negatives make the contrastive signal efficient at large batch sizes

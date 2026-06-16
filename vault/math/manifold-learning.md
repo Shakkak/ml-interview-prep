@@ -5,6 +5,7 @@ aliases: [manifold hypothesis, t-SNE, UMAP, Isomap, intrinsic dimensionality]
 difficulty: 2
 status: complete
 related: [eigenvalues-pca, curse-of-dimensionality, kernel-methods, spectral-bias, word-embeddings]
+depends_on: [eigenvalues-pca, kernel-methods, linear-algebra-fundamentals]
 ---
 
 # Manifold Learning and Dimensionality Reduction
@@ -43,6 +44,8 @@ PCA (see [[eigenvalues-pca]]) finds the linear subspace of dimension $k$ that ma
 
 $$\text{KL}(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}$$
 
+where $P$ = joint probability distribution over pairs in high-dimensional space (Gaussian kernel similarities), $Q$ = joint distribution in low-dimensional space (Student-$t$ kernel similarities), $p_{ij}$ = probability that point $i$ would pick point $j$ as its neighbor in high-D, and $q_{ij}$ = the analogous probability in low-D. Minimizing this KL pushes the low-D layout to reproduce the high-D neighborhood structure.
+
 Using a heavy-tailed $t$-distribution in low-D prevents crowding — dissimilar points get pushed far apart. t-SNE excels at revealing cluster structure in visualizations (2D/3D). **Limitations:**
 - Non-parametric: can't embed new points without re-running
 - Not globally meaningful: distances between clusters are not interpretable
@@ -80,9 +83,16 @@ The **intrinsic dimension** $k$ is the smallest $k$ such that the data approxima
 
 Deep networks implicitly learn manifold structure:
 - **Progressive disentanglement:** successive layers "unfold" the manifold, making it more linearly separable
-- **Neural collapse:** at the final layer of a well-trained classifier, class means form a simplex ETF (equiangular tight frame) — perfect geometric arrangement on the sphere
+- **Neural collapse:** at the final layer of a well-trained classifier, class means form a **simplex ETF (equiangular tight frame)** — a configuration where all $C$ class prototype vectors have equal pairwise angles ($\cos\theta = -1/(C-1)$), maximally spread on the unit sphere. This is the highest-symmetry arrangement possible for $C$ points, making the last-layer geometry independent of the training data distribution.
 - **Latent traversals:** in VAEs and GANs, interpolating in latent space produces smooth transitions because the generator maps a simple latent manifold to the data manifold
 
 **Spectral bias** (see [[spectral-bias]]): networks learn low-frequency (smooth, manifold-like) features first — consistent with the manifold hypothesis that low-frequency structure captures most variance.
 
-*See also: [[eigenvalues-pca]] · [[curse-of-dimensionality]] · [[kernel-methods]] · [[variational-autoencoders]] · [[word-embeddings]]*
+## Links
+
+- [[eigenvalues-pca]] — PCA finds a linear manifold (affine subspace); manifold learning (t-SNE, UMAP, Isomap) finds non-linear low-dimensional structure that PCA cannot capture
+- [[kernel-methods]] — kernel PCA applies the kernel trick to find non-linear projections; Isomap uses geodesic distances (shortest manifold paths) instead of Euclidean distances
+- [[linear-algebra-fundamentals]] — spectral embedding methods (Laplacian Eigenmaps, diffusion maps) build graph Laplacians and eigendecompose them to find manifold coordinates
+- [[curse-of-dimensionality]] — manifold learning is motivated by the manifold hypothesis: high-dimensional data lies near a low-dimensional manifold, escaping the curse
+- [[variational-autoencoders]] — VAE latent spaces are designed to approximate a smooth low-dimensional manifold; manifold learning provides the theoretical grounding
+- [[word-embeddings]] — word embeddings are learned manifold coordinates; the geometry of the embedding space reflects semantic relationships

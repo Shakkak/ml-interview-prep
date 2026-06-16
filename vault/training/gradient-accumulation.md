@@ -5,6 +5,7 @@ aliases: [gradient accumulation, micro-batches, simulated large batch]
 difficulty: 1
 status: complete
 related: [optimizer-adam, optimizer-sgd-momentum, large-batch-training, normalization-layers, mixed-precision]
+depends_on: [backpropagation, optimizer-sgd-momentum, large-batch-training]
 ---
 
 # Gradient Accumulation
@@ -75,4 +76,10 @@ When increasing effective batch size via accumulation:
 - **Warmup steps:** keep warmup in terms of optimizer steps (not micro-batch steps)
 - **Weight decay:** unaffected (applied per optimizer step)
 
-*See also: [[large-batch-training]] · [[optimizer-adam]] · [[mixed-precision]] · [[normalization-layers]]*
+## Links
+
+- [[backpropagation]] — gradient accumulation sums gradients over micro-batches before the optimizer step; gradients are accumulated in the same buffers used by backpropagation
+- [[optimizer-sgd-momentum]] — accumulation simulates larger batch size; the effective batch size = micro-batch size × accumulation steps; learning rate should be scaled accordingly
+- [[large-batch-training]] — gradient accumulation is the memory-constrained version of large-batch training; it achieves the same effective batch size without requiring the full batch in GPU memory simultaneously
+- [[normalization-layers]] — batch norm statistics are computed per micro-batch with accumulation, not over the full effective batch; this is why sync-BN or layer norm is preferred in low-memory training
+- [[mixed-precision]] — FP16 training with gradient accumulation requires careful loss scaling; the scaling factor must account for the accumulated gradients across all micro-batches

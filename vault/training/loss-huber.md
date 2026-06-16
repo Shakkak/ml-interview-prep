@@ -5,6 +5,7 @@ aliases: [Huber loss, smooth L1, robust regression]
 difficulty: 2
 status: complete
 related: [loss-mse, loss-cross-entropy]
+depends_on: [loss-mse, statistical-inference-mle]
 ---
 
 # Huber Loss / Smooth L1
@@ -28,6 +29,8 @@ where $a = y - \hat{y}$ is the residual.
 
 **Gradient:**
 $$\frac{\partial L_\delta}{\partial \hat{y}} = \begin{cases} -(y - \hat{y}) & |y - \hat{y}| \leq \delta \\ -\delta \cdot \text{sign}(y - \hat{y}) & |y - \hat{y}| > \delta \end{cases}$$
+
+where $-(y-\hat{y})$ = MSE gradient (proportional to residual), $-\delta \cdot \text{sign}(y-\hat{y})$ = clipped L1 gradient (constant magnitude $\delta$), clipping bound = $\pm\delta$ prevents gradient explosion for large errors.
 
 The gradient is bounded — outliers can push the gradient by at most $\pm\delta$.
 
@@ -58,6 +61,9 @@ $$\text{smooth}_{L1}(a) = \begin{cases} 0.5a^2 & |a| < 1 \\ |a| - 0.5 & |a| \geq
 
 **Quantile regression loss** (pinball loss): a generalization that allows predicting different quantiles of the output distribution:
 $$L_q(a) = \begin{cases} q \cdot a & a \geq 0 \\ (q-1) \cdot a & a < 0 \end{cases}$$
+
+where $q \in (0,1)$ = target quantile, $a = y - \hat{y}$ = residual, asymmetric weighting: overprediction ($a<0$) penalized by $1-q$, underprediction ($a\geq0$) penalized by $q$.
+
 At $q=0.5$: standard L1 (median regression). Predicting multiple quantiles (e.g., 10th, 50th, 90th percentile) gives prediction intervals. Widely used in demand forecasting and weather prediction.
 
 ---
@@ -74,4 +80,8 @@ where $C$ is the smallest enclosing box. GIoU (Rezatofighi et al., 2019) handles
 
 ---
 
-*See also: [[loss-mse]] · [[loss-cross-entropy]] · [[feature-pyramid-networks]]*
+## Links
+
+- [[loss-mse]] — MSE = $\frac{1}{2}(y-\hat{y})^2$ is quadratic everywhere; Huber loss is quadratic for $|e| \leq \delta$ and linear for $|e| > \delta$, reducing sensitivity to large outliers
+- [[statistical-inference-mle]] — Huber loss corresponds to MLE under an asymmetric distribution that is Gaussian in the center and Laplacian in the tails; it is a robust estimator between OLS and LAD
+- [[feature-pyramid-networks]] — Faster R-CNN uses smooth L1 (Huber) loss for bounding box regression; the linear tails prevent large gradient magnitudes from incorrectly localized anchors from dominating training

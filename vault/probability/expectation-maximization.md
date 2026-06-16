@@ -4,6 +4,7 @@ tags: [expectation-maximization, em-algorithm, latent-variables, mixture-models,
 aliases: [EM algorithm, E-step, M-step, EM, expectation maximization]
 difficulty: 2
 status: complete
+depends_on: [bayesian-inference, distributions-gaussian, math-convexity-jensen]
 related: [statistical-inference-mle, gaussian-mixture-models, variational-inference, bayesian-inference, clustering, distributions-gaussian]
 ---
 
@@ -18,6 +19,8 @@ related: [statistical-inference-mle, gaussian-mixture-models, variational-infere
 Maximum likelihood estimation (see [[statistical-inference-mle]]) maximizes $\log p(\mathcal{D}|\theta)$. For latent variable models, the log-likelihood involves a sum over all possible hidden states:
 
 $$\log p(\mathbf{x}|\theta) = \log \sum_{\mathbf{z}} p(\mathbf{x}, \mathbf{z}|\theta)$$
+
+where $\mathbf{x}$ = the observed data, $\mathbf{z}$ = the latent (hidden) variables (e.g., which cluster each point belongs to), $\theta$ = the model parameters, and $\sum_\mathbf{z}$ sums over every possible assignment of hidden variables — an exponentially large sum that makes direct maximization intractable.
 
 The sum/integral over $\mathbf{z}$ makes this non-convex and generally intractable to optimize directly — taking the gradient involves a ratio of sums, not separable terms.
 
@@ -58,9 +61,13 @@ For a GMM with $K$ components, the hidden variable $z_n \in \{1, \ldots, K\}$ is
 **E-step:** compute soft assignments (responsibilities):
 $$r_{nk} = p(z_n = k|\mathbf{x}_n, \theta^{(t)}) = \frac{\pi_k \mathcal{N}(\mathbf{x}_n; \mu_k, \Sigma_k)}{\sum_{j=1}^K \pi_j \mathcal{N}(\mathbf{x}_n; \mu_j, \Sigma_j)}$$
 
+where $r_{nk} \in [0,1]$ = the "responsibility" of component $k$ for data point $n$ (how much credit component $k$ takes for generating $\mathbf{x}_n$), $\pi_k$ = mixture weight for component $k$ (prior probability of belonging to component $k$), $\mathcal{N}(\mathbf{x}_n; \mu_k, \Sigma_k)$ = Gaussian density of component $k$ evaluated at $\mathbf{x}_n$, and the denominator normalizes so responsibilities sum to 1.
+
 **M-step:** update parameters using weighted sufficient statistics:
 $$N_k = \sum_{n=1}^N r_{nk}, \qquad \pi_k = N_k / N$$
 $$\mu_k = \frac{1}{N_k}\sum_n r_{nk} \mathbf{x}_n, \qquad \Sigma_k = \frac{1}{N_k}\sum_n r_{nk}(\mathbf{x}_n - \mu_k)(\mathbf{x}_n - \mu_k)^\top$$
+
+where $N$ = number of data points, $N_k = \sum_n r_{nk}$ = effective count of points assigned to component $k$, $\pi_k = N_k/N$ = updated mixing weight, $\mu_k$ = responsibility-weighted mean (centroid), and $\Sigma_k$ = responsibility-weighted covariance.
 
 **K-means as hard EM:** if we replace the soft responsibilities $r_{nk} \in [0,1]$ with hard 0/1 assignments (argmax), and use isotropic covariances, the EM updates become exactly the k-means update rule. K-means is EM with a degenerate (infinite precision) noise model.
 
@@ -112,4 +119,12 @@ At each E-step, we project the model distribution onto the family $\{p(\mathbf{z
 
 ---
 
-*See also: [[statistical-inference-mle]] · [[gaussian-mixture-models]] · [[variational-inference]] · [[bayesian-inference]] · [[clustering]] · [[distributions-gaussian]]*
+## Links
+
+- [[statistical-inference-mle]] — EM maximizes likelihood when latent variables are present; each M-step solves a complete-data MLE problem
+- [[bayesian-inference]] — the E-step computes posterior beliefs about latent variables given current parameters; EM is coordinate ascent on the ELBO
+- [[distributions-gaussian]] — Gaussian Mixture Models are the canonical EM application; closed-form E- and M-steps make the algorithm easy to analyze
+- [[math-convexity-jensen]] — the ELBO lower bound is derived via Jensen's inequality on the concave log function; this guarantees monotone likelihood increase
+- [[gaussian-mixture-models]] — GMM parameter estimation is the prototypical EM example; E-step assigns soft memberships, M-step updates means and covariances
+- [[variational-inference]] — variational EM generalizes EM by replacing the exact E-step posterior with an approximate variational family when the true E-step is intractable
+- [[clustering]] — GMM soft assignment generalizes k-means to probabilistic cluster memberships; EM converges to a local maximum, not global

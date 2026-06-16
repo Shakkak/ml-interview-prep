@@ -5,6 +5,7 @@ aliases: [exponential family, natural parameters, sufficient statistics, GLM, lo
 difficulty: 2
 status: complete
 related: [distributions-overview, distributions-gaussian, statistical-inference-mle, bayesian-inference, fisher-information, maximum-entropy-principle]
+depends_on: [distributions-overview, statistical-inference-mle, bayesian-inference]
 ---
 
 # Exponential Family Distributions
@@ -100,4 +101,10 @@ This gives a variational characterization: exponential families are the "least i
 
 The **natural gradient** uses the Fisher information matrix $F(\eta) = \nabla^2 A(\eta)$ as the Riemannian metric. For exponential families, $F = \text{Cov}[T(x)]$. The natural gradient update $\tilde{\nabla} = F^{-1} \nabla$ is invariant to reparameterization and converges faster than ordinary gradient descent in parameter space (see [[fisher-information]]).
 
-*See also: [[distributions-overview]] · [[bayesian-inference]] · [[statistical-inference-mle]] · [[maximum-entropy-principle]] · [[fisher-information]]*
+## Links
+
+- [[distributions-overview]] — all standard distributions (Gaussian, Poisson, Bernoulli, Gamma, Dirichlet) are exponential family members; the unifying form $p(x|\eta) = h(x)e^{\eta^\top T(x) - A(\eta)}$ covers them all
+- [[statistical-inference-mle]] — the MLE for exponential families always exists and satisfies $\hat{\eta}$: expected sufficient statistic = observed sufficient statistic ($E[T(x)] = \bar{T}$)
+- [[bayesian-inference]] — exponential families have conjugate priors of the form $p(\eta|\chi, \nu) \propto e^{\chi^\top \eta - \nu A(\eta)}$; the posterior remains in the same family
+- [[maximum-entropy-principle]] — exponential families are exactly the MaxEnt distributions subject to constraints on expected sufficient statistics; this provides an information-theoretic foundation
+- [[fisher-information]] — the Fisher information matrix for exponential families is the Hessian of the log-partition function: $F(\eta) = \nabla^2 A(\eta) = \text{Cov}[T(x)]$

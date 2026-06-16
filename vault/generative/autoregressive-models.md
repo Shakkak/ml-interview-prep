@@ -4,6 +4,7 @@ tags: [autoregressive, gpt, causal-lm, next-token-prediction, tokenization, bpe,
 aliases: [autoregressive model, GPT, causal language model, next token prediction, BPE, nucleus sampling, Chinchilla]
 difficulty: 2
 status: complete
+depends_on: [attention-mechanism, loss-cross-entropy, arch-kv-cache]
 related: [attention-mechanism, arch-positional-encoding, arch-kv-cache, bert-mlm, rlhf, lora-quantization, activation-gelu-swish]
 ---
 
@@ -29,6 +30,8 @@ This is fully **self-supervised** — labels are the tokens themselves, shifted 
 GPT is a stack of transformer decoder blocks with **causal (masked) [[attention-mechanism|self-attention]]**. Position $t$ cannot attend to positions $> t$:
 
 $$A_{ij} = \begin{cases}\text{softmax}(QK^T/\sqrt{d_k})_{ij} & i \geq j \\ 0 & i < j\end{cases}$$
+
+where $A_{ij}$ = attention weight from position $i$ to position $j$, $Q$, $K$ = query and key matrices (from linear projections of the token embeddings), $d_k$ = key dimension (scaling prevents softmax saturation), and the $i \geq j$ condition enforces causality (no future look-ahead).
 
 **Key design choices in GPT:**
 - **Pre-norm:** LayerNorm before attention/FFN (more stable gradients at scale)
@@ -80,7 +83,7 @@ GPT-style models follow empirical scaling laws (Kaplan et al., 2020):
 
 $$\mathcal{L}(N, D) \approx \left(\frac{N_c}{N}\right)^{\alpha_N} + \left(\frac{D_c}{D}\right)^{\alpha_D} + \mathcal{L}_\infty$$
 
-where $N$ = parameters, $D$ = training tokens, $\alpha_N \approx \alpha_D \approx 0.05$.
+where $N$ = number of model parameters, $D$ = training tokens, $N_c$ and $D_c$ = critical scales at which each term contributes equally (empirically, $N_c \approx 8.8 \times 10^{13}$ and $D_c \approx 5.4 \times 10^{13}$ for GPT-family models), $\alpha_N \approx \alpha_D \approx 0.05$ = power-law exponents (flatter than typical power laws — loss improves slowly but reliably), and $\mathcal{L}_\infty$ = irreducible loss (entropy of natural language — the floor below which no model can go).
 
 **Chinchilla (Hoffmann et al., 2022) correction:** for a fixed compute budget $C = 6ND$ (approximately), the optimal allocation is $D \approx 20 \times N$. GPT-3 (175B params, 300B tokens) was compute-suboptimal — it should have been trained with fewer parameters on more data. LLaMA follows Chinchilla scaling: LLaMA-7B trains on 1T tokens.
 
@@ -98,8 +101,18 @@ Modern LLMs (LLaMA, PaLM, Mistral) replace the standard FFN with SwiGLU:
 
 $$\text{SwiGLU}(x) = \text{Swish}(xW_1) \odot (xW_2), \quad \text{followed by } xW_3$$
 
+where $x \in \mathbb{R}^d$ = input token embedding, $W_1, W_2 \in \mathbb{R}^{d \times h}$ = gate and value projections, $\text{Swish}(u) = u \cdot \sigma(u)$ = smooth activation, $\odot$ = elementwise product (the gating mechanism), and $W_3 \in \mathbb{R}^{h \times d}$ = output projection.
+
 The hidden dimension must be set to $8d/3$ (not the standard $4d$) to keep parameter count equal. SwiGLU empirically outperforms GELU+MLP by ~1 perplexity point at equivalent parameter budgets (Noam Shazeer, 2020).
 
 ---
 
-*See also: [[attention-mechanism]] · [[arch-kv-cache]] · [[arch-positional-encoding]] · [[bert-mlm]] · [[rlhf]] · [[loss-cross-entropy]] · [[activation-gelu-swish]]*
+## Links
+
+- [[attention-mechanism]] — GPT-style models use causal (masked) self-attention; each token attends only to previous positions, enforcing the autoregressive factorization
+- [[loss-cross-entropy]] — next-token prediction minimizes cross-entropy over the vocabulary; negative log-likelihood per token is the training signal
+- [[arch-kv-cache]] — at inference, KV cache stores computed keys and values for all previous tokens; it enables $O(1)$ per-step attention instead of $O(N)$
+- [[arch-positional-encoding]] — GPT-2 uses absolute learned positions; LLaMA/Mistral use RoPE for better length generalization
+- [[bert-mlm]] — BERT is bidirectional (sees all positions simultaneously); autoregressive models are causal — the contrast is the core architectural difference
+- [[rlhf]] — RLHF fine-tunes autoregressive LMs with human preference signals after supervised instruction tuning
+- [[activation-gelu-swish]] — transformer FFN sublayers in GPT/LLaMA use GELU or SiLU; the activation choice affects training stability and performance

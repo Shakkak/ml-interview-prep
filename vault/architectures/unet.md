@@ -4,6 +4,7 @@ tags: [unet, encoder-decoder, skip-connections, segmentation, upsampling, transp
 aliases: [U-Net, UNet, encoder decoder, skip connections, contracting path, expanding path]
 difficulty: 2
 status: complete
+depends_on: [arch-residual-block, feature-pyramid-networks, convolution-math]
 related: [arch-residual-block, feature-pyramid-networks, diffusion-models, variational-autoencoders, arch-bottleneck-1x1, vision-transformer]
 ---
 
@@ -87,6 +88,8 @@ Denoising diffusion probabilistic models (DDPM, Ho et al., 2020) use a U-Net as 
 
 3. **Cross-attention for text conditioning:** in text-to-image models (Stable Diffusion), text embeddings from a frozen [[clip|CLIP]]/T5 encoder are injected via [[attention-mechanism|cross-attention]] in the bottleneck and decoder blocks. The U-Net's spatial features serve as queries; the text tokens provide keys and values.
 
+   The AdaIN-style time injection formula is: $\text{output} = \gamma(t) \cdot \text{GroupNorm}(h) + \beta(t)$, where $h$ = intermediate feature map, $\text{GroupNorm}(h)$ = the normalized feature map (zero mean, unit variance per group), $\gamma(t), \beta(t) \in \mathbb{R}^C$ = scale and shift vectors computed from the timestep embedding $t$ via a learned 2-layer MLP, and $C$ = number of channels (applied channel-wise to broadcast across spatial dimensions).
+
 Stable Diffusion's U-Net operates in the 64×64 latent space of a [[variational-autoencoders|VAE]] (not pixel space), has 860M parameters, and uses ResBlocks + self-attention at the 16×16 and 8×8 levels + cross-attention for text.
 
 ### Why Skip Connections Prevent Hallucination
@@ -112,4 +115,13 @@ FPN's addition-based merging is more parameter-efficient; U-Net's concatenation-
 
 ---
 
-*See also: [[feature-pyramid-networks]] · [[arch-residual-block]] · [[diffusion-models]] · [[vision-transformer]] · [[arch-positional-encoding]] · [[clip]] · [[variational-autoencoders]] · [[attention-mechanism]] · [[normalization-layers]] · [[activation-relu-variants]]*
+## Links
+
+- [[arch-residual-block]] — modern U-Nets use residual blocks instead of plain convolutions in both the encoder and decoder paths
+- [[feature-pyramid-networks]] — FPN and U-Net share the same top-down + lateral connection design; FPN is optimized for detection, U-Net for dense pixel-level prediction
+- [[convolution-math]] — U-Net uses transposed convolutions (deconvolutions) in the decoder path for spatial upsampling; the operation is the transpose of a strided conv
+- [[diffusion-models]] — the denoising U-Net is the standard noise-prediction backbone; its skip connections preserve spatial structure across noise levels
+- [[variational-autoencoders]] — Latent Diffusion Models (Stable Diffusion) use a U-Net denoiser operating in VAE latent space, not pixel space
+- [[attention-mechanism]] — attention-augmented U-Nets insert self-attention at low-resolution bottleneck levels for long-range spatial coherence
+- [[normalization-layers]] — Group Normalization replaced Batch Normalization in medical image U-Nets where small batch sizes make BN statistics noisy
+- [[activation-relu-variants]] — diffusion U-Nets use SiLU (Swish) instead of ReLU; the smooth non-linearity improves gradient flow through the deep encoder-decoder

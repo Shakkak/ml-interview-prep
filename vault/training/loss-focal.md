@@ -5,6 +5,7 @@ aliases: [focal loss, FL, RetinaNet loss]
 difficulty: 2
 status: complete
 related: [loss-cross-entropy, loss-dice, evaluation-metrics-guide]
+depends_on: [loss-cross-entropy, evaluation-metrics-guide]
 ---
 
 # Focal Loss
@@ -49,12 +50,16 @@ Hard example ($p_t = 0.5$): CE = 0.693, FL($\gamma=2$) = $(0.5)^2 \times 0.693 =
 **Alpha balancing:** Focal loss is often combined with a class-frequency weighting factor $\alpha_t$:
 $$FL(p_t) = -\alpha_t(1-p_t)^\gamma \log(p_t)$$
 
+where $\alpha_t$ = class-frequency weight ($\alpha_t = \alpha$ for foreground, $1-\alpha$ for background), $p_t$ = probability of the correct class, $\gamma$ = focusing parameter, $(1-p_t)^\gamma$ = modulating factor that down-weights easy examples.
+
 Typical values: $\alpha_t = 0.25$ for foreground (rare), $\alpha_t = 0.75$ for background (common). This balances absolute class frequency; focal modulation handles the easy/hard imbalance. In the original RetinaNet paper, $\alpha = 0.25$ and $\gamma = 2$ together gave the best results.
 
 **Focal loss vs hard negative mining:** two-stage detectors (Faster R-CNN) avoid the imbalance problem by sampling: during ROI proposal, keep a fixed ratio of positive to negative examples. This is explicit curation. Focal loss enables single-stage detectors to handle the full distribution implicitly, without needing to curate anchor boxes. The payoff is that single-stage detectors with focal loss achieve accuracy competitive with two-stage detectors at lower latency.
 
 **Gradient analysis:** the gradient of focal loss with respect to the logit $z$ (for a sigmoid output) is:
 $$\frac{\partial FL}{\partial z} = \alpha_t(1-p_t)^\gamma\left[\gamma p_t \log(p_t) + p_t - 1\right]$$
+
+where $z$ = pre-sigmoid logit, $p_t = \sigma(z)$ = sigmoid probability of correct class, $\alpha_t$ = class weight, $(1-p_t)^\gamma$ = modulating factor, $\gamma p_t \log(p_t) + p_t - 1$ = correction term that adjusts the standard BCE gradient.
 
 The factor $(1-p_t)^\gamma$ appears in the gradient, confirming that easy examples ($p_t \approx 1$) contribute near-zero gradient even under the full backward pass.
 
@@ -73,6 +78,9 @@ The factor $(1-p_t)^\gamma$ appears in the gradient, confirming that easy exampl
 
 **VariFocal Loss** (Zhang et al., 2021) for detection quality estimation: standard focal loss uses binary foreground/background labels. VariFocal Loss uses an asymmetric formulation where the modulating factor depends on the Intersection-over-Union ([[evaluation-metrics-guide|IoU]]) quality score:
 $$VFL(p, q) = \begin{cases} -q(q\log(p) + (1-q)\log(1-p)) & q > 0 \text{ (foreground)} \\ -(1-p)^\gamma \log(1-p) & q = 0 \text{ (background)} \end{cases}$$
+
+where $p$ = predicted classification score, $q$ = IoU quality score as soft target (0 for background, IoU score for foreground), $\gamma$ = focusing parameter for background, foreground case uses a weighted BCE between $p$ and $q$.
+
 This trains the classification head to also predict localization quality, used in YOLOX and TOOD for joint classification-localization confidence.
 
 **Distribution Focal Loss** (Li et al., 2020): instead of treating bounding box regression as a point estimate, DFL models the target as a distribution over discrete bins. The loss is a weighted cross-entropy:
@@ -83,4 +91,8 @@ where $y$ is the target and $S_i, S_{i+1}$ are probabilities of adjacent discret
 
 ---
 
-*See also: [[loss-cross-entropy]] · [[loss-dice]] · [[evaluation-metrics-guide]]*
+## Links
+
+- [[loss-cross-entropy]] — focal loss is $FL(p_t) = -(1-p_t)^\gamma \log p_t$; when $\gamma=0$, it reduces to cross-entropy; the modulating factor $(1-p_t)^\gamma$ down-weights easy examples
+- [[evaluation-metrics-guide]] — focal loss was designed to address the $1000:1$ foreground-background imbalance in one-stage detectors; AP (average precision) is the standard metric
+- [[loss-dice]] — focal loss and Dice loss both address class imbalance; focal loss operates on per-pixel classification, Dice loss on segmentation masks; they are often combined (combo loss)

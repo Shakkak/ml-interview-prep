@@ -5,6 +5,7 @@ aliases: [emergence in LLMs, emergent capabilities, phase transitions in scaling
 difficulty: 2
 status: complete
 related: [scaling-laws, autoregressive-models, prompt-engineering, instruction-tuning, generalization-bounds]
+depends_on: [scaling-laws, autoregressive-models, generalization-bounds]
 ---
 
 # Emergent Abilities in Large Language Models
@@ -85,4 +86,10 @@ The key practical question: can emergence be predicted from small-scale experime
 
 The current practical response: train at multiple scales, observe which capabilities emerge, then plan larger runs accordingly.
 
-*See also: [[scaling-laws]] · [[prompt-engineering]] · [[autoregressive-models]] · [[instruction-tuning]]*
+## Links
+
+- [[scaling-laws]] — emergent abilities appear to be discontinuous with scale; Chinchilla scaling laws predict smooth loss curves, but task performance can jump sharply at capability thresholds
+- [[autoregressive-models]] — emergent abilities manifest in autoregressive LLMs as tasks that require multi-step reasoning across long contexts, which become feasible only at sufficient scale
+- [[generalization-bounds]] — the apparent discontinuity in emergent abilities may be an artifact of evaluation metrics; linear metrics reveal smooth scaling while threshold metrics produce apparent phase transitions
+- [[prompt-engineering]] — chain-of-thought prompting unlocks emergent reasoning in sufficiently large models; smaller models fail to follow CoT prompts even with identical examples
+- [[instruction-tuning]] — instruction-tuned models show better-calibrated emergent abilities; fine-tuning aligns the model's latent capabilities with user-expressible prompts

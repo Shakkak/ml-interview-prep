@@ -5,6 +5,7 @@ aliases: [NTK, neural tangent kernel, lazy training, infinite-width limit]
 difficulty: 4
 status: complete
 related: [spectral-bias, optimizer-adam, bias-variance-double-descent, generalization-bounds]
+depends_on: [kernel-methods, matrix-calculus, generalization-bounds]
 ---
 
 # Neural Tangent Kernel (NTK)
@@ -26,6 +27,8 @@ This is a linear function of the parameter change $\theta - \theta_0$, with feat
 The **Neural Tangent Kernel (NTK)** is the kernel induced by these gradient features:
 
 $$K_{NTK}(x, x') = \nabla_\theta f(x; \theta)^\top \nabla_\theta f(x'; \theta)$$
+
+where $x, x'$ = two input examples, $\theta$ = network parameters (at initialization), $\nabla_\theta f(x; \theta) \in \mathbb{R}^{|\theta|}$ = gradient of the scalar network output w.r.t. all parameters (the "feature" vector induced by $x$).
 
 This measures how correlated the gradient directions are for two inputs $x$ and $x'$. Jacot et al. (2018) proved that as network width $\to \infty$, during gradient descent training:
 
@@ -91,8 +94,15 @@ Since the NTK regime produces kernel regression, its generalization is governed 
 
 $$\text{test error} \lesssim \frac{\|y\|_{K^{-1}}^2}{n}$$
 
-where $\|y\|_{K^{-1}}^2 = y^\top K^{-1} y$ is the norm of the target in the reproducing kernel Hilbert space (RKHS) of the NTK. Functions that are **smooth in the NTK RKHS** generalize well with few samples; high-frequency functions require exponentially many samples.
+where $\|y\|_{K^{-1}}^2 = y^\top K^{-1} y$ = RKHS norm of the target in the NTK's reproducing kernel Hilbert space, $K$ = NTK Gram matrix on training inputs, $n$ = training set size. Small RKHS norm = target is "smooth" w.r.t. the NTK = good generalization. Functions that are **smooth in the NTK RKHS** generalize well with few samples; high-frequency functions require exponentially many samples.
 
 ---
 
-*See also: [[spectral-bias]] · [[generalization-bounds]] · [[bias-variance-double-descent]] · [[optimizer-adam]] · [[kernel-methods]]*
+## Links
+
+- [[kernel-methods]] — the NTK is a kernel: $K_{\text{NTK}}(x,x') = \nabla_\theta f(x)\cdot\nabla_\theta f(x')$; in the infinite-width limit, training dynamics are governed by kernel regression with this kernel
+- [[matrix-calculus]] — the NTK is the Gram matrix of the model's Jacobian; computing it requires differentiating the network output with respect to all parameters
+- [[generalization-bounds]] — NTK theory gives PAC-Bayes-style bounds for overparameterized networks; the effective complexity is the NTK's trace, not the parameter count
+- [[spectral-bias]] — the NTK's eigenfunctions are ordered by frequency; the lowest-frequency components (largest eigenvalues) are learned first, explaining spectral bias of wide networks
+- [[bias-variance-double-descent]] — NTK theory proves that interpolating (zero training error) models can still generalize; the minimum-norm solution (NTK regression) corresponds to the second descent
+- [[optimizer-adam]] — the NTK analysis assumes gradient flow (infinitesimal learning rate); finite learning rates (Adam, SGD with large $\eta$) move networks out of the lazy training regime

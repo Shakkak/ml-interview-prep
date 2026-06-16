@@ -5,6 +5,8 @@ aliases: [vectors, matrices, rank, null space, norms, determinant, trace, condit
 difficulty: 1
 status: complete
 related: [eigenvalues-pca, matrix-calculus, math-svd, distributions-gaussian, regularization-weight-decay]
+depends_on: []
+
 ---
 
 # Linear Algebra Fundamentals
@@ -48,6 +50,8 @@ $\mathcal{C}(A) = \text{span}([1,2]^\top)$. Dimension $= 1$ ✓.
 
 $$\|x\|_p = \left(\sum_i |x_i|^p\right)^{1/p}$$
 
+where $x \in \mathbb{R}^n$ is a vector, $x_i$ is its $i$-th component, and $p \geq 1$ is the norm order. Common cases: $p=1$ (sum of absolute values), $p=2$ (Euclidean length), $p=\infty$ (largest absolute value).
+
 | Norm | Formula | Geometry | ML Use |
 |---|---|---|---|
 | $L_1$ | $\sum|x_i|$ | Manhattan distance | Lasso, sparsity |
@@ -72,7 +76,7 @@ Example: $v = [3, 4]$: $\|v\|_1 = 7$, $\|v\|_2 = 5$, $\|v\|_\infty = 4$.
 
 Inequalities: $\|A\|_2 \leq \|A\|_F \leq \sqrt{\min(m,n)}\|A\|_2$.
 
-**Spectral norm as the Lipschitz constant:** $\|Ax\|_2 \leq \|A\|_2 \|x\|_2$ — the spectral norm is the maximum amplification factor. Spectral normalization in [[generative-adversarial-networks|GAN]] discriminators divides each weight matrix by its spectral norm, enforcing a 1-Lipschitz constraint on the discriminator (used in WGAN-GP).
+**Spectral norm as the Lipschitz constant:** $\|Ax\|_2 \leq \|A\|_2 \|x\|_2$ — the spectral norm is the maximum amplification factor. A function $f$ is **$L$-Lipschitz** if $\|f(x) - f(y)\| \leq L\|x - y\|$ for all $x, y$ (bounded rate of change). Spectral normalization in [[generative-adversarial-networks|GAN]] discriminators divides each weight matrix by its spectral norm, enforcing a 1-Lipschitz constraint on the discriminator (used in WGAN-GP).
 
 ### Trace
 
@@ -100,8 +104,12 @@ ML appearances: Gaussian normalizing constant $\propto |\Sigma|^{-1/2}$; normali
 
 $$\kappa(A) = \frac{\sigma_{\max}}{\sigma_{\min}} = \frac{\lambda_{\max}}{\lambda_{\min}} \quad\text{(for positive definite matrices)}$$
 
+where $\sigma_{\max}$ and $\sigma_{\min}$ are the largest and smallest singular values of $A$ (see [[math-svd]]), and $\lambda_{\max}, \lambda_{\min}$ are the largest and smallest eigenvalues (equal to singular values for positive definite matrices). A condition number near 1 = well-conditioned (easy to solve); large $\kappa$ = ill-conditioned (small perturbations cause large errors).
+
 **Gradient descent convergence on quadratics:** for loss $f(x) = \frac{1}{2}x^\top Hx - b^\top x$ with optimal step size, error at step $t$:
 $$\|x_t - x^*\|_H \leq \left(\frac{\kappa-1}{\kappa+1}\right)^t \|x_0 - x^*\|_H$$
+
+where $x_t$ = parameters at step $t$, $x^*$ = the optimal solution, $\|v\|_H = \sqrt{v^\top H v}$ = the $H$-weighted norm (measures distance scaled by the loss curvature), and $\kappa$ = condition number of the Hessian $H$. The convergence rate $(\kappa-1)/(\kappa+1) < 1$ approaches 1 for large $\kappa$, explaining why ill-conditioned problems converge slowly.
 
 | $\kappa$ | Steps to reduce error by 99% |
 |---|---|
@@ -118,7 +126,9 @@ Orthogonal projection of $b$ onto $\mathcal{C}(A)$:
 
 $$\hat{b} = A(A^\top A)^{-1}A^\top b = Pb$$
 
-$P = A(A^\top A)^{-1}A^\top$ is the projection matrix. Properties: $P^2 = P$ (idempotent), $P^\top = P$ (symmetric), eigenvalues are 0 or 1.
+where $b \in \mathbb{R}^m$ = the vector being projected, $A \in \mathbb{R}^{m \times n}$ = the matrix whose column space defines the projection target, $P = A(A^\top A)^{-1}A^\top \in \mathbb{R}^{m \times m}$ = projection matrix, and $\hat{b}$ = the closest point to $b$ that lies in the column space of $A$.
+
+$P$ is the projection matrix. Properties: $P^2 = P$ (idempotent), $P^\top = P$ (symmetric), eigenvalues are 0 or 1.
 
 **Normal equation derivation:** minimize $\|Ax - b\|^2$. Set gradient $2A^\top(Ax - b) = 0$ to get $A^\top Ax = A^\top b$. The solution $\hat{b} = A\hat{x}$ is the projection of $b$ onto $\mathcal{C}(A)$.
 
@@ -162,4 +172,13 @@ $\text{rank}(A+B) \leq \text{rank}(A) + \text{rank}(B)$: adding low-rank matrice
 
 ---
 
-*See also: [[eigenvalues-pca]] · [[math-svd]] · [[matrix-calculus]] · [[regularization-weight-decay]] · [[distributions-gaussian]] · [[normalizing-flows]] · [[generative-adversarial-networks]] · [[lora-quantization]]*
+## Links
+
+- [[eigenvalues-pca]] — eigenvectors are the "natural axes" of a matrix; PCA finds directions of maximum variance in the covariance matrix
+- [[math-svd]] — SVD generalizes eigendecomposition to non-square matrices, built on rank and subspace concepts here
+- [[matrix-calculus]] — matrix derivatives use the trace trick and transpose rules established here
+- [[regularization-weight-decay]] — L2 regularization adds $\lambda I$ to the Hessian, improving the condition number $\kappa$
+- [[distributions-gaussian]] — Gaussian sampling requires Cholesky factorization of the covariance matrix
+- [[normalizing-flows]] — change-of-variables requires $\log|\det J|$; determinant and volume concepts come from here
+- [[generative-adversarial-networks]] — spectral normalization divides weights by $\sigma_{\max}$ (spectral norm)
+- [[lora-quantization]] — LoRA is motivated by the low stable-rank structure of pretrained weight matrices

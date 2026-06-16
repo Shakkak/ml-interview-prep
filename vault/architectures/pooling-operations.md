@@ -4,6 +4,7 @@ tags: [cnn, pooling, global-pooling, spatial-pyramid, architecture]
 aliases: [max pooling, average pooling, global average pooling, GAP, spatial pyramid pooling, adaptive pooling]
 difficulty: 1
 status: complete
+depends_on: [convolution-math, linear-algebra-fundamentals]
 related: [cnn-architectures-guide, convolution-math, arch-roi-align, feature-pyramid-networks, attention-mechanism, vision-transformer]
 ---
 
@@ -146,4 +147,12 @@ Each $2\times$ downsampling doubles the effective receptive field and halves the
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[convolution-math]] · [[arch-roi-align]] · [[feature-pyramid-networks]] · [[vision-transformer]] · [[attention-mechanism]]*
+## Links
+
+- [[convolution-math]] — pooling is a fixed (non-learned) spatial aggregation operation; it reduces spatial resolution without learnable parameters
+- [[linear-algebra-fundamentals]] — global average pooling computes the mean over a spatial grid, equivalent to a dot product with the all-ones vector normalized by count
+- [[cnn-architectures-guide]] — max pooling for spatial downsampling and global average pooling for the final feature vector are the two canonical uses in CNN architectures
+- [[arch-roi-align]] — ROI Align is a differentiable, position-aware pooling that extracts fixed-size features from arbitrary-scale regions; it superseded ROI pooling
+- [[feature-pyramid-networks]] — SPP (Spatial Pyramid Pooling) pools at multiple scales to produce multi-scale features without a full FPN top-down pathway
+- [[vision-transformer]] — ViT has no pooling layers; the class token is the global summary instead; patch embeddings maintain fixed resolution throughout
+- [[attention-mechanism]] — global attention can be seen as learned soft pooling; each output is a weighted average of all input values

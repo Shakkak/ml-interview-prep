@@ -4,6 +4,7 @@ tags: [dilated-convolution, atrous-convolution, aspp, deeplab, semantic-segmenta
 aliases: [dilated convolution, atrous convolution, ASPP, atrous spatial pyramid pooling, DeepLab, dilation rate]
 difficulty: 2
 status: complete
+depends_on: [convolution-math, arch-residual-block]
 related: [cnn-architectures-guide, feature-pyramid-networks, unet, arch-residual-block, arch-bottleneck-1x1]
 ---
 
@@ -15,11 +16,13 @@ related: [cnn-architectures-guide, feature-pyramid-networks, unet, arch-residual
 
 Standard CNN backbones aggressively downsample via strided convolutions — ResNet-50 produces a 7×7 feature map from 224×224 input (stride 32). For classification this is fine. For **dense prediction** (segmentation, depth, optical flow), you need both a large receptive field *and* high spatial resolution — these goals are in direct tension with strided downsampling.
 
+**Intuition:** imagine a 3×3 filter that, instead of looking at 3 consecutive pixels, looks at every 2nd pixel — covering a $5 \times 5$ area with the same 9 weights. That is dilation rate 2. Increase to rate 4 and the same 9 weights cover a $9 \times 9$ area. The network "sees further" without needing more parameters or losing spatial resolution.
+
 **Dilated convolution** inserts gaps between kernel elements, expanding the receptive field without downsampling:
 
 $$y[i] = \sum_k x[i + d \cdot k] \cdot w[k]$$
 
-For a 3×3 kernel with dilation rate $d$:
+where $y[i]$ = output at position $i$, $x$ = input signal, $d$ = dilation rate (gap between sampled positions), $k$ = kernel element index (0 to $K-1$ for a size-$K$ kernel), and $w[k]$ = kernel weight at position $k$. For a 3×3 kernel with dilation rate $d$:
 - $d=1$: standard conv, covers $3 \times 3$ area.
 - $d=2$: covers $5 \times 5$ area (skipping every other element).
 - $d=4$: covers $9 \times 9$ area.
@@ -109,4 +112,11 @@ DeepLab v3+ combines both: ASPP for multi-scale context + a U-Net-style decoder 
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[feature-pyramid-networks]] · [[unet]] · [[arch-bottleneck-1x1]] · [[arch-residual-block]]*
+## Links
+
+- [[convolution-math]] — dilation is a modification to the standard convolution kernel; inserting $r-1$ zeros between kernel elements is equivalent to multiplying the effective kernel size
+- [[arch-residual-block]] — dilated convolutions replace standard convolutions inside residual blocks in WaveNet, DeepLab, and dilated ResNets
+- [[cnn-architectures-guide]] — dilated convolutions are the alternative to pooling + upsampling for maintaining spatial resolution in semantic segmentation
+- [[feature-pyramid-networks]] — FPN aggregates multi-scale context using pooling; ASPP achieves similar coverage via parallel dilated convolutions at different rates
+- [[unet]] — U-Net uses pooling + upsampling for multi-scale context; dilated convolutions provide the same without losing spatial resolution
+- [[arch-bottleneck-1x1]] — atrous bottleneck blocks combine dilated $3\times 3$ convolutions with $1\times 1$ channel reduction

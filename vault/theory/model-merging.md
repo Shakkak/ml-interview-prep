@@ -5,6 +5,7 @@ aliases: [task vectors, model soup, weight averaging, TIES merging, SLERP, linea
 difficulty: 2
 status: complete
 related: [transfer-learning, lora-quantization, generalization-bounds, domain-adaptation, ensemble-methods]
+depends_on: [transfer-learning, linear-algebra-fundamentals, lora-quantization]
 ---
 
 # Model Merging
@@ -20,6 +21,8 @@ related: [transfer-learning, lora-quantization, generalization-bounds, domain-ad
 **Model soup (Wortsman et al., 2022):** average the weights of several independently fine-tuned checkpoints of the same base model:
 
 $$\theta_\text{merged} = \frac{1}{K} \sum_{k=1}^K \theta_k$$
+
+where $K$ = number of independently fine-tuned checkpoints, $\theta_k$ = parameters of the $k$-th checkpoint (all fine-tuned from the same base model).
 
 Surprisingly, the average model often outperforms any individual model. This works because the fine-tuned models live in the same loss basin as the base model — linear interpolation stays within the basin.
 
@@ -48,6 +51,8 @@ For interpolating between two models $A$ and $B$:
 
 **SLERP:** treats model parameters as a point on a hypersphere, interpolates along the great circle:
 $$\theta_t = \frac{\sin((1-t)\Omega)}{\sin\Omega}\theta_A + \frac{\sin(t\Omega)}{\sin\Omega}\theta_B, \quad \Omega = \arccos\left(\frac{\theta_A \cdot \theta_B}{\|\theta_A\|\|\theta_B\|}\right)$$
+
+where $t \in [0,1]$ = interpolation parameter ($t=0$ gives $\theta_A$, $t=1$ gives $\theta_B$), $\Omega$ = angle between the two weight vectors on the unit hypersphere (the great-circle arc length).
 
 SLERP preserves the norm of the interpolated model and tends to give smoother capability interpolation than LERP, particularly for fine-tuned models at different specializations.
 
@@ -87,4 +92,10 @@ Model merging fails for:
 - Very different task domains with opposing gradient directions
 - Large fine-tuning learning rates that push models far from base
 
-*See also: [[transfer-learning]] · [[lora-quantization]] · [[ensemble-methods]] · [[domain-adaptation]]*
+## Links
+
+- [[transfer-learning]] — model merging combines fine-tuned variants of the same pretrained base; the key insight is that fine-tuning creates task vectors (weight deltas) in a shared parameter space
+- [[linear-algebra-fundamentals]] — task vector merging is linear arithmetic in weight space: $\theta_{\text{merged}} = \theta_{\text{base}} + \sum_k \alpha_k \Delta\theta_k$; the geometry of weight space determines merge quality
+- [[lora-quantization]] — LoRA adapters can be merged via task vector addition; TIES-merging resolves sign conflicts that arise when merging multiple LoRA fine-tunes
+- [[ensemble-methods]] — model merging is a cheaper alternative to ensembling: one forward pass instead of $k$; but a single merged model loses the variance reduction of true ensembles
+- [[domain-adaptation]] — merging a domain-adapted model with the base model can recover lost capabilities from catastrophic forgetting, at the cost of partial task performance

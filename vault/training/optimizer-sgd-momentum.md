@@ -4,6 +4,7 @@ tags: [optimizer, training, gradient-descent]
 aliases: [SGD, stochastic gradient descent, momentum, mini-batch SGD]
 difficulty: 1
 status: complete
+depends_on: [backpropagation, loss-mse]
 related: [optimizer-adam, backpropagation, bias-variance-double-descent]
 ---
 
@@ -13,13 +14,22 @@ related: [optimizer-adam, backpropagation, bias-variance-double-descent]
 
 ## Fundamental
 
-**Gradient descent** on full dataset:
+**The problem:** a neural network has millions of parameters. We want to find the values that minimize the training loss. There is no closed-form solution for most architectures, so we must iterate. The gradient of the loss tells us the direction of steepest increase — subtracting it moves us toward a minimum.
+
+**Gradient descent** minimizes $L(\theta)$ by repeatedly moving in the direction opposite to the gradient:
+
 $$\theta \leftarrow \theta - \eta \nabla_\theta L(\theta)$$
 
-Too slow for large datasets — one pass through all data per update.
+where $\theta$ = model parameters (all weights and biases), $\eta$ = learning rate (step size, e.g., $10^{-3}$), $L(\theta)$ = the loss function, and $\nabla_\theta L(\theta)$ = gradient of the loss w.r.t. all parameters (pointing uphill; we subtract to go downhill).
+
+**Geometric intuition:** think of a ball placed on a hilly landscape. The gradient is the slope at the current position. Gradient descent rolls the ball downhill one small step at a time until it reaches a valley (local minimum).
+
+This requires computing the gradient over the entire dataset — one pass per update. For a dataset of 1M examples, that is one gradient step per epoch. Too slow.
 
 **Stochastic Gradient Descent (SGD)** uses a mini-batch of $B$ samples per update:
 $$\theta \leftarrow \theta - \frac{\eta}{B}\sum_{i \in \text{batch}} \nabla_\theta L_i(\theta)$$
+
+where $B$ = batch size (number of samples per update, e.g., 32 or 256) and $L_i(\theta)$ = loss on the $i$-th sample; averaging over the batch gives an unbiased estimate of the full-dataset gradient.
 
 **Why noise helps:** the noisy gradient estimate acts as regularization — helps escape sharp minima and saddle points. Smaller batches → more noise → stronger implicit regularization.
 
@@ -35,6 +45,8 @@ Converging toward $[3,2]$. Each step reduces distance by factor $(1-2\eta) = 0.4
 
 **Momentum** maintains a running average of past gradients (velocity):
 $$v_t \leftarrow \beta v_{t-1} + \nabla_\theta L_t, \qquad \theta \leftarrow \theta - \eta v_t$$
+
+where $v_t$ = velocity (accumulated gradient direction at step $t$), $\beta$ = momentum coefficient (typically 0.9, meaning each step retains 90% of previous velocity), and $\nabla_\theta L_t$ = gradient at current step $t$. The update moves in the direction of velocity $v_t$, not just the current gradient.
 
 Typical $\beta = 0.9$. Consistent gradient directions accumulate (accelerate); flipping directions cancel out (dampen oscillations).
 
@@ -52,6 +64,8 @@ Note: we overshot the optimum. Momentum accumulates velocity and initially oscil
 
 **Nesterov Momentum (look-ahead):**
 $$v_t \leftarrow \beta v_{t-1} + \nabla_\theta L(\theta - \eta \beta v_{t-1}), \qquad \theta \leftarrow \theta - \eta v_t$$
+
+where $\theta - \eta \beta v_{t-1}$ is the "look-ahead position" — where momentum would carry us next step. We evaluate the gradient there, not at the current position $\theta$. All other variables as above.
 
 Computes gradient at "where we're headed" rather than "where we are." Better convergence on convex problems (Nesterov's accelerated gradient achieves $O(1/t^2)$ vs $O(1/t)$ for standard gradient descent on smooth convex objectives). Less sensitive to oscillations because the gradient is evaluated at the look-ahead point, not the current position.
 
@@ -82,4 +96,10 @@ Computes gradient at "where we're headed" rather than "where we are." Better con
 
 ---
 
-*See also: [[optimizer-adam]] · [[backpropagation]] · [[large-batch-training]]*
+## Links
+
+- [[backpropagation]] — provides the gradient $\nabla_\theta L$ that SGD applies to update parameters
+- [[loss-mse]] — the loss landscape that gradient descent descends; loss function choice determines the gradient shape
+- [[optimizer-adam]] — Adam extends SGD with per-parameter adaptive rates; understanding SGD is prerequisite
+- [[large-batch-training]] — batch size directly controls the noise level in SGD's gradient estimates
+- [[bias-variance-double-descent]] — SGD's noise-induced implicit regularization connects to why flat minima generalize better

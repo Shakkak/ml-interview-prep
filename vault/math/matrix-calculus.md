@@ -4,6 +4,7 @@ tags: [linear-algebra, calculus, backpropagation, optimization, jacobian, hessia
 aliases: [matrix calculus, vector derivatives, Jacobian, Hessian, gradient of matrix, denominator layout]
 difficulty: 3
 status: complete
+depends_on: [linear-algebra-fundamentals]
 related: [linear-algebra-fundamentals, eigenvalues-pca, backpropagation, backpropagation-advanced, lagrangian-optimization]
 ---
 
@@ -72,7 +73,7 @@ For $f: \mathbb{R}^n \to \mathbb{R}^m$: $J \in \mathbb{R}^{m \times n}$, $J_{ij}
 
 $\partial p_i/\partial x_j$: for $i = j$: $p_i(1-p_i)$. For $i \neq j$: $-p_i p_j$.
 
-So $J_{ij} = p_i(\delta_{ij} - p_j)$, i.e., $J = \text{diag}(p) - pp^\top$.
+So $J_{ij} = p_i(\delta_{ij} - p_j)$, where $\delta_{ij}$ = Kronecker delta ($\delta_{ij} = 1$ if $i=j$, else 0). Thus $J = \text{diag}(p) - pp^\top$.
 
 **Worked example.** $x = [2, 1, 0]$, $p \approx [0.665, 0.245, 0.090]$.
 
@@ -168,4 +169,12 @@ For a model with Gaussian output, $F = J^\top J$ (the Gauss-Newton matrix). **Na
 
 ---
 
-*See also: [[backpropagation]] · [[backpropagation-advanced]] · [[linear-algebra-fundamentals]] · [[eigenvalues-pca]] · [[lagrangian-optimization]] · [[activation-softmax]] · [[loss-cross-entropy]] · [[fisher-information]]*
+## Links
+
+- [[linear-algebra-fundamentals]] — matrix calculus extends scalar calculus to vectors and matrices; inner products, transposes, and trace identities are the foundation
+- [[backpropagation]] — the backpropagation algorithm is the chain rule applied in matrix calculus notation; gradients of scalars w.r.t. vectors and matrices
+- [[backpropagation-advanced]] — the Jacobian formulation of backprop is the full matrix-calculus view; vanishing/exploding gradients are properties of the Jacobian product
+- [[eigenvalues-pca]] — computing the gradient of the Rayleigh quotient and setting it to zero gives the eigenvalue equation; matrix calculus makes this derivation clean
+- [[lagrangian-optimization]] — KKT conditions use gradients of the Lagrangian w.r.t. primal and dual variables; Jacobian and Hessian are both needed
+- [[activation-softmax]] — the Jacobian of softmax is $\text{diag}(p) - pp^\top$; matrix calculus derives this from the quotient rule applied to the exponential
+- [[fisher-information]] — the Fisher matrix is the expected outer product of the score (gradient of log-likelihood); it is a matrix-calculus object

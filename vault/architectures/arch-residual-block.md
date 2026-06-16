@@ -4,6 +4,7 @@ tags: [architecture, cnn, resnet, skip-connection]
 aliases: [residual block, skip connection, shortcut connection, ResNet block]
 difficulty: 1
 status: complete
+depends_on: [backpropagation-advanced, normalization-layers]
 related: [cnn-architectures-guide, arch-bottleneck-1x1, normalization-layers, backpropagation-advanced]
 ---
 
@@ -99,8 +100,17 @@ ResNeXt replaces the 3×3 conv in the bottleneck with $C$ parallel 3×3 convs ov
 
 $$F(x) = \sum_{i=1}^{C} \mathcal{T}_i(x)$$
 
+where $C$ is the cardinality (number of parallel transformation branches), $\mathcal{T}_i(x)$ is the $i$-th transformation — a bottleneck path (1×1 reduce → 3×3 spatial filter → 1×1 expand) operating on a $d/C$-dimensional slice of the channels, and the outputs are summed before the shortcut addition.
+
 Empirically, increasing cardinality at fixed parameter count outperforms increasing width or depth. ResNeXt-101 32×8d outperforms ResNet-101 by 1.7% on ImageNet.
 
 ---
 
-*See also: [[cnn-architectures-guide]] · [[arch-bottleneck-1x1]] · [[normalization-layers]] · [[backpropagation-advanced]] · [[backpropagation]] · [[activation-relu-variants]]*
+## Links
+
+- [[backpropagation-advanced]] — the skip connection provides a gradient highway: $\partial L/\partial x = \partial L/\partial y \cdot (1 + \partial F/\partial x)$; the 1 ensures gradients flow even when $F$ saturates
+- [[normalization-layers]] — batch normalization or layer normalization is typically placed inside the residual branch; post-norm vs. pre-norm affects gradient flow
+- [[cnn-architectures-guide]] — ResNet stacks residual blocks to train 50–152+ layer networks that would otherwise suffer from degradation
+- [[arch-bottleneck-1x1]] — the bottleneck variant uses $1\times 1$ convolutions to reduce then restore channel depth, cutting compute by $\sim 4\times$
+- [[activation-relu-variants]] — ReLU is applied after the addition in post-norm ResNets; pre-activation ResNets apply BN+ReLU before each convolution
+- [[backpropagation]] — without skip connections, gradients in very deep networks decay exponentially; residuals transform multiplicative chains into additive ones

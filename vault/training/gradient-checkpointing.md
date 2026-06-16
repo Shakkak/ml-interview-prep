@@ -5,6 +5,7 @@ aliases: [gradient checkpointing, activation recomputation, rematerialization, a
 difficulty: 1
 status: complete
 related: [backpropagation, mixed-precision, large-batch-training, normalization-layers, lora-quantization]
+depends_on: [backpropagation, mixed-precision]
 ---
 
 # Gradient Checkpointing
@@ -18,6 +19,8 @@ related: [backpropagation, mixed-precision, large-batch-training, normalization-
 During a forward pass, neural networks store all intermediate activations — they are needed during the backward pass to compute gradients. For a network with $L$ layers and batch size $B$:
 
 $$\text{Activation memory} \approx L \times B \times d \times \text{bytes}$$
+
+where $L$ = number of layers, $B$ = batch size, $d$ = hidden dimension, bytes = 2 for FP16 or 4 for FP32.
 
 For a GPT-2 Large (36 layers, $d = 1280$) with batch 8 and sequence 1024 in FP16: $\approx 36 \times 8 \times 1024 \times 1280 \times 2 \approx$ **1.2 GB** just for activations. For larger models, activations dominate memory usage.
 
@@ -85,4 +88,9 @@ Beyond standard layers, some operations are particularly activation-hungry:
 
 This is why Flash Attention + gradient checkpointing together is the standard memory-efficient training recipe for transformers.
 
-*See also: [[backpropagation]] · [[mixed-precision]] · [[large-batch-training]] · [[flash-attention]]*
+## Links
+
+- [[backpropagation]] — standard backpropagation stores all intermediate activations for the backward pass; gradient checkpointing discards and recomputes them, trading compute for memory
+- [[mixed-precision]] — FP16 halves activation memory; gradient checkpointing further reduces peak memory; together they enable training much larger models on the same GPU
+- [[large-batch-training]] — gradient checkpointing enables larger effective batch sizes by reducing activation memory; it is commonly combined with gradient accumulation
+- [[flash-attention]] — Flash Attention avoids storing the $n\times n$ attention matrix by tiling and recomputing; it is effectively gradient checkpointing applied to the attention operation
